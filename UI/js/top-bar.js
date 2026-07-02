@@ -50,11 +50,8 @@ function buildChatActionBarHtml() {
 function buildActionPanelHtml() {
   return `
     <div class="action-panel hidden" id="action-panel">
-      <div class="action-panel-inner">
-        <div class="chat-column">
-          <h2 class="action-panel-title" id="action-panel-title"></h2>
-          <p class="action-panel-desc" id="action-panel-desc"></p>
-        </div>
+      <div class="action-panel-inner action-panel-inner-fill">
+        <div class="action-panel-content" id="action-panel-content"></div>
       </div>
     </div>
   `;
@@ -65,11 +62,22 @@ function setViewTitle(container, title) {
   if (el) el.textContent = title || '';
 }
 
+function renderActionPanelContent(container, tabId, tabInfo) {
+  const contentEl = container.querySelector('#action-panel-content');
+  if (!contentEl) return;
+
+  if (tabId === 'backpack') {
+    mountBackpackPanel(contentEl);
+  } else if (tabId === 'character') {
+    mountCharacterPanel(contentEl);
+  } else {
+    mountDefaultPanel(contentEl, tabInfo);
+  }
+}
+
 function initActionPanel(container, tabs) {
   const tabEls = container.querySelectorAll('.action-tab');
   const panel = container.querySelector('#action-panel');
-  const panelTitle = container.querySelector('#action-panel-title');
-  const panelDesc = container.querySelector('#action-panel-desc');
   let activeTab = null;
 
   tabEls.forEach(tab => {
@@ -89,8 +97,7 @@ function initActionPanel(container, tabs) {
       tab.classList.add('active');
       activeTab = tabId;
 
-      panelTitle.textContent = '标签页占位符 — ' + tabInfo.label;
-      panelDesc.textContent = '此处将显示「' + tabInfo.label + '」面板内容。';
+      renderActionPanelContent(container, tabId, tabInfo);
       panel.classList.remove('hidden');
     });
   });

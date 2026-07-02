@@ -1,0 +1,109 @@
+.backpack-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr 2fr;
+  height: 100%;
+  min-height: 0;
+}
+
+.backpack-panel-col {
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding: 7px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.backpack-panel-col:last-child {
+  border-right: none;
+}
+
+.backpack-panel-col::-webkit-scrollbar {
+  width: 6px;
+}
+
+.backpack-panel-col::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.backpack-panel-item {
+  display: block;
+  width: 100%;
+  padding: 8px 6px;
+  margin-bottom: 1px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: var(--font-action-panel-body);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.backpack-panel-item:hover {
+  background: var(--bg-hover);
+}
+
+.backpack-panel-item.active {
+  background: var(--bg-active);
+  color: var(--text-heading);
+}
+
+.backpack-categories {
+  display: flex;
+  flex-direction: column;
+}
+
+.backpack-categories-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.backpack-categories-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.backpack-categories-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.backpack-wealth {
+  flex-shrink: 0;
+  padding: 8px 6px 0;
+  margin-bottom: 5px;
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+}
+
+.backpack-detail-inner {
+  min-height: 0;
+  padding: 0 6px;
+}
+
+.backpack-detail-title {
+  font-size: var(--font-action-panel-body);
+  font-weight: 500;
+  color: var(--text-heading);
+  padding: 8px 0 0;
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.backpack-detail-body {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.backpack-detail-empty {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-muted);
+  padding: 8px 0;
+}

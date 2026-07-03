@@ -1,0 +1,9 @@
+{
+  "name": "dnd-game-engine",
+  "private": true,
+  "scripts": {
+    "setup": "pip3 install -r Server/requirements.txt && test -f Server/.env || cp Server/.env.example Server/.env",
+    "dev": "cd Server && python3 -m uvicorn main:app --reload --host 127.0.0.1 --port 8000",
+    "dev:open": "npm run dev & sleep 1 && open http://127.0.0.1:8000/UI/"
+  }
+}

@@ -46,16 +46,34 @@ function initChat(root, options = {}) {
       appendMessage(messagesEl, role, text, label || (role === 'dm' ? 'DM' : playerLabel));
       scrollToBottom(scrollEl);
     },
+    setMessages(messages) {
+      messagesEl.innerHTML = '';
+      (messages || []).forEach(msg => {
+        appendMessage(messagesEl, msg.role, msg.text, msg.label);
+      });
+      scrollToBottom(scrollEl);
+    },
     focusInput() {
       input.focus();
     },
+    showThinking(label) {
+      showThinkingIndicator(messagesEl, label || 'DM');
+      scrollToBottom(scrollEl);
+    },
+    hideThinking() {
+      hideThinkingIndicator(messagesEl);
+    },
+    setBusy(busy) {
+      input.disabled = busy;
+      if (sendBtn) sendBtn.disabled = busy;
+      if (busy) {
+        showThinkingIndicator(messagesEl, 'DM');
+        scrollToBottom(scrollEl);
+      } else {
+        hideThinkingIndicator(messagesEl);
+      }
+    },
   };
-}
-
-function dmTestReply(chat) {
-  setTimeout(() => {
-    chat.addMessage('dm', '你好，我是DM');
-  }, 400);
 }
 
 function appendMessage(container, role, text, label) {
@@ -70,20 +88,99 @@ function appendMessage(container, role, text, label) {
   bubble.className = 'chat-bubble';
 
   const content = document.createElement('div');
-  content.className = 'chat-text';
-  content.textContent = text;
+  if (role === 'dm') {
+    content.className = 'chat-text chat-text-md md-content';
+    if (typeof renderMarkdown === 'function') {
+      content.innerHTML = renderMarkdown(text);
+    } else {
+      content.textContent = text;
+    }
+  } else {
+    content.className = 'chat-text';
+    content.textContent = text;
+  }
 
   bubble.appendChild(content);
 
+  const body = document.createElement('div');
+  body.className = 'chat-message-body';
+  body.appendChild(bubble);
+  body.appendChild(createCopyButton(text));
+
   if (role === 'dm') {
     row.appendChild(avatar);
-    row.appendChild(bubble);
+    row.appendChild(body);
   } else {
-    row.appendChild(bubble);
+    row.appendChild(body);
     row.appendChild(avatar);
   }
 
   container.appendChild(row);
+}
+
+function createCopyButton(text) {
+  const actions = document.createElement('div');
+  actions.className = 'chat-message-actions';
+
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'chat-copy-btn';
+  btn.setAttribute('aria-label', 'Copy');
+  btn.innerHTML = `
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    </svg>
+  `;
+
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.classList.add('copied');
+      btn.setAttribute('aria-label', 'Copied');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.setAttribute('aria-label', 'Copy');
+      }, 1500);
+    } catch (_) {}
+  });
+
+  actions.appendChild(btn);
+  return actions;
+}
+
+function showThinkingIndicator(container, label) {
+  hideThinkingIndicator(container);
+
+  const row = document.createElement('div');
+  row.className = 'chat-message chat-message-dm chat-message-thinking';
+  row.dataset.thinking = 'true';
+
+  const avatar = document.createElement('div');
+  avatar.className = 'chat-avatar';
+  avatar.textContent = label || 'DM';
+
+  const thinking = document.createElement('div');
+  thinking.className = 'chat-thinking';
+  thinking.setAttribute('role', 'status');
+  thinking.setAttribute('aria-label', 'Thinking');
+  for (let i = 0; i < 3; i += 1) {
+    const dot = document.createElement('div');
+    dot.className = 'chat-thinking-dot';
+    thinking.appendChild(dot);
+  }
+
+  row.appendChild(avatar);
+  row.appendChild(thinking);
+  container.appendChild(row);
+}
+
+function hideThinkingIndicator(container) {
+  const existing = container.querySelector('[data-thinking="true"]');
+  if (existing) {
+    existing.remove();
+  }
 }
 
 function scrollToBottom(container) {

@@ -6,7 +6,8 @@
   <title>Dungeon Master</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/themes.css">
-  <link rel="stylesheet" href="css/chat.css">
+  <link rel="stylesheet" href="css/markdown.css?v=7">
+  <link rel="stylesheet" href="css/chat.css?v=7">
   <link rel="stylesheet" href="css/panels.css">
   <link rel="stylesheet" href="css/panels/character-panel.css">
   <link rel="stylesheet" href="css/panels/backpack-panel.css">
@@ -58,10 +59,20 @@
       </nav>
 
       <div class="sidebar-footer">
-        <button class="nav-item" id="btn-consult" type="button">
-          <span class="nav-icon">?</span>
-          <span class="nav-label">咨询城主</span>
-        </button>
+        <div class="save-item consult-item">
+          <div class="save-item-row consult-item-row">
+            <button class="nav-item consult-btn" id="btn-consult" type="button">
+              <span class="nav-icon">?</span>
+              <span class="nav-label">咨询城主</span>
+            </button>
+            <button type="button" class="save-menu-btn consult-clear-btn" id="btn-consult-clear" aria-label="清除对话记录">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M18 2l4 4-12 12H6v-4L18 2z"></path>
+                <path d="M2 22h8"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
         <div class="footer-row">
           <div class="save-item account-item">
             <div class="save-item-row account-item-row">
@@ -105,6 +116,16 @@
     </div>
   </div>
 
+  <div class="modal-overlay hidden" id="clear-consult-modal">
+    <div class="modal">
+      <p id="clear-consult-message">确认清除所有的历史记录吗？</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-clear-consult">取消</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-clear-consult">清除</button>
+      </div>
+    </div>
+  </div>
+
   <div class="dropdown-menu hidden" id="account-menu" role="menu">
     <button type="button" data-mode="developer" role="menuitem">开发者</button>
     <button type="button" data-mode="guest" role="menuitem">游客</button>
@@ -118,7 +139,14 @@
 
   <script src="js/theme.js"></script>
   <script src="js/game-data.js"></script>
-  <script src="js/chat.js"></script>
+  <script src="js/llm/config.js"></script>
+  <script src="js/llm/channels.js"></script>
+  <script src="js/llm/client.js"></script>
+  <script src="js/llm/chat-service.js"></script>
+  <script src="js/vendor/marked.min.js"></script>
+  <script src="js/vendor/purify.min.js"></script>
+  <script src="js/markdown.js?v=7"></script>
+  <script src="js/chat.js?v=9"></script>
   <script src="js/panels/panel-common.js"></script>
   <script src="js/panels/character-panel.js"></script>
   <script src="js/panels/backpack-panel.js"></script>

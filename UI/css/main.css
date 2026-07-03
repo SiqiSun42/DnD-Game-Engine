@@ -333,6 +333,50 @@ html, body {
   flex-shrink: 0;
 }
 
+.consult-item {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.consult-item-row {
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.consult-item:hover .consult-item-row,
+.consult-item:focus-within .consult-item-row {
+  background: var(--bg-hover);
+}
+
+.consult-item.active .consult-item-row {
+  background: var(--bg-active);
+}
+
+.consult-btn {
+  flex: 1;
+  min-width: 0;
+}
+
+.consult-item.active .consult-btn {
+  background: none;
+}
+
+.consult-item:hover .consult-clear-btn,
+.consult-item:focus-within .consult-clear-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.consult-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.consult-clear-btn svg {
+  display: block;
+}
+
 .footer-row {
   display: flex;
   align-items: center;
@@ -373,7 +417,7 @@ html, body {
   height: 28px;
   border-radius: 50%;
   background: var(--accent);
-  color: #fff;
+  color: var(--text-on-accent);
   font-size: 13px;
   font-weight: 600;
   flex-shrink: 0;
@@ -440,7 +484,7 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(0, 0, 0, 0.65);
+  background: var(--modal-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -458,17 +502,17 @@ html, body {
   max-width: 420px;
   width: 90%;
   box-shadow: 0 16px 48px var(--shadow);
-  color: var(--popover-text);
+  color: var(--text-primary);
 }
 
 .modal h2 {
   font-size: 20px;
   margin-bottom: 12px;
-  color: var(--popover-text);
+  color: var(--text-heading);
 }
 
 .modal p {
-  color: #b8c5d6;
+  color: var(--text-primary);
   margin-bottom: 24px;
   line-height: 1.5;
   font-size: 15px;
@@ -491,16 +535,16 @@ html, body {
 
 .btn-secondary {
   background: var(--popover-hover);
-  color: var(--popover-text);
+  color: var(--text-primary);
 }
 
 .btn-secondary:hover {
-  background: #364560;
+  background: var(--btn-secondary-hover);
 }
 
 .btn-danger {
   background: var(--danger);
-  color: #fff;
+  color: var(--text-on-danger);
   border-color: var(--danger);
 }
 

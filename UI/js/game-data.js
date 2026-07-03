@@ -405,13 +405,48 @@ function getSettingsGameSchema() {
   return GameData.settingsGameSchema;
 }
 
+function resetConsultChatHistory() {
+  const saveName = typeof CONSULT_SAVE_NAME === 'string' ? CONSULT_SAVE_NAME : '咨询城主';
+  const defaultMessage = {
+    role: 'dm',
+    label: 'DM',
+    text: '你好，我是城主。有什么规则或冒险相关的问题可以问我。',
+  };
+
+  let data = readLocalJSON(getLocalSaveKey(saveName));
+  if (!data && GameData.activeSaveName === saveName && GameData.activeSaveData) {
+    data = GameData.activeSaveData;
+  }
+
+  const messages = data?.chat?.messages || [];
+  const firstMessage = messages.length > 0 ? { ...messages[0] } : { ...defaultMessage };
+  const nextChat = { messages: [firstMessage] };
+
+  if (data) {
+    data.chat = nextChat;
+    writeLocalJSON(getLocalSaveKey(saveName), data);
+  } else {
+    writeLocalJSON(getLocalSaveKey(saveName), { chat: nextChat });
+  }
+
+  if (GameData.activeSaveName === saveName && GameData.activeSaveData) {
+    GameData.activeSaveData.chat = nextChat;
+  }
+
+  return true;
+}
+
 function buildChatHistoryEntries(messages) {
   return (messages || []).map((message, index) => {
     const label = message.label || (message.role === 'dm' ? 'DM' : 'Player');
-    const preview = `${label}: ${message.text}`;
+    const text = message.text || '';
+    const preview = `${label}: ${text}`;
     return {
       id: `history-${index + 1}`,
       preview,
+      label,
+      role: message.role,
+      text,
       terms: preview.toLowerCase().split(/\s+/).filter(Boolean),
     };
   });

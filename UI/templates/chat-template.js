@@ -36,12 +36,13 @@ function mountChatTemplate(container, options = {}) {
     playerLabel,
     initialMessages,
     onSend(text) {
-      appendChatMessage({ role: 'player', label: playerLabel, text });
-      setTimeout(() => {
-        const reply = '你好，我是DM';
-        chat.addMessage('dm', reply);
-        appendChatMessage({ role: 'dm', label: 'DM', text: reply });
-      }, 400);
+      handleChatSend({
+        text,
+        playerLabel,
+        chat,
+        channel: options.channel,
+        saveName: options.saveName,
+      });
     },
   });
 

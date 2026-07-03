@@ -1,5 +1,3 @@
-const CONSULT_SAVE_NAME = '咨询城主';
-
 const PAGE_TITLES = {
   home: '主页',
   'new-adventure': '创建新游戏',
@@ -14,6 +12,7 @@ const PAGES = {
 
 let activePage = 'home';
 let activeSaveName = null;
+let activeChat = null;
 let accountMode = 'developer';
 let menuTargetSaveName = null;
 let deleteTargetName = null;
@@ -27,6 +26,7 @@ const accountMenu = document.getElementById('account-menu');
 const accountOptionsMenu = document.getElementById('account-options-menu');
 const deleteModal = document.getElementById('delete-modal');
 const deleteMessage = document.getElementById('delete-message');
+const clearConsultModal = document.getElementById('clear-consult-modal');
 const avatar = document.getElementById('avatar');
 const accountLabel = document.getElementById('account-label');
 const btnCollapse = document.getElementById('btn-collapse');
@@ -205,6 +205,7 @@ function escapeHtml(str) {
 }
 
 function showPlaceholder(title, desc) {
+  activeChat = null;
   mainContent.innerHTML = `
     <div class="placeholder">
       <h1>${escapeHtml(title)}</h1>
@@ -219,9 +220,11 @@ function mountTemplate(type, options = {}) {
   const chatOptions = { playerLabel, ...options };
 
   if (type === 'game') {
-    mountGameTemplate(mainContent, chatOptions);
+    activeChat = mountGameTemplate(mainContent, chatOptions);
   } else if (type === 'chat') {
-    mountChatTemplate(mainContent, chatOptions);
+    activeChat = mountChatTemplate(mainContent, chatOptions);
+  } else {
+    activeChat = null;
   }
   bindViewTitleRenameState();
 }
@@ -234,7 +237,7 @@ async function navigate(pageKey, saveName) {
   activePage = pageKey;
   activeSaveName = saveName || null;
 
-  document.querySelectorAll('.nav-item.active, .save-item.active').forEach(el => {
+  document.querySelectorAll('.nav-item.active, .save-item.active, .consult-item.active').forEach(el => {
     el.classList.remove('active');
   });
 
@@ -261,6 +264,7 @@ async function navigate(pageKey, saveName) {
     if (save) {
       if (saveName === CONSULT_SAVE_NAME) {
         document.getElementById('btn-consult').classList.add('active');
+        document.querySelector('.consult-item')?.classList.add('active');
       }
       updateSaveMeta(saveName, { lastPlayed: Date.now() });
       await loadSave(saveName);
@@ -358,6 +362,16 @@ async function handleSaveAction(action) {
   if (action !== 'delete') renderSaveList();
 }
 
+function confirmClearConsult() {
+  if (resetConsultChatHistory()) {
+    if (activeSaveName === CONSULT_SAVE_NAME && activeChat?.setMessages) {
+      activeChat.setMessages(getChatMessages());
+      activeChat.focusInput();
+    }
+  }
+  clearConsultModal.classList.add('hidden');
+}
+
 function confirmDelete() {
   if (deleteTargetName) {
     removeSave(deleteTargetName);
@@ -396,6 +410,18 @@ btnCollapse.addEventListener('click', () => {
 document.getElementById('btn-from-scratch').addEventListener('click', () => navigate('new-adventure'));
 document.getElementById('btn-templates').addEventListener('click', () => navigate('templates'));
 document.getElementById('btn-consult').addEventListener('click', () => openSave(CONSULT_SAVE_NAME));
+
+document.getElementById('btn-consult-clear').addEventListener('click', e => {
+  e.stopPropagation();
+  closeAllMenus();
+  clearConsultModal.classList.remove('hidden');
+});
+
+document.getElementById('btn-cancel-clear-consult').addEventListener('click', () => {
+  clearConsultModal.classList.add('hidden');
+});
+
+document.getElementById('btn-confirm-clear-consult').addEventListener('click', confirmClearConsult);
 
 document.getElementById('btn-account').addEventListener('click', e => {
   closeAllMenus();
@@ -446,6 +472,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeAllMenus();
     deleteModal.classList.add('hidden');
+    clearConsultModal.classList.add('hidden');
     deleteTargetName = null;
   }
 });

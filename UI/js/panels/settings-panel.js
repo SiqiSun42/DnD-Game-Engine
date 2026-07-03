@@ -395,7 +395,21 @@ function mountSettingsPanel(container, options = {}) {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'settings-history-item';
-      btn.textContent = entry.preview;
+
+      const labelEl = document.createElement('div');
+      labelEl.className = 'settings-history-label';
+      labelEl.textContent = `${entry.label}:`;
+
+      const bodyEl = document.createElement('div');
+      bodyEl.className = 'settings-history-body md-content';
+      if (typeof renderMarkdown === 'function') {
+        bodyEl.innerHTML = renderMarkdown(entry.text);
+      } else {
+        bodyEl.textContent = entry.text;
+      }
+
+      btn.appendChild(labelEl);
+      btn.appendChild(bodyEl);
       btn.addEventListener('click', () => {});
       resultsEl.appendChild(btn);
     });

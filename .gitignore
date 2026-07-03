@@ -1,5 +1,7 @@
 .env
 Server/.env
+Server/.venv/
+Server/rag/data/
 __pycache__/
 *.pyc
 .venv/

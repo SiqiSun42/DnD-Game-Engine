@@ -1,0 +1,23 @@
+{
+  "corpus": "rules",
+  "books": [
+    {
+      "id": "phb",
+      "title": "玩家手册",
+      "path": "/Users/siqisun/学习/4.研一Summer/DnD Rule Books/玩家手册.pdf",
+      "priority": 1
+    },
+    {
+      "id": "dmg",
+      "title": "城主指南",
+      "path": "/Users/siqisun/学习/4.研一Summer/DnD Rule Books/城主指南.pdf",
+      "priority": 2
+    },
+    {
+      "id": "mm",
+      "title": "怪物图鉴",
+      "path": "/Users/siqisun/学习/4.研一Summer/DnD Rule Books/怪物图鉴.pdf",
+      "priority": 3
+    }
+  ]
+}

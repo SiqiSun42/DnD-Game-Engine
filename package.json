@@ -2,8 +2,9 @@
   "name": "dnd-game-engine",
   "private": true,
   "scripts": {
-    "setup": "pip3 install -r Server/requirements.txt && test -f Server/.env || cp Server/.env.example Server/.env",
-    "dev": "cd Server && python3 -m uvicorn main:app --reload --host 127.0.0.1 --port 8000",
+    "setup": "cd Server && python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && test -f .env || cp .env.example .env",
+    "rag:build": "cd Server && .venv/bin/python -m rag.ingest.build_index",
+    "dev": "cd Server && .venv/bin/python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000",
     "dev:open": "npm run dev & sleep 1 && open http://127.0.0.1:8000/UI/"
   }
 }

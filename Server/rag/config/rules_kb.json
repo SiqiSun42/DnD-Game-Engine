@@ -1,0 +1,10 @@
+{
+  "corpus": "rules",
+  "chunk_size": 700,
+  "chunk_overlap": 120,
+  "top_k": 5,
+  "min_score": 0.25,
+  "embedding_model": "BAAI/bge-small-zh-v1.5",
+  "collection_name": "dnd_rules",
+  "batch_size": 64
+}

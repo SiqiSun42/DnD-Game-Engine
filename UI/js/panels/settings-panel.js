@@ -1,7 +1,9 @@
-function buildSettingsCategories(schema) {
+function buildSettingsCategories(schema, allowedIds) {
   const categories = {};
   (schema?.categories || []).forEach(cat => {
-    categories[cat.id] = { id: cat.id, label: cat.label };
+    if (!allowedIds || allowedIds.includes(cat.id)) {
+      categories[cat.id] = { id: cat.id, label: cat.label };
+    }
   });
   return categories;
 }
@@ -22,17 +24,19 @@ function getDefaultGameSettings(schema) {
   };
 }
 
-function mountSettingsPanel(container) {
+function mountSettingsPanel(container, options = {}) {
   const uiSchema = getSettingsUISchema() || {};
   const gameSchema = getSettingsGameSchema() || {};
-  const SETTINGS_CATEGORIES = buildSettingsCategories(uiSchema);
+  const docType = options.docType || getSettingsDocType();
+  const allowedCategoryIds = docType === 'conversation' ? ['ui', 'history'] : ['ui', 'game', 'history'];
+  const SETTINGS_CATEGORIES = buildSettingsCategories(uiSchema, allowedCategoryIds);
   const THEME_OPTIONS = uiSchema.themes || [];
   const THEME_OPTION_ROWS = buildThemeOptionRows(THEME_OPTIONS);
   const FONT_OPTIONS = uiSchema.fonts || [];
   const FONT_SIZE_OPTIONS = uiSchema.fontSizes || [];
   const GAME_OPTIONS = gameSchema;
 
-  let activeCategory = 'ui';
+  let activeCategory = allowedCategoryIds.includes('ui') ? 'ui' : allowedCategoryIds[0];
   const globalUISettings = getGlobalUISettings();
   let selectedFont = globalUISettings.font || 'default';
   let selectedFontSize = globalUISettings.fontSize || 'medium';
@@ -456,6 +460,9 @@ function mountSettingsPanel(container) {
   }
 
   function renderAll() {
+    if (!SETTINGS_CATEGORIES[activeCategory]) {
+      activeCategory = allowedCategoryIds[0] || 'ui';
+    }
     panelEl.classList.toggle('settings-panel--ui', activeCategory === 'ui');
     renderCategories();
     renderContent();

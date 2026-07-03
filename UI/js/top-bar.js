@@ -77,7 +77,7 @@ function renderActionPanelContent(container, tabId, tabInfo) {
   } else if (tabId === 'notes') {
     mountNotesPanel(contentEl, getPanelSchema('notes'), getPanelData('notes'));
   } else if (tabId === 'settings') {
-    mountSettingsPanel(contentEl);
+    mountSettingsPanel(contentEl, { docType: getSettingsDocType() });
   } else {
     mountDefaultPanel(contentEl, tabInfo);
   }

@@ -1,15 +1,15 @@
+const CONSULT_SAVE_NAME = '咨询城主';
+
 const PAGE_TITLES = {
   home: '主页',
   'new-adventure': '创建新游戏',
   templates: '选择模板',
-  consult: '咨询城主',
 };
 
 const PAGES = {
   home: { title: '占位符 — 主页', desc: '欢迎使用 Dungeon Master，请从侧边栏选择一项。' },
   'new-adventure': { title: '占位符 — 创建新游戏', desc: '从零开始创建新的冒险。' },
   templates: { title: '占位符 — 选择模板', desc: '从现有故事模板中选择。' },
-  consult: { title: '占位符 — 咨询城主', desc: '规则查询与城主咨询窗口。' },
 };
 
 let activePage = 'home';
@@ -44,7 +44,7 @@ function sortSaves(list) {
 
 function filteredSaves() {
   const q = saveSearch.value.trim().toLowerCase();
-  const sorted = sortSaves(getSavesList());
+  const sorted = sortSaves(getSavesList()).filter(save => save.name !== CONSULT_SAVE_NAME);
   if (!q) return sorted;
   return sorted.filter(s => s.name.toLowerCase().includes(q));
 }
@@ -227,6 +227,10 @@ function mountTemplate(type, options = {}) {
 }
 
 async function navigate(pageKey, saveName) {
+  if (!(pageKey === 'save' && saveName)) {
+    clearActiveSave();
+  }
+
   activePage = pageKey;
   activeSaveName = saveName || null;
 
@@ -252,20 +256,19 @@ async function navigate(pageKey, saveName) {
         { role: 'dm', label: 'DM', text: '请选择一个现有模板，或告诉我你想玩哪种类型的故事。' },
       ],
     });
-  } else if (pageKey === 'consult') {
-    document.getElementById('btn-consult').classList.add('active');
-    mountTemplate('chat', {
-      title: PAGE_TITLES.consult,
-      initialMessages: [
-        { role: 'dm', label: 'DM', text: '你好，我是城主。有什么规则或冒险相关的问题可以问我。' },
-      ],
-    });
   } else if (pageKey === 'save' && saveName) {
     const save = findSave(saveName);
     if (save) {
+      if (saveName === CONSULT_SAVE_NAME) {
+        document.getElementById('btn-consult').classList.add('active');
+      }
       updateSaveMeta(saveName, { lastPlayed: Date.now() });
       await loadSave(saveName);
-      mountTemplate('game', { title: save.name });
+      if (save.docType === 'conversation') {
+        mountTemplate('chat', { title: save.name });
+      } else {
+        mountTemplate('game', { title: save.name });
+      }
       renderSaveList();
     }
   }
@@ -325,6 +328,7 @@ async function handleSaveAction(action) {
       const copyName = save.name + ' — 副本';
       getSavesList().push({
         name: copyName,
+        docType: save.docType || 'game',
         pinned: false,
         lastPlayed: Date.now(),
       });
@@ -391,7 +395,7 @@ btnCollapse.addEventListener('click', () => {
 });
 document.getElementById('btn-from-scratch').addEventListener('click', () => navigate('new-adventure'));
 document.getElementById('btn-templates').addEventListener('click', () => navigate('templates'));
-document.getElementById('btn-consult').addEventListener('click', () => navigate('consult'));
+document.getElementById('btn-consult').addEventListener('click', () => openSave(CONSULT_SAVE_NAME));
 
 document.getElementById('btn-account').addEventListener('click', e => {
   closeAllMenus();

@@ -27,15 +27,21 @@ function mountChatTemplate(container, options = {}) {
   setViewTitle(container, options.title || '未命名');
   initActionPanel(container, [SETTINGS_TAB]);
 
-  const defaultMessages = options.initialMessages || [
-    { role: 'dm', label: 'DM', text: '你好，我是城主。有什么规则或冒险相关的问题可以问我。' },
-  ];
+  const playerLabel = options.playerLabel || 'A';
+  const initialMessages = options.initialMessages !== undefined
+    ? options.initialMessages
+    : getChatMessages();
 
   const chat = initChat(container.querySelector('.chat-root'), {
-    playerLabel: options.playerLabel || 'A',
-    initialMessages: defaultMessages,
-    onSend() {
-      dmTestReply(chat);
+    playerLabel,
+    initialMessages,
+    onSend(text) {
+      appendChatMessage({ role: 'player', label: playerLabel, text });
+      setTimeout(() => {
+        const reply = '你好，我是DM';
+        chat.addMessage('dm', reply);
+        appendChatMessage({ role: 'dm', label: 'DM', text: reply });
+      }, 400);
     },
   });
 

@@ -2,11 +2,25 @@
   "saves": [
     {
       "name": "空白游戏",
+      "docType": "game",
       "pinned": false,
       "lastPlayed": 0
     },
     {
       "name": "新手村冒险",
+      "docType": "game",
+      "pinned": false,
+      "lastPlayed": 0
+    },
+    {
+      "name": "空白对话",
+      "docType": "conversation",
+      "pinned": false,
+      "lastPlayed": 0
+    },
+    {
+      "name": "咨询城主",
+      "docType": "conversation",
       "pinned": false,
       "lastPlayed": 0
     }

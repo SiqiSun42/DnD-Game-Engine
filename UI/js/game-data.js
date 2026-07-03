@@ -88,6 +88,7 @@ function normalizeSaveEntry(save) {
   if (!name) return null;
   return {
     name,
+    docType: save.docType === 'conversation' ? 'conversation' : 'game',
     pinned: !!save.pinned,
     lastPlayed: save.lastPlayed || 0,
   };
@@ -104,6 +105,7 @@ function mergeSavesIndex(fileIndex, localIndex) {
     const localSave = localByName.get(fileSave.name);
     merged.push(localSave ? {
       name: fileSave.name,
+      docType: fileSave.docType,
       pinned: localSave.pinned,
       lastPlayed: Math.max(localSave.lastPlayed || 0, fileSave.lastPlayed || 0),
     } : { ...fileSave });
@@ -239,6 +241,12 @@ async function loadTemplateData() {
   return { chat, inventory, characters, status, world, notes, settingsGame };
 }
 
+async function loadConversationSaveData(saveName) {
+  const base = getSaveFolderBase(saveName);
+  const chat = await fetchJSON(`${base}/chat.json`);
+  return { chat };
+}
+
 async function loadSaveDataFromFolder(saveName) {
   const base = getSaveFolderBase(saveName);
   const [chat, inventory, characters, status, world, notes, settingsGame] = await Promise.all([
@@ -256,15 +264,20 @@ async function loadSaveDataFromFolder(saveName) {
 async function loadSave(saveName) {
   const saveMeta = findSave(saveName);
   if (!saveMeta) {
-    GameData.activeSaveName = null;
-    GameData.activeSaveMeta = null;
-    GameData.activeSaveData = null;
+    clearActiveSave();
     return null;
   }
 
-  const templateData = await loadTemplateData();
-  const saveData = await loadSaveDataFromFolder(saveMeta.name);
-  let fileData = deepMerge(templateData, saveData);
+  const docType = saveMeta.docType || 'game';
+  let fileData = null;
+
+  if (docType === 'conversation') {
+    fileData = await loadConversationSaveData(saveMeta.name);
+  } else {
+    const templateData = await loadTemplateData();
+    const saveData = await loadSaveDataFromFolder(saveMeta.name);
+    fileData = deepMerge(templateData, saveData);
+  }
 
   const localData = readLocalJSON(getLocalSaveKey(saveName));
   if (localData) {
@@ -275,6 +288,12 @@ async function loadSave(saveName) {
   GameData.activeSaveMeta = { ...saveMeta };
   GameData.activeSaveData = fileData;
   return GameData.activeSaveData;
+}
+
+function clearActiveSave() {
+  GameData.activeSaveName = null;
+  GameData.activeSaveMeta = null;
+  GameData.activeSaveData = null;
 }
 
 function persistActiveSaveData() {
@@ -324,26 +343,37 @@ function updateGameSettings(patch) {
 }
 
 function appendChatMessage(message) {
-  if (!GameData.activeSaveData?.chat) return;
+  if (!GameData.activeSaveName) return;
+  if (!GameData.activeSaveData) {
+    GameData.activeSaveData = { chat: { messages: [] } };
+  }
+  if (!GameData.activeSaveData.chat) {
+    GameData.activeSaveData.chat = { messages: [] };
+  }
   GameData.activeSaveData.chat.messages.push(message);
   persistActiveSaveData();
 }
 
-async function createSaveFromTemplate(name) {
+async function createSaveFromTemplate(name, docType = 'game') {
   const saveName = String(name || '').trim();
   if (!saveName) return null;
   if (findSave(saveName)) return null;
 
-  const templateData = await loadTemplateData();
+  const type = docType === 'conversation' ? 'conversation' : 'game';
   const saveMeta = {
     name: saveName,
+    docType: type,
     pinned: false,
     lastPlayed: Date.now(),
   };
 
   GameData.savesIndex.saves.push(saveMeta);
   persistSavesIndex();
-  writeLocalJSON(getLocalSaveKey(saveName), templateData);
+
+  const initialData = type === 'conversation'
+    ? { chat: { messages: [] } }
+    : await loadTemplateData();
+  writeLocalJSON(getLocalSaveKey(saveName), initialData);
   return saveMeta;
 }
 
@@ -351,12 +381,16 @@ async function duplicateSaveData(sourceName, newName) {
   const source = findSave(sourceName);
   if (!source || findSave(newName)) return null;
 
-  const templateData = await loadTemplateData();
   let data = readLocalJSON(getLocalSaveKey(sourceName));
 
   if (!data) {
-    const saveData = await loadSaveDataFromFolder(source.name);
-    data = deepMerge(templateData, saveData);
+    if (source.docType === 'conversation') {
+      data = await loadConversationSaveData(source.name);
+    } else {
+      const templateData = await loadTemplateData();
+      const saveData = await loadSaveDataFromFolder(source.name);
+      data = deepMerge(templateData, saveData);
+    }
   }
 
   writeLocalJSON(getLocalSaveKey(newName), deepClone(data));
@@ -399,4 +433,16 @@ function removeSave(saveName) {
 
 function getActiveSaveName() {
   return GameData.activeSaveName;
+}
+
+function getSettingsDocType() {
+  const meta = getActiveSaveMeta();
+  if (meta) {
+    return meta.docType === 'conversation' ? 'conversation' : 'game';
+  }
+  return 'conversation';
+}
+
+function isGameDoc() {
+  return getSettingsDocType() === 'game';
 }

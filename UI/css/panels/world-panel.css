@@ -1,0 +1,165 @@
+.world-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr 3fr;
+  height: 100%;
+  min-height: 0;
+}
+
+.world-panel-col {
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding: 7px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.world-panel-col:last-child {
+  border-right: none;
+}
+
+.world-panel-col::-webkit-scrollbar {
+  width: 6px;
+}
+
+.world-panel-col::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.world-panel-item {
+  display: block;
+  width: 100%;
+  padding: 8px 6px;
+  margin-bottom: 1px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: var(--font-action-panel-body);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.world-panel-item:hover {
+  background: var(--bg-hover);
+}
+
+.world-panel-item.active {
+  background: var(--bg-active);
+  color: var(--text-heading);
+}
+
+.world-location-item {
+  margin-bottom: 1px;
+}
+
+.world-location-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.world-location-item:hover .world-location-row,
+.world-location-item:focus-within .world-location-row {
+  background: var(--bg-hover);
+}
+
+.world-location-item.active .world-location-row {
+  background: var(--bg-active);
+}
+
+.world-location-item.active .world-location-btn {
+  color: var(--text-heading);
+}
+
+.world-location-row--depth-0 .world-location-btn {
+  padding-left: 6px;
+}
+
+.world-location-row--depth-1 .world-location-btn {
+  padding-left: 18px;
+}
+
+.world-location-row--depth-2 .world-location-btn {
+  padding-left: 30px;
+}
+
+.world-location-row--depth-3 .world-location-btn {
+  padding-left: 42px;
+}
+
+.world-location-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 4px 8px 6px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: var(--font-action-panel-body);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.world-location-expand-btn {
+  opacity: 0;
+  pointer-events: none;
+  flex-shrink: 0;
+  margin-right: 4px;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+}
+
+.world-location-item:hover .world-location-expand-btn,
+.world-location-item:focus-within .world-location-expand-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.world-location-expand-btn:hover {
+  background: var(--save-menu-hover-bg);
+  color: var(--text-heading);
+}
+
+.world-detail-inner {
+  min-height: 0;
+  padding: 0 6px;
+}
+
+.world-detail-title {
+  font-size: var(--font-action-panel-body);
+  font-weight: 500;
+  color: var(--text-heading);
+  padding: 8px 0 0;
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.world-detail-body {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.world-detail-empty {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-muted);
+  padding: 8px 0;
+}

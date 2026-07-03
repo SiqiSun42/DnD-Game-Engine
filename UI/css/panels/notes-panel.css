@@ -1,0 +1,206 @@
+.notes-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr 3fr;
+  height: 100%;
+  min-height: 0;
+}
+
+.notes-panel-col {
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  padding: 7px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.notes-panel-col:last-child {
+  border-right: none;
+}
+
+.notes-panel-col::-webkit-scrollbar {
+  width: 6px;
+}
+
+.notes-panel-col::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+.notes-panel-item {
+  display: block;
+  width: 100%;
+  padding: 8px 6px;
+  margin-bottom: 1px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: var(--font-action-panel-body);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.notes-panel-item:hover {
+  background: var(--bg-hover);
+}
+
+.notes-panel-item.active {
+  background: var(--bg-active);
+  color: var(--text-heading);
+}
+
+.notes-panel-item--indented {
+  padding-left: 18px;
+}
+
+.notes-expand-item {
+  margin-bottom: 1px;
+}
+
+.notes-expand-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.notes-expand-item:hover .notes-expand-row,
+.notes-expand-item:focus-within .notes-expand-row {
+  background: var(--bg-hover);
+}
+
+.notes-expand-item.active .notes-expand-row {
+  background: var(--bg-active);
+}
+
+.notes-expand-item.active .notes-expand-btn,
+.notes-expand-item.active .notes-select-btn {
+  color: var(--text-heading);
+}
+
+.notes-expand-row--depth-0 .notes-expand-btn,
+.notes-expand-row--depth-0 .notes-select-btn {
+  padding-left: 6px;
+}
+
+.notes-expand-row--depth-1 .notes-expand-btn,
+.notes-expand-row--depth-1 .notes-select-btn {
+  padding-left: 18px;
+}
+
+.notes-expand-row--depth-2 .notes-expand-btn,
+.notes-expand-row--depth-2 .notes-select-btn {
+  padding-left: 30px;
+}
+
+.notes-expand-row--depth-3 .notes-expand-btn,
+.notes-expand-row--depth-3 .notes-select-btn {
+  padding-left: 42px;
+}
+
+.notes-select-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 4px 8px 6px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: var(--font-action-panel-body);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.notes-expand-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 4px 8px 6px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: var(--font-action-panel-body);
+  text-align: left;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.notes-expand-toggle {
+  opacity: 0;
+  pointer-events: none;
+  flex-shrink: 0;
+  margin-right: 4px;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: opacity 0.15s, color 0.15s, background 0.15s;
+}
+
+.notes-expand-item:hover .notes-expand-toggle,
+.notes-expand-item:focus-within .notes-expand-toggle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.notes-expand-toggle:hover {
+  background: var(--save-menu-hover-bg);
+  color: var(--text-heading);
+}
+
+.notes-detail-inner {
+  min-height: 0;
+  padding: 0 6px;
+}
+
+.notes-detail-title {
+  font-size: var(--font-action-panel-body);
+  font-weight: 500;
+  color: var(--text-heading);
+  padding: 8px 0 0;
+  margin: 0 0 6px;
+  line-height: 1.4;
+}
+
+.notes-detail-body {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.notes-detail-list {
+  margin: 0;
+  padding: 0 0 0 1.2em;
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.notes-detail-list li {
+  margin-bottom: 4px;
+}
+
+.notes-detail-list li:last-child {
+  margin-bottom: 0;
+}
+
+.notes-detail-empty {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-muted);
+  padding: 8px 0;
+}

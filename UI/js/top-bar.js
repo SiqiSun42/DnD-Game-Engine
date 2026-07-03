@@ -68,8 +68,16 @@ function renderActionPanelContent(container, tabId, tabInfo) {
 
   if (tabId === 'backpack') {
     mountBackpackPanel(contentEl);
+  } else if (tabId === 'status') {
+    mountStatusPanel(contentEl);
   } else if (tabId === 'character') {
     mountCharacterPanel(contentEl);
+  } else if (tabId === 'world') {
+    mountWorldPanel(contentEl);
+  } else if (tabId === 'notes') {
+    mountNotesPanel(contentEl);
+  } else if (tabId === 'settings') {
+    mountSettingsPanel(contentEl);
   } else {
     mountDefaultPanel(contentEl, tabInfo);
   }

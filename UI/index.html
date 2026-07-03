@@ -1,14 +1,19 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="dark">
+<html lang="zh-CN" data-color-theme="stars">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dungeon Master</title>
   <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/themes.css">
   <link rel="stylesheet" href="css/chat.css">
   <link rel="stylesheet" href="css/panels.css">
   <link rel="stylesheet" href="css/panels/character-panel.css">
   <link rel="stylesheet" href="css/panels/backpack-panel.css">
+  <link rel="stylesheet" href="css/panels/status-panel.css">
+  <link rel="stylesheet" href="css/panels/world-panel.css">
+  <link rel="stylesheet" href="css/panels/notes-panel.css">
+  <link rel="stylesheet" href="css/panels/settings-panel.css">
 </head>
 <body>
   <div class="app">
@@ -58,13 +63,15 @@
           <span class="nav-label">咨询城主</span>
         </button>
         <div class="footer-row">
-          <button class="nav-item account-btn" id="btn-account" type="button">
-            <span class="avatar" id="avatar">A</span>
-            <span class="nav-label" id="account-label">开发者</span>
-          </button>
-          <button class="theme-toggle" id="btn-theme" type="button" aria-label="切换外观" title="切换外观">
-            <span id="theme-icon">☀</span>
-          </button>
+          <div class="save-item account-item">
+            <div class="save-item-row account-item-row">
+              <button class="save-item-btn account-btn" id="btn-account" type="button">
+                <span class="avatar" id="avatar">A</span>
+                <span class="nav-label" id="account-label">开发者</span>
+              </button>
+              <button type="button" class="save-menu-btn account-menu-btn" id="btn-account-options" aria-label="账户选项">⋮</button>
+            </div>
+          </div>
         </div>
       </div>
     </aside>
@@ -103,15 +110,21 @@
     <button type="button" data-mode="guest" role="menuitem">游客</button>
   </div>
 
-  <div class="dropdown-menu hidden" id="theme-menu" role="menu">
-    <button type="button" data-theme="dark" role="menuitem">黑夜模式</button>
-    <button type="button" data-theme="light" role="menuitem">白天模式</button>
+  <div class="dropdown-menu hidden" id="account-options-menu" role="menu">
+    <button type="button" data-action="placeholder-1" role="menuitem">占位符 1</button>
+    <button type="button" data-action="placeholder-2" role="menuitem">占位符 2</button>
+    <button type="button" data-action="placeholder-3" role="menuitem">占位符 3</button>
   </div>
 
+  <script src="js/theme.js"></script>
   <script src="js/chat.js"></script>
   <script src="js/panels/panel-common.js"></script>
   <script src="js/panels/character-panel.js"></script>
   <script src="js/panels/backpack-panel.js"></script>
+  <script src="js/panels/status-panel.js"></script>
+  <script src="js/panels/world-panel.js"></script>
+  <script src="js/panels/notes-panel.js"></script>
+  <script src="js/panels/settings-panel.js"></script>
   <script src="js/top-bar.js"></script>
   <script src="templates/game-template.js"></script>
   <script src="templates/chat-template.js"></script>

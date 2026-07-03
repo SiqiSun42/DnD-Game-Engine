@@ -18,6 +18,15 @@ const INVENTORY_CATEGORIES = {
       { id: 'flint', name: '燧石', quantity: 1, description: '干燥的燧石，可用于生火。' },
     ],
   },
+  equipment: {
+    id: 'equipment',
+    label: '装备',
+    items: [
+      { id: 'short-sword', name: '短剑', quantity: 1, description: '轻型单手剑，装备后攻击 +1。' },
+      { id: 'leather-armor', name: '皮甲', quantity: 1, description: '磨损但可靠的皮甲，装备后护甲 +1。' },
+      { id: 'oak-staff', name: '橡木法杖', quantity: 1, description: '简单的施法媒介，装备后法术攻击 +1。' },
+    ],
+  },
   key: {
     id: 'key',
     label: '关键物品',

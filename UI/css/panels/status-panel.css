@@ -1,11 +1,11 @@
-.backpack-panel {
+.status-panel {
   display: grid;
   grid-template-columns: 1fr 1fr 3fr;
   height: 100%;
   min-height: 0;
 }
 
-.backpack-panel-col {
+.status-panel-col {
   min-height: 0;
   overflow-y: auto;
   border-right: 1px solid var(--border);
@@ -14,20 +14,20 @@
   scrollbar-color: var(--border) transparent;
 }
 
-.backpack-panel-col:last-child {
+.status-panel-col:last-child {
   border-right: none;
 }
 
-.backpack-panel-col::-webkit-scrollbar {
+.status-panel-col::-webkit-scrollbar {
   width: 6px;
 }
 
-.backpack-panel-col::-webkit-scrollbar-thumb {
+.status-panel-col::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 3px;
 }
 
-.backpack-panel-item {
+.status-panel-item {
   display: block;
   width: 100%;
   padding: 8px 6px;
@@ -42,51 +42,21 @@
   transition: background 0.15s, color 0.15s;
 }
 
-.backpack-panel-item:hover {
+.status-panel-item:hover {
   background: var(--bg-hover);
 }
 
-.backpack-panel-item.active {
+.status-panel-item.active {
   background: var(--bg-active);
   color: var(--text-heading);
 }
 
-.backpack-categories {
-  display: flex;
-  flex-direction: column;
-}
-
-.backpack-categories-list {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-
-.backpack-categories-list::-webkit-scrollbar {
-  width: 6px;
-}
-
-.backpack-categories-list::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
-}
-
-.backpack-wealth {
-  flex-shrink: 0;
-  padding: 8px 6px 0;
-  margin-bottom: 5px;
-  font-size: var(--font-action-panel-body);
-  color: var(--text-secondary);
-}
-
-.backpack-detail-inner {
+.status-detail-inner {
   min-height: 0;
   padding: 0 6px;
 }
 
-.backpack-detail-title {
+.status-detail-title {
   font-size: var(--font-action-panel-body);
   font-weight: 500;
   color: var(--text-heading);
@@ -95,14 +65,14 @@
   line-height: 1.4;
 }
 
-.backpack-detail-body {
+.status-detail-body {
   font-size: var(--font-action-panel-body);
   color: var(--text-secondary);
   line-height: 1.65;
   margin: 0;
 }
 
-.backpack-detail-empty {
+.status-detail-empty {
   font-size: var(--font-action-panel-body);
   color: var(--text-muted);
   padding: 8px 0;

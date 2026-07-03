@@ -32,7 +32,6 @@ let saves = [
 let activePage = 'home';
 let activeSaveId = null;
 let accountMode = 'developer';
-let theme = 'dark';
 let menuTargetSaveId = null;
 let deleteTargetId = null;
 
@@ -42,12 +41,11 @@ const saveList = document.getElementById('save-list');
 const saveSearch = document.getElementById('save-search');
 const saveMenu = document.getElementById('save-menu');
 const accountMenu = document.getElementById('account-menu');
-const themeMenu = document.getElementById('theme-menu');
+const accountOptionsMenu = document.getElementById('account-options-menu');
 const deleteModal = document.getElementById('delete-modal');
 const deleteMessage = document.getElementById('delete-message');
 const avatar = document.getElementById('avatar');
 const accountLabel = document.getElementById('account-label');
-const themeIcon = document.getElementById('theme-icon');
 const btnCollapse = document.getElementById('btn-collapse');
 
 function getPlayerLabel() {
@@ -301,7 +299,7 @@ function openSave(id) {
 }
 
 function closeAllMenus() {
-  [saveMenu, accountMenu, themeMenu].forEach(m => m.classList.add('hidden'));
+  [saveMenu, accountMenu, accountOptionsMenu].forEach(m => m.classList.add('hidden'));
 }
 
 function positionMenu(menu, rect) {
@@ -394,13 +392,9 @@ function setAccountMode(mode) {
   closeAllMenus();
 }
 
-function setTheme(newTheme) {
-  theme = newTheme;
-  document.documentElement.setAttribute('data-theme', theme);
-  themeIcon.textContent = theme === 'dark' ? '☀' : '🌙';
-  btnCollapse.setAttribute('title', sidebar.classList.contains('collapsed') ? '展开' : '收起');
-  btnCollapse.setAttribute('aria-label', sidebar.classList.contains('collapsed') ? '展开侧边栏' : '收起侧边栏');
+function openAccountOptionsMenu(e) {
   closeAllMenus();
+  positionMenu(accountOptionsMenu, e.currentTarget.getBoundingClientRect());
 }
 
 function updateCollapseLabel() {
@@ -423,9 +417,9 @@ document.getElementById('btn-account').addEventListener('click', e => {
   positionMenu(accountMenu, e.currentTarget.getBoundingClientRect());
 });
 
-document.getElementById('btn-theme').addEventListener('click', e => {
-  closeAllMenus();
-  positionMenu(themeMenu, e.currentTarget.getBoundingClientRect());
+document.getElementById('btn-account-options').addEventListener('click', e => {
+  e.stopPropagation();
+  openAccountOptionsMenu(e);
 });
 
 saveSearch.addEventListener('input', renderSaveList);
@@ -438,8 +432,8 @@ accountMenu.querySelectorAll('[data-mode]').forEach(btn => {
   btn.addEventListener('click', () => setAccountMode(btn.dataset.mode));
 });
 
-themeMenu.querySelectorAll('[data-theme]').forEach(btn => {
-  btn.addEventListener('click', () => setTheme(btn.dataset.theme));
+accountOptionsMenu.querySelectorAll('[data-action]').forEach(btn => {
+  btn.addEventListener('click', () => closeAllMenus());
 });
 
 document.getElementById('btn-cancel-delete').addEventListener('click', () => {
@@ -458,7 +452,7 @@ mainContent.addEventListener('dblclick', e => {
 
 document.addEventListener('click', e => {
   if (!e.target.closest('.dropdown-menu') && !e.target.closest('.save-menu-btn') &&
-      !e.target.closest('#btn-account') && !e.target.closest('#btn-theme')) {
+      !e.target.closest('#btn-account')) {
     closeAllMenus();
   }
 });
@@ -472,4 +466,5 @@ document.addEventListener('keydown', e => {
 });
 
 renderSaveList();
+initColorTheme();
 navigate('home');

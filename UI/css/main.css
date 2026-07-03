@@ -6,54 +6,13 @@
   padding: 0;
 }
 
-:root,
-[data-theme="dark"] {
-  --bg-app: #0f1419;
-  --bg-sidebar: #1a2332;
-  --bg-hover: #243044;
-  --bg-active: #2d3a52;
-  --bg-main: #121820;
-  --bg-input: #1e2a3a;
-  --border: #2a3548;
-  --text-heading: #ffffff;
-  --text-primary: #ffffff;
-  --text-secondary: #b8c5d6;
-  --text-muted: #7a8a9e;
-  --accent: #4a7c9b;
-  --danger: #c45c5c;
-  --danger-hover: #a84848;
-  --shadow: rgba(0, 0, 0, 0.4);
+:root {
   --sidebar-width: 272px;
   --sidebar-collapsed: 48px;
-  --popover-bg: #1e2a3a;
-  --popover-text: #a2a6aa;
-  --popover-hover: #2d3a52;
-  --popover-border: #3a4a60;
-  --popover-danger: #e07070;
   --font-sidebar-base: 18px;
   --font-sidebar-title: 20px;
   --font-sidebar-heading: 18px;
   --font-sidebar-secondary: 16px;
-  --save-menu-hover-bg: #3a5068;
-}
-
-[data-theme="light"] {
-  --bg-app: #e8ecf0;
-  --bg-sidebar: #f4f6f8;
-  --bg-hover: #dde3ea;
-  --bg-active: #cfd8e3;
-  --bg-main: #ffffff;
-  --bg-input: #eef1f5;
-  --border: #c5ced8;
-  --text-heading: #1a2332;
-  --text-primary: #1a2332;
-  --text-secondary: #4a5568;
-  --text-muted: #718096;
-  --accent: #2b6cb0;
-  --danger: #c53030;
-  --danger-hover: #9b2c2c;
-  --shadow: rgba(0, 0, 0, 0.12);
-  --save-menu-hover-bg: #b8c8dc;
 }
 
 html, body {
@@ -377,12 +336,33 @@ html, body {
 .footer-row {
   display: flex;
   align-items: center;
-  gap: 4px;
+  width: 100%;
+}
+
+.account-item {
+  width: 100%;
+}
+
+.account-item .save-item-row {
+  width: 100%;
+}
+
+.account-item:hover .save-item-row,
+.account-item:focus-within .save-item-row {
+  background: var(--bg-hover);
+}
+
+.account-item:hover .save-menu-btn,
+.account-item:focus-within .save-menu-btn {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .account-btn {
   flex: 1;
   min-width: 0;
+  color: var(--text-heading);
+  font-size: var(--font-sidebar-heading);
 }
 
 .avatar {
@@ -399,27 +379,13 @@ html, body {
   flex-shrink: 0;
 }
 
-.theme-toggle {
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 18px;
-  flex-shrink: 0;
-  transition: background 0.15s;
-}
-
 .sidebar-title:hover,
-.sidebar-collapse:hover,
-.theme-toggle:hover {
+.sidebar-collapse:hover {
   background: var(--bg-hover);
 }
 
 .sidebar-title:active,
-.sidebar-collapse:active,
-.theme-toggle:active {
+.sidebar-collapse:active {
   background: var(--bg-active);
 }
 
@@ -444,7 +410,7 @@ html, body {
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 10px 14px;
+  padding: 8px 14px;
   background: none;
   border: none;
   border-radius: 4px;

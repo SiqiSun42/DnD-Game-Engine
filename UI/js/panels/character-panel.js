@@ -1,24 +1,3 @@
-const CHARACTER_CATEGORIES = {
-  party: {
-    id: 'party',
-    label: '探险者小队',
-    characters: [
-      { id: 'pc', name: '主控', tier: 'player', order: 0, detail: '占位符界面 — 主控' },
-      { id: 'ally1', name: '盟友 1', tier: 'ally', order: 1, detail: '占位符界面 — 盟友 1' },
-      { id: 'ally2', name: '盟友 2', tier: 'ally', order: 2, detail: '占位符界面 — 盟友 2' },
-    ],
-  },
-  chapter: {
-    id: 'chapter',
-    label: '本章人物',
-    characters: [
-      { id: 'key1', name: '关键人物 1', tier: 'key', order: 0, detail: '占位符界面 — 关键人物 1' },
-      { id: 'npc1', name: '普通人物 1', tier: 'normal', order: 1, detail: '占位符界面 — 普通人物 1' },
-      { id: 'npc2', name: '普通人物 2', tier: 'normal', order: 2, detail: '占位符界面 — 普通人物 2' },
-    ],
-  },
-};
-
 const TIER_ORDER = { player: 0, ally: 1, key: 0, normal: 1 };
 
 function sortCharacters(list) {
@@ -29,9 +8,30 @@ function sortCharacters(list) {
   });
 }
 
-function mountCharacterPanel(container) {
-  let activeCategory = 'party';
-  let activeCharacterId = CHARACTER_CATEGORIES.party.characters[0].id;
+function buildCharacterCategories(schema, data) {
+  const categories = {};
+  (schema?.categories || []).forEach(cat => {
+    categories[cat.id] = {
+      id: cat.id,
+      label: cat.label,
+      characters: data?.[cat.id] || [],
+    };
+  });
+  return categories;
+}
+
+function mountCharacterPanel(container, schema, data) {
+  if (!schema || !data) {
+    mountDefaultPanel(container, { label: '人物' });
+    return;
+  }
+
+  const CHARACTER_CATEGORIES = buildCharacterCategories(schema, data);
+  const firstCategory = schema.categories[0]?.id || 'party';
+  const firstCharacter = sortCharacters(CHARACTER_CATEGORIES[firstCategory]?.characters || [])[0];
+
+  let activeCategory = firstCategory;
+  let activeCharacterId = firstCharacter?.id || null;
 
   container.innerHTML = `
     <div class="character-panel" id="character-panel">

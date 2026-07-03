@@ -1,0 +1,13 @@
+{
+  "inCombat": true,
+  "team": [
+    { "id": "pc", "name": "主控", "tier": "player", "order": 0, "detail": "占位符界面 — 主控" },
+    { "id": "teammate1", "name": "队友 1", "tier": "teammate", "order": 1, "detail": "占位符界面 — 队友 1" },
+    { "id": "ally1", "name": "盟友 1", "tier": "ally", "order": 2, "detail": "占位符界面 — 盟友 1" }
+  ],
+  "enemy": [
+    { "id": "boss1", "name": "Boss", "tier": "boss", "order": 0, "detail": "占位符界面 — Boss" },
+    { "id": "enemy1", "name": "敌人 1", "tier": "normal", "order": 1, "detail": "占位符界面 — 敌人 1" },
+    { "id": "enemy2", "name": "敌人 2", "tier": "normal", "order": 2, "detail": "占位符界面 — 敌人 2" }
+  ]
+}

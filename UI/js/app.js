@@ -12,28 +12,11 @@ const PAGES = {
   consult: { title: '占位符 — 咨询城主', desc: '规则查询与城主咨询窗口。' },
 };
 
-let saves = [
-  {
-    id: 'game-template',
-    name: '游戏模板',
-    template: 'game',
-    pinned: false,
-    lastPlayed: Date.now(),
-  },
-  {
-    id: 'chat-template',
-    name: '对话模板',
-    template: 'chat',
-    pinned: false,
-    lastPlayed: Date.now() - 1000,
-  },
-];
-
 let activePage = 'home';
-let activeSaveId = null;
+let activeSaveName = null;
 let accountMode = 'developer';
-let menuTargetSaveId = null;
-let deleteTargetId = null;
+let menuTargetSaveName = null;
+let deleteTargetName = null;
 
 const sidebar = document.getElementById('sidebar');
 const mainContent = document.getElementById('main-content');
@@ -61,7 +44,7 @@ function sortSaves(list) {
 
 function filteredSaves() {
   const q = saveSearch.value.trim().toLowerCase();
-  const sorted = sortSaves(saves);
+  const sorted = sortSaves(getSavesList());
   if (!q) return sorted;
   return sorted.filter(s => s.name.toLowerCase().includes(q));
 }
@@ -72,8 +55,8 @@ function renderSaveList() {
 
   list.forEach(save => {
     const li = document.createElement('li');
-    li.className = 'save-item' + (save.pinned ? ' pinned' : '') + (save.id === activeSaveId ? ' active' : '');
-    li.dataset.id = save.id;
+    li.className = 'save-item' + (save.pinned ? ' pinned' : '') + (save.name === activeSaveName ? ' active' : '');
+    li.dataset.name = save.name;
 
     const row = document.createElement('div');
     row.className = 'save-item-row';
@@ -99,14 +82,14 @@ function renderSaveList() {
     btn.addEventListener('click', () => {
       if (nameSpan.dataset.editing) return;
       clearTimeout(clickTimer);
-      clickTimer = setTimeout(() => openSave(save.id), 220);
+      clickTimer = setTimeout(() => openSave(save.name), 220);
     });
 
     nameSpan.addEventListener('dblclick', e => {
       e.preventDefault();
       e.stopPropagation();
       clearTimeout(clickTimer);
-      startSaveNameEdit(save.id, nameSpan);
+      startSaveNameEdit(save.name, nameSpan);
     });
 
     const menuBtn = document.createElement('button');
@@ -116,7 +99,7 @@ function renderSaveList() {
     menuBtn.setAttribute('aria-label', '存档选项');
     menuBtn.addEventListener('click', e => {
       e.stopPropagation();
-      openSaveMenu(e, save.id);
+      openSaveMenu(e, save.name);
     });
 
     row.appendChild(btn);
@@ -126,17 +109,18 @@ function renderSaveList() {
   });
 }
 
-function renameSave(saveId, newName) {
-  const save = saves.find(s => s.id === saveId);
+function renameSave(currentName, newName) {
+  const save = findSave(currentName);
   if (!save) return;
   const trimmed = newName.trim();
-  if (!trimmed) {
+  if (!trimmed || findSave(trimmed)) {
     renderSaveList();
     return;
   }
-  save.name = trimmed;
-  if (activeSaveId === save.id) {
-    updateActiveViewTitle(save.name);
+  updateSaveMeta(currentName, { name: trimmed });
+  if (activeSaveName === currentName) {
+    activeSaveName = trimmed;
+    updateActiveViewTitle(trimmed);
   }
   renderSaveList();
 }
@@ -187,31 +171,31 @@ function attachInlineRename(hostEl, getValue, onCommit) {
   input.addEventListener('mousedown', e => e.stopPropagation());
 }
 
-function startSaveNameEdit(saveId, nameEl) {
+function startSaveNameEdit(saveName, nameEl) {
   attachInlineRename(
     nameEl,
-    () => saves.find(s => s.id === saveId)?.name || '',
-    val => renameSave(saveId, val)
+    () => findSave(saveName)?.name || '',
+    val => renameSave(saveName, val)
   );
 }
 
 function startViewTitleEdit() {
-  if (!activeSaveId) return;
+  if (!activeSaveName) return;
   const titleEl = mainContent.querySelector('#view-title');
   if (!titleEl) return;
-  const saveId = activeSaveId;
+  const saveName = activeSaveName;
   attachInlineRename(
     titleEl,
-    () => saves.find(s => s.id === saveId)?.name || '',
-    val => renameSave(saveId, val)
+    () => findSave(saveName)?.name || '',
+    val => renameSave(saveName, val)
   );
 }
 
 function bindViewTitleRenameState() {
   const titleEl = mainContent.querySelector('#view-title');
   if (!titleEl) return;
-  titleEl.classList.toggle('renameable', !!activeSaveId);
-  titleEl.title = activeSaveId ? '双击重命名' : '';
+  titleEl.classList.toggle('renameable', !!activeSaveName);
+  titleEl.title = activeSaveName ? '双击重命名' : '';
 }
 
 function escapeHtml(str) {
@@ -242,9 +226,9 @@ function mountTemplate(type, options = {}) {
   bindViewTitleRenameState();
 }
 
-function navigate(pageKey, saveId) {
+async function navigate(pageKey, saveName) {
   activePage = pageKey;
-  activeSaveId = saveId || null;
+  activeSaveName = saveName || null;
 
   document.querySelectorAll('.nav-item.active, .save-item.active').forEach(el => {
     el.classList.remove('active');
@@ -276,15 +260,12 @@ function navigate(pageKey, saveId) {
         { role: 'dm', label: 'DM', text: '你好，我是城主。有什么规则或冒险相关的问题可以问我。' },
       ],
     });
-  } else if (pageKey === 'save' && saveId) {
-    const save = saves.find(s => s.id === saveId);
+  } else if (pageKey === 'save' && saveName) {
+    const save = findSave(saveName);
     if (save) {
-      save.lastPlayed = Date.now();
-      if (save.template === 'game') {
-        mountTemplate('game', { title: save.name });
-      } else if (save.template === 'chat') {
-        mountTemplate('chat', { title: save.name });
-      }
+      updateSaveMeta(saveName, { lastPlayed: Date.now() });
+      await loadSave(saveName);
+      mountTemplate('game', { title: save.name });
       renderSaveList();
     }
   }
@@ -294,8 +275,8 @@ function updateActiveViewTitle(name) {
   setViewTitle(mainContent, name);
 }
 
-function openSave(id) {
-  navigate('save', id);
+function openSave(name) {
+  navigate('save', name);
 }
 
 function closeAllMenus() {
@@ -319,10 +300,10 @@ function positionMenu(menu, rect) {
   menu.style.left = left + 'px';
 }
 
-function openSaveMenu(e, saveId) {
+function openSaveMenu(e, saveName) {
   closeAllMenus();
-  menuTargetSaveId = saveId;
-  const save = saves.find(s => s.id === saveId);
+  menuTargetSaveName = saveName;
+  const save = findSave(saveName);
   const pinBtn = saveMenu.querySelector('[data-action="pin"]');
   if (pinBtn && save) {
     pinBtn.innerHTML = save.pinned
@@ -332,38 +313,38 @@ function openSaveMenu(e, saveId) {
   positionMenu(saveMenu, e.currentTarget.getBoundingClientRect());
 }
 
-function handleSaveAction(action) {
-  const save = saves.find(s => s.id === menuTargetSaveId);
+async function handleSaveAction(action) {
+  const save = findSave(menuTargetSaveName);
   if (!save) return;
 
   switch (action) {
     case 'pin':
-      save.pinned = !save.pinned;
+      updateSaveMeta(save.name, { pinned: !save.pinned });
       break;
     case 'copy': {
       const copyName = save.name + ' — 副本';
-      saves.push({
-        id: String(Date.now()),
+      getSavesList().push({
         name: copyName,
-        template: save.template,
         pinned: false,
         lastPlayed: Date.now(),
       });
+      persistSavesIndex();
+      await duplicateSaveData(save.name, copyName);
       break;
     }
     case 'rename': {
       closeAllMenus();
-      const li = saveList.querySelector(`.save-item[data-id="${save.id}"]`);
+      const li = saveList.querySelector(`.save-item[data-name="${CSS.escape(save.name)}"]`);
       const nameEl = li?.querySelector('.save-name');
       if (nameEl) {
-        requestAnimationFrame(() => startSaveNameEdit(save.id, nameEl));
-      } else if (activeSaveId === save.id) {
+        requestAnimationFrame(() => startSaveNameEdit(save.name, nameEl));
+      } else if (activeSaveName === save.name) {
         startViewTitleEdit();
       }
       return;
     }
     case 'delete':
-      deleteTargetId = save.id;
+      deleteTargetName = save.name;
       deleteMessage.textContent = `确定要删除「${save.name}」吗？此操作无法撤销。`;
       deleteModal.classList.remove('hidden');
       break;
@@ -374,12 +355,12 @@ function handleSaveAction(action) {
 }
 
 function confirmDelete() {
-  if (deleteTargetId) {
-    saves = saves.filter(s => s.id !== deleteTargetId);
-    if (activeSaveId === deleteTargetId) {
+  if (deleteTargetName) {
+    removeSave(deleteTargetName);
+    if (activeSaveName === deleteTargetName) {
       navigate('home');
     }
-    deleteTargetId = null;
+    deleteTargetName = null;
     renderSaveList();
   }
   deleteModal.classList.add('hidden');
@@ -437,7 +418,7 @@ accountOptionsMenu.querySelectorAll('[data-action]').forEach(btn => {
 });
 
 document.getElementById('btn-cancel-delete').addEventListener('click', () => {
-  deleteTargetId = null;
+  deleteTargetName = null;
   deleteModal.classList.add('hidden');
 });
 
@@ -445,7 +426,7 @@ document.getElementById('btn-confirm-delete').addEventListener('click', confirmD
 
 mainContent.addEventListener('dblclick', e => {
   const titleEl = e.target.closest('#view-title');
-  if (!titleEl || !activeSaveId || titleEl.querySelector('.inline-rename-input')) return;
+  if (!titleEl || !activeSaveName || titleEl.querySelector('.inline-rename-input')) return;
   e.preventDefault();
   startViewTitleEdit();
 });
@@ -461,10 +442,16 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeAllMenus();
     deleteModal.classList.add('hidden');
-    deleteTargetId = null;
+    deleteTargetName = null;
   }
 });
 
-renderSaveList();
-initColorTheme();
-navigate('home');
+initGameData()
+  .then(() => {
+    renderSaveList();
+    navigate('home');
+  })
+  .catch(err => {
+    console.error(err);
+    showPlaceholder('加载失败', '无法读取游戏数据，请检查 Data 与 UI 目录。');
+  });

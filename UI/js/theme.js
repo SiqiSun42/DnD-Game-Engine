@@ -11,20 +11,19 @@ function getColorTheme() {
   return colorTheme;
 }
 
-function setColorTheme(id) {
+function applyColorTheme(id) {
   if (!isColorTheme(id)) return;
   colorTheme = id;
   document.documentElement.setAttribute('data-color-theme', id);
-  try {
-    localStorage.setItem('colorTheme', id);
-  } catch (_) {}
+}
+
+function setColorTheme(id) {
+  applyColorTheme(id);
+  if (typeof updateGlobalUISettings === 'function') {
+    updateGlobalUISettings({ colorTheme: id });
+  }
 }
 
 function initColorTheme() {
-  let next = DEFAULT_COLOR_THEME;
-  try {
-    const stored = localStorage.getItem('colorTheme');
-    if (stored && isColorTheme(stored)) next = stored;
-  } catch (_) {}
-  setColorTheme(next);
+  applyColorTheme(DEFAULT_COLOR_THEME);
 }

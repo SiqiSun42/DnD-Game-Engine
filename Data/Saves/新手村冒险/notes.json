@@ -1,0 +1,61 @@
+{
+  "currentQuests": [
+    "找到哥布林洞穴的位置",
+    "向村民打听哥布林的具体情况（可选）",
+    "购买物资（可选）",
+    "探索村庄和周边地区（可选）"
+  ],
+  "historyQuests": {
+    "pages": [
+      {
+        "id": "history-1",
+        "name": "历史任务 1",
+        "items": [
+          "帮助路边哭泣的 NPC（已完成）",
+          "找到新手村的位置（已完成）"
+        ]
+      }
+    ]
+  },
+  "devPlotTree": [
+    {
+      "id": "dev-long-1",
+      "name": "长期剧情 1",
+      "description": "占位符界面 — 长期剧情框架，描述贯穿整个战役的主线走向与终局目标。",
+      "children": [
+        {
+          "id": "dev-mid-1",
+          "name": "中期剧情 1",
+          "description": "新手村闹哥布林，村长请求玩家帮忙；玩家在哥布林巢穴受了埋伏，但最后打败了哥布林大王，发现原来村长和哥布林大王勾结，欺骗过路的英雄然后搜刮他们的财物。",
+          "children": [
+            {
+              "id": "dev-short-1",
+              "name": "短期剧情 1",
+              "description": "节点 1 是找到哥布林巢穴在村庄南边。至于具体怎么达成由玩家随性发挥，可以询问村民，可以观察地貌，可以逐一探索东南西北最后试出来。",
+              "children": []
+            },
+            {
+              "id": "dev-short-2",
+              "name": "短期剧情 2",
+              "description": "占位符界面 — 短期剧情 2。",
+              "children": []
+            },
+            {
+              "id": "dev-short-3",
+              "name": "短期剧情 3",
+              "description": "占位符界面 — 短期剧情 3。",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "dev-mid-2",
+          "name": "中期剧情 2",
+          "description": "占位符界面 — 中期剧情 2。",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "defaultDevPlotEntryId": "dev-short-1"
+}

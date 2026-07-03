@@ -1,0 +1,12 @@
+{
+  "party": [
+    { "id": "pc", "name": "主控", "tier": "player", "order": 0, "detail": "占位符界面 — 主控" },
+    { "id": "ally1", "name": "盟友 1", "tier": "ally", "order": 1, "detail": "占位符界面 — 盟友 1" },
+    { "id": "ally2", "name": "盟友 2", "tier": "ally", "order": 2, "detail": "占位符界面 — 盟友 2" }
+  ],
+  "chapter": [
+    { "id": "key1", "name": "关键人物 1", "tier": "key", "order": 0, "detail": "占位符界面 — 关键人物 1" },
+    { "id": "npc1", "name": "普通人物 1", "tier": "normal", "order": 1, "detail": "占位符界面 — 普通人物 1" },
+    { "id": "npc2", "name": "普通人物 2", "tier": "normal", "order": 2, "detail": "占位符界面 — 普通人物 2" }
+  ]
+}

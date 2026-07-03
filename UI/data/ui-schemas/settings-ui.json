@@ -1,0 +1,27 @@
+{
+  "categories": [
+    { "id": "ui", "label": "界面" },
+    { "id": "game", "label": "游戏" },
+    { "id": "history", "label": "历史" }
+  ],
+  "themes": [
+    { "id": "night", "label": "黑夜" },
+    { "id": "day", "label": "白昼" },
+    { "id": "spring", "label": "春晓" },
+    { "id": "forest", "label": "森林" },
+    { "id": "book", "label": "古书" },
+    { "id": "sky", "label": "晴空" },
+    { "id": "flower", "label": "花海" },
+    { "id": "stars", "label": "星辰" }
+  ],
+  "fonts": [
+    { "id": "default", "label": "系统默认" },
+    { "id": "serif", "label": "衬线体" },
+    { "id": "sans", "label": "无衬线体" }
+  ],
+  "fontSizes": [
+    { "id": "small", "label": "小" },
+    { "id": "medium", "label": "中" },
+    { "id": "large", "label": "大" }
+  ]
+}

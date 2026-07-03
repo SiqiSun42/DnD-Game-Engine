@@ -1,35 +1,19 @@
-const STATUS_IN_COMBAT = true;
-
-const STATUS_CATEGORIES = {
-  team: {
-    id: 'team',
-    label: '团队',
-    combatOnly: false,
-    characters: [
-      { id: 'pc', name: '主控', tier: 'player', order: 0, detail: '占位符界面 — 主控' },
-      { id: 'teammate1', name: '队友 1', tier: 'teammate', order: 1, detail: '占位符界面 — 队友 1' },
-      { id: 'ally1', name: '盟友 1', tier: 'ally', order: 2, detail: '占位符界面 — 盟友 1' },
-    ],
-  },
-  enemy: {
-    id: 'enemy',
-    label: '敌人',
-    combatOnly: true,
-    characters: [
-      { id: 'boss1', name: 'Boss', tier: 'boss', order: 0, detail: '占位符界面 — Boss' },
-      { id: 'enemy1', name: '敌人 1', tier: 'normal', order: 1, detail: '占位符界面 — 敌人 1' },
-      { id: 'enemy2', name: '敌人 2', tier: 'normal', order: 2, detail: '占位符界面 — 敌人 2' },
-    ],
-  },
-};
-
 const STATUS_TIER_ORDER = {
   team: { player: 0, teammate: 1, ally: 2 },
   enemy: { boss: 0, normal: 1 },
 };
 
-function getVisibleStatusCategories() {
-  return Object.values(STATUS_CATEGORIES).filter(cat => !cat.combatOnly || STATUS_IN_COMBAT);
+function buildStatusCategories(schema, data) {
+  const categories = {};
+  (schema?.categories || []).forEach(cat => {
+    categories[cat.id] = {
+      id: cat.id,
+      label: cat.label,
+      combatOnly: !!cat.combatOnly,
+      characters: data?.[cat.id] || [],
+    };
+  });
+  return categories;
 }
 
 function sortStatusCharacters(categoryId, list) {
@@ -41,7 +25,19 @@ function sortStatusCharacters(categoryId, list) {
   });
 }
 
-function mountStatusPanel(container) {
+function mountStatusPanel(container, schema, data) {
+  if (!schema || !data) {
+    mountDefaultPanel(container, { label: '状态' });
+    return;
+  }
+
+  const STATUS_IN_COMBAT = !!data.inCombat;
+  const STATUS_CATEGORIES = buildStatusCategories(schema, data);
+
+  function getVisibleStatusCategories() {
+    return Object.values(STATUS_CATEGORIES).filter(cat => !cat.combatOnly || STATUS_IN_COMBAT);
+  }
+
   const visibleCategories = getVisibleStatusCategories();
   let activeCategory = visibleCategories[0]?.id || 'team';
   let activeCharacterId = STATUS_CATEGORIES[activeCategory]?.characters[0]?.id || null;

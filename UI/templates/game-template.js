@@ -27,13 +27,17 @@ function mountGameTemplate(container, options = {}) {
   setViewTitle(container, options.title || '未命名');
   initActionPanel(container, ALL_PANEL_TABS);
 
+  const playerLabel = options.playerLabel || 'A';
   const chat = initChat(container.querySelector('.chat-root'), {
-    playerLabel: options.playerLabel || 'A',
-    initialMessages: options.initialMessages || [
-      { role: 'dm', label: 'DM', text: '欢迎来到龙与地下城。你站在酒馆门口，空气中弥漫着麦酒与冒险的气息。你想做什么？' },
-    ],
-    onSend() {
-      dmTestReply(chat);
+    playerLabel,
+    initialMessages: options.initialMessages || getChatMessages(),
+    onSend(text) {
+      appendChatMessage({ role: 'player', label: playerLabel, text });
+      setTimeout(() => {
+        const reply = '你好，我是DM';
+        chat.addMessage('dm', reply);
+        appendChatMessage({ role: 'dm', label: 'DM', text: reply });
+      }, 400);
     },
   });
 

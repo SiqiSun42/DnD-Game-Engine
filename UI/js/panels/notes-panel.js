@@ -1,85 +1,15 @@
 const CURRENT_QUESTS_PAGE_ID = 'current-quests';
-const DEFAULT_QUEST_ENTRY_ID = CURRENT_QUESTS_PAGE_ID;
-const DEFAULT_DEV_PLOT_ENTRY_ID = 'dev-short-1';
 const HISTORY_ROOT_ID = 'history-root';
 
-const CURRENT_QUEST_ITEMS = [
-  '找到哥布林洞穴的位置',
-  '向村民打听哥布林的具体情况（可选）',
-  '购买物资（可选）',
-  '探索村庄和周边地区（可选）',
-];
-
-const HISTORY_QUEST_ROOT = {
-  id: HISTORY_ROOT_ID,
-  name: '历史任务',
-  pages: [
-    {
-      id: 'history-1',
-      name: '历史任务 1',
-      items: [
-        '帮助路边哭泣的 NPC（已完成）',
-        '找到新手村的位置（已完成）',
-      ],
-    },
-  ],
-};
-
-const DEV_PLOT_TREE = [
-  {
-    id: 'dev-long-1',
-    name: '长期剧情 1',
-    description: '占位符界面 — 长期剧情框架，描述贯穿整个战役的主线走向与终局目标。',
-    children: [
-      {
-        id: 'dev-mid-1',
-        name: '中期剧情 1',
-        description: '新手村闹哥布林，村长请求玩家帮忙；玩家在哥布林巢穴受了埋伏，但最后打败了哥布林大王，发现原来村长和哥布林大王勾结，欺骗过路的英雄然后搜刮他们的财物。',
-        children: [
-          {
-            id: 'dev-short-1',
-            name: '短期剧情 1',
-            description: '节点 1 是找到哥布林巢穴在村庄南边。至于具体怎么达成由玩家随性发挥，可以询问村民，可以观察地貌，可以逐一探索东南西北最后试出来。',
-            children: [],
-          },
-          {
-            id: 'dev-short-2',
-            name: '短期剧情 2',
-            description: '占位符界面 — 短期剧情 2。',
-            children: [],
-          },
-          {
-            id: 'dev-short-3',
-            name: '短期剧情 3',
-            description: '占位符界面 — 短期剧情 3。',
-            children: [],
-          },
-        ],
-      },
-      {
-        id: 'dev-mid-2',
-        name: '中期剧情 2',
-        description: '占位符界面 — 中期剧情 2。',
-        children: [],
-      },
-    ],
-  },
-];
-
-const NOTES_CATEGORIES = {
-  quest: { id: 'quest', label: '任务' },
-  devPlot: { id: 'devPlot', label: '开发者剧情' },
-};
-
-function findHistoryQuestPage(id) {
-  return HISTORY_QUEST_ROOT.pages.find(page => page.id === id) || null;
+function findHistoryQuestPage(root, id) {
+  return root.pages.find(page => page.id === id) || null;
 }
 
-function isValidQuestEntryId(id) {
-  return id === CURRENT_QUESTS_PAGE_ID || !!findHistoryQuestPage(id);
+function isValidQuestEntryId(root, id) {
+  return id === CURRENT_QUESTS_PAGE_ID || !!findHistoryQuestPage(root, id);
 }
 
-function findDevPlotNode(id, nodes = DEV_PLOT_TREE) {
+function findDevPlotNode(id, nodes) {
   for (const node of nodes) {
     if (node.id === id) return node;
     if (node.children?.length) {
@@ -102,7 +32,7 @@ function getVisibleDevPlotRows(nodes, expandedIds, depth = 0) {
   return rows;
 }
 
-function getDevPlotExpandPath(targetId, nodes = DEV_PLOT_TREE, path = []) {
+function getDevPlotExpandPath(targetId, nodes, path = []) {
   for (const node of nodes) {
     if (node.id === targetId) return path;
     if (node.children?.length) {
@@ -113,16 +43,40 @@ function getDevPlotExpandPath(targetId, nodes = DEV_PLOT_TREE, path = []) {
   return null;
 }
 
-function getDefaultExpandedDevPlotIds() {
-  const path = getDevPlotExpandPath(DEFAULT_DEV_PLOT_ENTRY_ID);
+function getDefaultExpandedDevPlotIds(devPlotTree, defaultDevPlotEntryId) {
+  const path = getDevPlotExpandPath(defaultDevPlotEntryId, devPlotTree);
   return new Set(path || []);
 }
 
-function mountNotesPanel(container) {
+function buildNotesCategories(schema) {
+  const categories = {};
+  (schema?.categories || []).forEach(cat => {
+    categories[cat.id] = { id: cat.id, label: cat.label };
+  });
+  return categories;
+}
+
+function mountNotesPanel(container, schema, data) {
+  if (!schema || !data) {
+    mountDefaultPanel(container, { label: '笔记' });
+    return;
+  }
+
+  const NOTES_CATEGORIES = buildNotesCategories(schema);
+  const CURRENT_QUEST_ITEMS = data.currentQuests || [];
+  const HISTORY_QUEST_ROOT = {
+    id: HISTORY_ROOT_ID,
+    name: schema.questLabels?.historyRoot || '历史任务',
+    pages: data.historyQuests?.pages || [],
+  };
+  const DEV_PLOT_TREE = data.devPlotTree || [];
+  const DEFAULT_DEV_PLOT_ENTRY_ID = data.defaultDevPlotEntryId || DEV_PLOT_TREE[0]?.id || null;
+  const currentQuestLabel = schema.questLabels?.currentPage || '当前任务';
+
   let activeCategory = 'quest';
-  let activeEntryId = DEFAULT_QUEST_ENTRY_ID;
+  let activeEntryId = CURRENT_QUESTS_PAGE_ID;
   let historyExpanded = true;
-  const expandedDevPlotIds = getDefaultExpandedDevPlotIds();
+  const expandedDevPlotIds = getDefaultExpandedDevPlotIds(DEV_PLOT_TREE, DEFAULT_DEV_PLOT_ENTRY_ID);
 
   container.innerHTML = `
     <div class="notes-panel" id="notes-panel">
@@ -145,7 +99,7 @@ function mountNotesPanel(container) {
       btn.textContent = cat.label;
       btn.addEventListener('click', () => {
         activeCategory = cat.id;
-        activeEntryId = activeCategory === 'quest' ? DEFAULT_QUEST_ENTRY_ID : DEFAULT_DEV_PLOT_ENTRY_ID;
+        activeEntryId = activeCategory === 'quest' ? CURRENT_QUESTS_PAGE_ID : DEFAULT_DEV_PLOT_ENTRY_ID;
         renderAll();
       });
       categoriesEl.appendChild(btn);
@@ -154,14 +108,14 @@ function mountNotesPanel(container) {
 
   function renderQuestList() {
     listEl.innerHTML = '';
-    if (!isValidQuestEntryId(activeEntryId)) {
-      activeEntryId = DEFAULT_QUEST_ENTRY_ID;
+    if (!isValidQuestEntryId(HISTORY_QUEST_ROOT, activeEntryId)) {
+      activeEntryId = CURRENT_QUESTS_PAGE_ID;
     }
 
     const currentBtn = document.createElement('button');
     currentBtn.type = 'button';
     currentBtn.className = 'notes-panel-item' + (activeEntryId === CURRENT_QUESTS_PAGE_ID ? ' active' : '');
-    currentBtn.textContent = '当前任务';
+    currentBtn.textContent = currentQuestLabel;
     currentBtn.addEventListener('click', () => {
       activeEntryId = CURRENT_QUESTS_PAGE_ID;
       renderList();
@@ -213,7 +167,7 @@ function mountNotesPanel(container) {
 
   function renderDevPlotList() {
     listEl.innerHTML = '';
-    if (!findDevPlotNode(activeEntryId)) {
+    if (!findDevPlotNode(activeEntryId, DEV_PLOT_TREE)) {
       activeEntryId = DEFAULT_DEV_PLOT_ENTRY_ID;
     }
 
@@ -280,7 +234,7 @@ function mountNotesPanel(container) {
 
   function renderDetail() {
     if (activeCategory === 'devPlot') {
-      const entry = findDevPlotNode(activeEntryId);
+      const entry = findDevPlotNode(activeEntryId, DEV_PLOT_TREE);
       if (!entry) {
         detailEl.innerHTML = '<p class="notes-detail-empty">请选择条目</p>';
         return;
@@ -295,11 +249,11 @@ function mountNotesPanel(container) {
     }
 
     if (activeEntryId === CURRENT_QUESTS_PAGE_ID) {
-      renderQuestPageDetail('当前任务', CURRENT_QUEST_ITEMS);
+      renderQuestPageDetail(currentQuestLabel, CURRENT_QUEST_ITEMS);
       return;
     }
 
-    const historyPage = findHistoryQuestPage(activeEntryId);
+    const historyPage = findHistoryQuestPage(HISTORY_QUEST_ROOT, activeEntryId);
     if (historyPage) {
       renderQuestPageDetail(historyPage.name, historyPage.items);
       return;

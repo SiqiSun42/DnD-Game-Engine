@@ -1,78 +1,4 @@
-const LOCATION_TREE = [
-  {
-    id: 'continent-east',
-    name: '东部大陆',
-    description: '大陆东部的温带地区，多国并存，贸易与冒险活动频繁。',
-    children: [
-      {
-        id: 'country-airland',
-        name: '艾尔兰',
-        description: '东部大陆上的沿海王国，以渔业和港口贸易闻名。',
-        children: [
-          {
-            id: 'region-coast',
-            name: '滨海地区',
-            description: '艾尔兰东南沿海一带，分布着数个渔村与小型港口。',
-            children: [
-              {
-                id: 'starter-village',
-                name: '新手村',
-                description: '一个普通的小渔村，最近被哥布林骚扰。包含以下地点：酒店、商店、码头、村长家',
-                children: [],
-              },
-              {
-                id: 'mist-forest',
-                name: '灰雾森林',
-                description: '新手村北方的低语森林，常年笼罩薄雾，偶有魔物出没。',
-                children: [],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-];
-
-const WORLD_CATEGORIES = {
-  location: {
-    id: 'location',
-    label: '地点',
-    tree: LOCATION_TREE,
-  },
-  species: {
-    id: 'species',
-    label: '物种',
-    entries: [
-      { id: 'human', name: '人类', description: '滨海地区最常见的种族，以渔民、商贩和冒险者为主。' },
-      { id: 'goblin', name: '哥布林', description: '近期在新手村附近出没的小型绿皮生物，成群行动，喜欢偷袭落单目标。' },
-    ],
-  },
-  organization: {
-    id: 'organization',
-    label: '组织',
-    entries: [
-      { id: 'village-council', name: '村长议会', description: '新手村的自治组织，负责分配渔获、维护秩序与对外交涉。' },
-      { id: 'fisher-guild', name: '渔民行会', description: '组织出海与分配码头泊位，对村内渔获交易有相当话语权。' },
-    ],
-  },
-  culture: {
-    id: 'culture',
-    label: '文化',
-    entries: [
-      { id: 'harbor-custom', name: '开港祭', description: '每年渔季开始前在码头举行的祈福仪式，村民会向海神献上第一份渔获。' },
-    ],
-  },
-  event: {
-    id: 'event',
-    label: '事件',
-    entries: [
-      { id: 'goblin-raid', name: '哥布林骚扰', description: '近几周来，哥布林夜间袭击新手村外围，已有数名村民受伤，码头货物也曾失窃。' },
-    ],
-  },
-};
-
-function findLocationNode(id, nodes = LOCATION_TREE) {
+function findLocationNode(id, nodes) {
   for (const node of nodes) {
     if (node.id === id) return node;
     if (node.children?.length) {
@@ -95,9 +21,7 @@ function getVisibleLocationRows(nodes, expandedIds, depth = 0) {
   return rows;
 }
 
-const DEFAULT_LOCATION_ID = 'starter-village';
-
-function getLocationExpandPath(targetId, nodes = LOCATION_TREE, path = []) {
+function getLocationExpandPath(targetId, nodes, path = []) {
   for (const node of nodes) {
     if (node.id === targetId) return path;
     if (node.children?.length) {
@@ -108,15 +32,44 @@ function getLocationExpandPath(targetId, nodes = LOCATION_TREE, path = []) {
   return null;
 }
 
-function getDefaultExpandedLocationIds() {
-  const path = getLocationExpandPath('starter-village');
+function getDefaultExpandedLocationIds(locationTree, defaultLocationId) {
+  const path = getLocationExpandPath(defaultLocationId, locationTree);
   return new Set(path || []);
 }
 
-function mountWorldPanel(container) {
+function buildWorldCategories(schema, data) {
+  const categories = {};
+  (schema?.categories || []).forEach(cat => {
+    if (cat.id === 'location') {
+      categories.location = {
+        id: 'location',
+        label: cat.label,
+        tree: data?.locationTree || [],
+      };
+    } else {
+      categories[cat.id] = {
+        id: cat.id,
+        label: cat.label,
+        entries: data?.[cat.id] || [],
+      };
+    }
+  });
+  return categories;
+}
+
+function mountWorldPanel(container, schema, data) {
+  if (!schema || !data) {
+    mountDefaultPanel(container, { label: '世界' });
+    return;
+  }
+
+  const WORLD_CATEGORIES = buildWorldCategories(schema, data);
+  const LOCATION_TREE = data.locationTree || [];
+  const DEFAULT_LOCATION_ID = data.defaultLocationId || LOCATION_TREE[0]?.id || null;
+
   let activeCategory = 'location';
   let activeEntryId = DEFAULT_LOCATION_ID;
-  const expandedLocationIds = getDefaultExpandedLocationIds();
+  const expandedLocationIds = getDefaultExpandedLocationIds(LOCATION_TREE, DEFAULT_LOCATION_ID);
 
   container.innerHTML = `
     <div class="world-panel" id="world-panel">
@@ -132,7 +85,7 @@ function mountWorldPanel(container) {
 
   function getActiveEntry() {
     if (activeCategory === 'location') {
-      return findLocationNode(activeEntryId);
+      return findLocationNode(activeEntryId, LOCATION_TREE);
     }
     const cat = WORLD_CATEGORIES[activeCategory];
     return cat?.entries?.find(e => e.id === activeEntryId) || null;
@@ -160,7 +113,7 @@ function mountWorldPanel(container) {
 
   function renderLocationList() {
     listEl.innerHTML = '';
-    if (!findLocationNode(activeEntryId)) {
+    if (!findLocationNode(activeEntryId, LOCATION_TREE)) {
       activeEntryId = DEFAULT_LOCATION_ID;
     }
     const rows = getVisibleLocationRows(LOCATION_TREE, expandedLocationIds);

@@ -67,15 +67,15 @@ function renderActionPanelContent(container, tabId, tabInfo) {
   if (!contentEl) return;
 
   if (tabId === 'backpack') {
-    mountBackpackPanel(contentEl);
+    mountBackpackPanel(contentEl, getPanelSchema('backpack'), getPanelData('backpack'));
   } else if (tabId === 'status') {
-    mountStatusPanel(contentEl);
+    mountStatusPanel(contentEl, getPanelSchema('status'), getPanelData('status'));
   } else if (tabId === 'character') {
-    mountCharacterPanel(contentEl);
+    mountCharacterPanel(contentEl, getPanelSchema('character'), getPanelData('character'));
   } else if (tabId === 'world') {
-    mountWorldPanel(contentEl);
+    mountWorldPanel(contentEl, getPanelSchema('world'), getPanelData('world'));
   } else if (tabId === 'notes') {
-    mountNotesPanel(contentEl);
+    mountNotesPanel(contentEl, getPanelSchema('notes'), getPanelData('notes'));
   } else if (tabId === 'settings') {
     mountSettingsPanel(contentEl);
   } else {

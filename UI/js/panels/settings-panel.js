@@ -1,78 +1,43 @@
-const SETTINGS_CATEGORIES = {
-  ui: { id: 'ui', label: '界面' },
-  game: { id: 'game', label: '游戏' },
-  history: { id: 'history', label: '历史' },
-};
+function buildSettingsCategories(schema) {
+  const categories = {};
+  (schema?.categories || []).forEach(cat => {
+    categories[cat.id] = { id: cat.id, label: cat.label };
+  });
+  return categories;
+}
 
-const THEME_OPTIONS = [
-  { id: 'night', label: '黑夜' },
-  { id: 'day', label: '白昼' },
-  { id: 'spring', label: '春晓' },
-  { id: 'forest', label: '森林' },
-  { id: 'book', label: '古书' },
-  { id: 'sky', label: '晴空' },
-  { id: 'flower', label: '花海' },
-  { id: 'stars', label: '星辰' },
-];
+function buildThemeOptionRows(themes) {
+  const list = themes || [];
+  return [list.slice(0, 4), list.slice(4, 8)];
+}
 
-const THEME_OPTION_ROWS = [
-  THEME_OPTIONS.slice(0, 4),
-  THEME_OPTIONS.slice(4, 8),
-];
-
-const FONT_OPTIONS = [
-  { id: 'default', label: '系统默认' },
-  { id: 'serif', label: '衬线体' },
-  { id: 'sans', label: '无衬线体' },
-];
-
-const FONT_SIZE_OPTIONS = [
-  { id: 'small', label: '小' },
-  { id: 'medium', label: '中' },
-  { id: 'large', label: '大' },
-];
-
-const GAME_OPTIONS = {
-  difficulty: ['新手', '普通', '困难'],
-  realism: ['轻松', '适中', '黑暗'],
-  dmStyle: ['朴素', '正常', '华丽'],
-  rating: ['全年龄', '青少年', '成人'],
-};
-
-const HISTORY_MOCK_ENTRIES = [
-  {
-    id: 'history-1',
-    preview: 'DM: 欢迎来到龙与地下城。你站在酒馆门口，空气中弥漫着麦酒与冒险的气息。',
-    terms: ['欢迎', '酒馆', '龙与地下城'],
-  },
-  {
-    id: 'history-2',
-    preview: '玩家: 我向村民打听哥布林的具体情况。',
-    terms: ['村民', '哥布林', '打听'],
-  },
-  {
-    id: 'history-3',
-    preview: 'DM: 村长请求你帮忙调查哥布林巢穴，但他似乎隐瞒了什么。',
-    terms: ['村长', '哥布林', '巢穴'],
-  },
-  {
-    id: 'history-4',
-    preview: '玩家: 我在商店购买了治疗药水和火把。',
-    terms: ['商店', '治疗药水', '火把'],
-  },
-];
+function getDefaultGameSettings(schema) {
+  const pick = (key, fallback) => schema?.[key]?.[1] || schema?.[key]?.[0] || fallback;
+  return {
+    difficulty: pick('difficulty', '普通'),
+    realism: pick('realism', '适中'),
+    dmStyle: pick('dmStyle', '正常'),
+    rating: pick('rating', '青少年'),
+    preferences: [''],
+  };
+}
 
 function mountSettingsPanel(container) {
+  const uiSchema = getSettingsUISchema() || {};
+  const gameSchema = getSettingsGameSchema() || {};
+  const SETTINGS_CATEGORIES = buildSettingsCategories(uiSchema);
+  const THEME_OPTIONS = uiSchema.themes || [];
+  const THEME_OPTION_ROWS = buildThemeOptionRows(THEME_OPTIONS);
+  const FONT_OPTIONS = uiSchema.fonts || [];
+  const FONT_SIZE_OPTIONS = uiSchema.fontSizes || [];
+  const GAME_OPTIONS = gameSchema;
+
   let activeCategory = 'ui';
-  let selectedFont = 'default';
-  let selectedFontSize = 'medium';
-  let gameSettings = {
-    difficulty: '普通',
-    realism: '适中',
-    dmStyle: '正常',
-    rating: '青少年',
-  };
-  let preferences = ['避免非常血腥的描写'];
+  const globalUISettings = getGlobalUISettings();
+  let selectedFont = globalUISettings.font || 'default';
+  let selectedFontSize = globalUISettings.fontSize || 'medium';
+  let gameSettings = { ...getDefaultGameSettings(GAME_OPTIONS), ...(getGameSettings() || {}) };
+  let preferences = [...(gameSettings.preferences?.length ? gameSettings.preferences : [''])];
   let historyQuery = '';
   let historyMatchMode = 'exact';
 
@@ -241,11 +206,13 @@ function mountSettingsPanel(container) {
     const fontPicker = typeEl.querySelector('#settings-font-picker');
     bindPicker(fontPicker, FONT_OPTIONS, selectedFont, id => {
       selectedFont = id;
+      updateGlobalUISettings({ font: id });
     });
 
     const sizePicker = typeEl.querySelector('#settings-size-picker');
     bindPicker(sizePicker, FONT_SIZE_OPTIONS, selectedFontSize, id => {
       selectedFontSize = id;
+      updateGlobalUISettings({ fontSize: id });
     });
   }
 
@@ -266,6 +233,16 @@ function mountSettingsPanel(container) {
     });
 
     renderUiTypeColumn();
+  }
+
+  function persistGameSettings() {
+    updateGameSettings({
+      difficulty: gameSettings.difficulty,
+      realism: gameSettings.realism,
+      dmStyle: gameSettings.dmStyle,
+      rating: gameSettings.rating,
+      preferences: preferences.filter(item => item.trim()),
+    });
   }
 
   function renderGameContent() {
@@ -302,25 +279,37 @@ function mountSettingsPanel(container) {
       contentEl.querySelector('#settings-difficulty-picker'),
       GAME_OPTIONS.difficulty,
       gameSettings.difficulty,
-      value => { gameSettings.difficulty = value; }
+      value => {
+        gameSettings.difficulty = value;
+        persistGameSettings();
+      }
     );
     bindPicker(
       contentEl.querySelector('#settings-realism-picker'),
       GAME_OPTIONS.realism,
       gameSettings.realism,
-      value => { gameSettings.realism = value; }
+      value => {
+        gameSettings.realism = value;
+        persistGameSettings();
+      }
     );
     bindPicker(
       contentEl.querySelector('#settings-dm-style-picker'),
       GAME_OPTIONS.dmStyle,
       gameSettings.dmStyle,
-      value => { gameSettings.dmStyle = value; }
+      value => {
+        gameSettings.dmStyle = value;
+        persistGameSettings();
+      }
     );
     bindPicker(
       contentEl.querySelector('#settings-rating-picker'),
       GAME_OPTIONS.rating,
       gameSettings.rating,
-      value => { gameSettings.rating = value; }
+      value => {
+        gameSettings.rating = value;
+        persistGameSettings();
+      }
     );
 
     const listEl = contentEl.querySelector('#settings-preference-list');
@@ -335,6 +324,7 @@ function mountSettingsPanel(container) {
       input.placeholder = '输入一条偏好规则';
       input.addEventListener('input', () => {
         preferences[index] = input.value;
+        persistGameSettings();
       });
 
       const removeBtn = document.createElement('button');
@@ -347,6 +337,7 @@ function mountSettingsPanel(container) {
         if (!preferences.length) {
           preferences.push('');
         }
+        persistGameSettings();
         renderContent();
       });
 
@@ -357,22 +348,28 @@ function mountSettingsPanel(container) {
 
     contentEl.querySelector('#settings-add-preference').addEventListener('click', () => {
       preferences.push('');
+      persistGameSettings();
       renderContent();
     });
   }
 
+  function getHistoryEntries() {
+    return buildChatHistoryEntries(getChatMessages());
+  }
+
   function filterHistoryEntries() {
+    const entries = getHistoryEntries();
     const query = historyQuery.trim().toLowerCase();
     if (!query) {
-      return HISTORY_MOCK_ENTRIES;
+      return entries;
     }
     if (historyMatchMode === 'exact') {
-      return HISTORY_MOCK_ENTRIES.filter(entry =>
+      return entries.filter(entry =>
         entry.preview.toLowerCase().includes(query) ||
         entry.terms.some(term => term.toLowerCase().includes(query))
       );
     }
-    return HISTORY_MOCK_ENTRIES.filter(entry =>
+    return entries.filter(entry =>
       entry.preview.toLowerCase().includes(query) ||
       entry.terms.some(term => term.toLowerCase().includes(query))
     );

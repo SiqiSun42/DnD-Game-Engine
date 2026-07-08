@@ -1,5 +1,5 @@
 {
-  "defaultLocationId": "starter-village",
+  "defaultLocationId": "village-entrance",
   "locationTree": [
     {
       "id": "continent-east",
@@ -18,15 +18,72 @@
               "children": [
                 {
                   "id": "starter-village",
-                  "name": "新手村",
-                  "description": "一个普通的小渔村，最近被哥布林骚扰。包含以下地点：酒店、商店、码头、村长家",
-                  "children": []
+                  "name": "小渔村",
+                  "description": "一个普通的小渔村，最近被哥布林骚扰，村民安全受到威胁。凯文与艾琳来此补充物资。",
+                  "children": [
+                    {
+                      "id": "village-entrance",
+                      "name": "村庄入口",
+                      "description": "进入村庄的道口。初始场景：可见哥布林正在抢劫村民。玩家可选择帮助、躲避或离开。",
+                      "children": []
+                    },
+                    {
+                      "id": "village-chief-office",
+                      "name": "村长办公室",
+                      "description": "村长办公之处。可了解哥布林情况、领取任务并获得南边洞穴地图。",
+                      "children": []
+                    },
+                    {
+                      "id": "village-shop",
+                      "name": "商店",
+                      "description": "村中商店。可购买食物、火把、药品等，也可出售物品。",
+                      "children": []
+                    },
+                    {
+                      "id": "village-tavern",
+                      "name": "酒馆",
+                      "description": "村民聚集的酒馆。可购买饮料与食物，与酒保闲聊。",
+                      "children": []
+                    },
+                    {
+                      "id": "village-dock",
+                      "name": "码头",
+                      "description": "渔村码头。渔民在此劳作；玩家可坚持离开以提前结束冒险，艾琳会劝阻。",
+                      "children": []
+                    },
+                    {
+                      "id": "village-streets",
+                      "name": "村庄街道",
+                      "description": "村内街道，分布着随机村民，可打听消息或闲聊。",
+                      "children": []
+                    }
+                  ]
                 },
                 {
-                  "id": "mist-forest",
-                  "name": "灰雾森林",
-                  "description": "新手村北方的低语森林，常年笼罩薄雾，偶有魔物出没。",
-                  "children": []
+                  "id": "south-road",
+                  "name": "南边的路",
+                  "description": "从小渔村向南延伸的道路，通往哥布林洞穴的正确方向。",
+                  "children": [
+                    {
+                      "id": "goblin-cave",
+                      "name": "哥布林洞穴",
+                      "description": "哥布林巢穴。需火把或魔法照明。内有连续战斗、岔路陷阱，以及哥布林大王。",
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "id": "north-road",
+                  "name": "北边的路",
+                  "description": "从小渔村向北延伸的道路，走到底是无效方向。",
+                  "children": [
+                    {
+                      "id": "north-dead-end",
+                      "name": "死路",
+                      "description": "北路的尽头，没有通往洞穴，可原路返回村庄。",
+                      "children": []
+                    }
+                  ]
                 }
               ]
             }
@@ -36,17 +93,46 @@
     }
   ],
   "species": [
-    { "id": "human", "name": "人类", "description": "滨海地区最常见的种族，以渔民、商贩和冒险者为主。" },
-    { "id": "goblin", "name": "哥布林", "description": "近期在新手村附近出没的小型绿皮生物，成群行动，喜欢偷袭落单目标。" }
+    {
+      "id": "human",
+      "name": "人类",
+      "description": "滨海地区最常见的种族，村民、商贩与冒险者多为人类。"
+    },
+    {
+      "id": "elf",
+      "name": "精灵",
+      "description": "长寿而敏锐的种族。队友艾琳为精灵牧师。"
+    },
+    {
+      "id": "goblin",
+      "name": "哥布林",
+      "description": "近期在小渔村附近出没的小型绿皮生物，成群行动，威胁村民安全。"
+    }
   ],
   "organization": [
-    { "id": "village-council", "name": "村长议会", "description": "新手村的自治组织，负责分配渔获、维护秩序与对外交涉。" },
-    { "id": "fisher-guild", "name": "渔民行会", "description": "组织出海与分配码头泊位，对村内渔获交易有相当话语权。" }
+    {
+      "id": "village-council",
+      "name": "村长议会",
+      "description": "小渔村的自治组织，村长负责对外交涉与村内重大事务。"
+    },
+    {
+      "id": "fisher-guild",
+      "name": "渔民行会",
+      "description": "组织出海与码头泊位，对渔获交易有相当话语权。"
+    }
   ],
   "culture": [
-    { "id": "harbor-custom", "name": "开港祭", "description": "每年渔季开始前在码头举行的祈福仪式，村民会向海神献上第一份渔获。" }
+    {
+      "id": "harbor-custom",
+      "name": "开港祭",
+      "description": "每年渔季开始前在码头举行的祈福仪式，村民会向海神献上第一份渔获。"
+    }
   ],
   "event": [
-    { "id": "goblin-raid", "name": "哥布林骚扰", "description": "近几周来，哥布林夜间袭击新手村外围，已有数名村民受伤，码头货物也曾失窃。" }
+    {
+      "id": "goblin-raid",
+      "name": "哥布林骚扰",
+      "description": "近几周哥布林袭击小渔村外围，村民受伤，码头货物也曾失窃。游戏目标：击败哥布林大王。"
+    }
   ]
 }

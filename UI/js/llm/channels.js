@@ -35,3 +35,33 @@ function buildApiMessages(messages) {
     label: message.label || null,
   }));
 }
+
+function buildGameContext() {
+  const data = typeof getActiveSaveData === 'function' ? getActiveSaveData() : null;
+  if (!data) return null;
+
+  const world = data.world || {};
+  const locationId = world.defaultLocationId;
+  const locationNode = typeof findLocationNode === 'function'
+    ? findLocationNode(locationId, world.locationTree || [])
+    : null;
+
+  return {
+    saveName: typeof getActiveSaveName === 'function' ? getActiveSaveName() : null,
+    location: locationNode?.name || locationId || null,
+    locationDescription: locationNode?.description || null,
+    locationNode: locationNode || null,
+    world: world,
+    wealth: data.inventory?.wealth || null,
+    inventory: data.inventory || null,
+    status: data.status || null,
+    inCombat: data.status?.inCombat ?? false,
+    currentQuests: data.notes?.currentQuests || [],
+    historyQuests: data.notes?.historyQuests || { pages: [] },
+    characters: data.characters || null,
+    devPlotTree: data.notes?.devPlotTree || null,
+    defaultDevPlotEntryId: data.notes?.defaultDevPlotEntryId || null,
+    settingsGame: data.settingsGame || null,
+    promptFile: data.settingsGame?.promptFile || null,
+  };
+}

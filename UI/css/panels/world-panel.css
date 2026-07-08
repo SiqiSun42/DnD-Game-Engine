@@ -156,6 +156,18 @@
   color: var(--text-secondary);
   line-height: 1.65;
   margin: 0;
+  white-space: pre-wrap;
+}
+
+.world-detail-section {
+  margin-bottom: 12px;
+}
+
+.world-detail-label {
+  font-size: var(--font-action-panel-body);
+  font-weight: 500;
+  color: var(--text-heading);
+  margin: 0 0 4px;
 }
 
 .world-detail-empty {

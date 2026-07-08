@@ -1,6 +1,12 @@
 {
   "saves": [
     {
+      "name": "骰子测试",
+      "docType": "game",
+      "pinned": false,
+      "lastPlayed": 0
+    },
+    {
       "name": "空白游戏",
       "docType": "game",
       "pinned": false,
@@ -8,6 +14,12 @@
     },
     {
       "name": "新手村冒险",
+      "docType": "game",
+      "pinned": false,
+      "lastPlayed": 0
+    },
+    {
+      "name": "新手村冒险2",
       "docType": "game",
       "pinned": false,
       "lastPlayed": 0
@@ -21,6 +33,30 @@
     {
       "name": "咨询城主",
       "docType": "conversation",
+      "pinned": false,
+      "lastPlayed": 0
+    },
+    {
+      "name": "环境测试",
+      "docType": "game",
+      "pinned": false,
+      "lastPlayed": 0
+    },
+    {
+      "name": "人物测试",
+      "docType": "game",
+      "pinned": false,
+      "lastPlayed": 0
+    },
+    {
+      "name": "剧情测试",
+      "docType": "game",
+      "pinned": false,
+      "lastPlayed": 0
+    },
+    {
+      "name": "鉴定测试",
+      "docType": "game",
       "pinned": false,
       "lastPlayed": 0
     }

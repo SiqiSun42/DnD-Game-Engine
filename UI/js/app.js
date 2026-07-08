@@ -35,6 +35,10 @@ function getPlayerLabel() {
   return accountMode === 'developer' ? 'A' : 'G';
 }
 
+function getAccountMode() {
+  return accountMode;
+}
+
 function sortSaves(list) {
   return [...list].sort((a, b) => {
     if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;

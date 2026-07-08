@@ -34,6 +34,7 @@ function mountChatTemplate(container, options = {}) {
 
   const chat = initChat(container.querySelector('.chat-root'), {
     playerLabel,
+    busyPlaceholder: '请耐心等待回复…',
     initialMessages,
     onSend(text) {
       handleChatSend({

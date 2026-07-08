@@ -39,7 +39,11 @@ function getDefaultExpandedLocationIds(locationTree, defaultLocationId) {
 
 function buildWorldCategories(schema, data) {
   const categories = {};
+  const visible = Array.isArray(data?.visibleCategories) ? new Set(data.visibleCategories) : null;
   (schema?.categories || []).forEach(cat => {
+    if (visible && !visible.has(cat.id)) {
+      return;
+    }
     if (cat.id === 'location') {
       categories.location = {
         id: 'location',
@@ -57,6 +61,35 @@ function buildWorldCategories(schema, data) {
   return categories;
 }
 
+function getLocationDetailFields(data, schema) {
+  if (Array.isArray(data?.locationFields) && data.locationFields.length) {
+    return data.locationFields.filter(field => field?.key && field?.label);
+  }
+  if (Array.isArray(schema?.defaultLocationFields) && schema.defaultLocationFields.length) {
+    return schema.defaultLocationFields.filter(field => field?.key && field?.label);
+  }
+  return [{ key: 'description', label: '描述' }];
+}
+
+function renderLocationDetailSections(entry, data, schema) {
+  const fields = getLocationDetailFields(data, schema);
+  const sections = [];
+  fields.forEach(field => {
+    const value = entry[field.key];
+    if (!value) return;
+    sections.push(`
+      <section class="world-detail-section">
+        <h4 class="world-detail-label">${escapePanelText(field.label)}</h4>
+        <p class="world-detail-body">${escapePanelText(value)}</p>
+      </section>
+    `);
+  });
+  if (!sections.length) {
+    sections.push(`<p class="world-detail-body">${escapePanelText(entry.name)}</p>`);
+  }
+  return sections.join('');
+}
+
 function mountWorldPanel(container, schema, data) {
   if (!schema || !data) {
     mountDefaultPanel(container, { label: '世界' });
@@ -66,6 +99,8 @@ function mountWorldPanel(container, schema, data) {
   const WORLD_CATEGORIES = buildWorldCategories(schema, data);
   const LOCATION_TREE = data.locationTree || [];
   const DEFAULT_LOCATION_ID = data.defaultLocationId || LOCATION_TREE[0]?.id || null;
+  const WORLD_PANEL_DATA = data;
+  const WORLD_SCHEMA = schema;
 
   let activeCategory = 'location';
   let activeEntryId = DEFAULT_LOCATION_ID;
@@ -195,10 +230,19 @@ function mountWorldPanel(container, schema, data) {
       detailEl.innerHTML = '<p class="world-detail-empty">请选择条目</p>';
       return;
     }
+    if (activeCategory === 'location') {
+      detailEl.innerHTML = `
+        <div class="world-detail-inner">
+          <h3 class="world-detail-title">${escapePanelText(entry.name)}</h3>
+          ${renderLocationDetailSections(entry, WORLD_PANEL_DATA, WORLD_SCHEMA)}
+        </div>
+      `;
+      return;
+    }
     detailEl.innerHTML = `
       <div class="world-detail-inner">
         <h3 class="world-detail-title">${escapePanelText(entry.name)}</h3>
-        <p class="world-detail-body">${escapePanelText(entry.description)}</p>
+        <p class="world-detail-body">${escapePanelText(entry.description || '')}</p>
       </div>
     `;
   }

@@ -12,6 +12,9 @@
     "categories": [
       { "id": "party", "label": "探险者小队" },
       { "id": "chapter", "label": "本章人物" }
+    ],
+    "defaultCharacterFields": [
+      { "key": "detail", "label": "介绍" }
     ]
   },
   "status": {
@@ -27,6 +30,9 @@
       { "id": "organization", "label": "组织" },
       { "id": "culture", "label": "文化" },
       { "id": "event", "label": "事件" }
+    ],
+    "defaultLocationFields": [
+      { "key": "description", "label": "描述" }
     ]
   },
   "notes": {

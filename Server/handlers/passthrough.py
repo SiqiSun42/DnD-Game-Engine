@@ -21,8 +21,8 @@ async def handle_passthrough(
     context: dict | None = None,
 ) -> dict:
     llm_messages = to_llm_messages(messages)
-    text = await deepseek_client.chat(
+    result = await deepseek_client.chat(
         llm_messages,
         system="You are a helpful assistant. Reply in the same language as the user.",
     )
-    return {"text": text, "role": "dm", "label": "DM"}
+    return deepseek_client.to_handler_response(result)

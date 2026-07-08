@@ -1,61 +1,66 @@
 {
-  "currentQuests": [
-    "找到哥布林洞穴的位置",
-    "向村民打听哥布林的具体情况（可选）",
-    "购买物资（可选）",
-    "探索村庄和周边地区（可选）"
-  ],
+  "currentQuests": [],
   "historyQuests": {
-    "pages": [
-      {
-        "id": "history-1",
-        "name": "历史任务 1",
-        "items": [
-          "帮助路边哭泣的 NPC（已完成）",
-          "找到新手村的位置（已完成）"
-        ]
-      }
-    ]
+    "pages": []
   },
   "devPlotTree": [
     {
-      "id": "dev-long-1",
-      "name": "长期剧情 1",
-      "description": "占位符界面 — 长期剧情框架，描述贯穿整个战役的主线走向与终局目标。",
+      "id": "plot-main",
+      "name": "新手村冒险",
+      "description": "凯文与艾琳来到小渔村补充物资。村庄被哥布林骚扰，游戏目标：击败哥布林大王，解决村庄问题。",
       "children": [
         {
-          "id": "dev-mid-1",
-          "name": "中期剧情 1",
-          "description": "新手村闹哥布林，村长请求玩家帮忙；玩家在哥布林巢穴受了埋伏，但最后打败了哥布林大王，发现原来村长和哥布林大王勾结，欺骗过路的英雄然后搜刮他们的财物。",
+          "id": "plot-village-entrance",
+          "name": "村庄入口",
+          "description": "可见哥布林抢劫村民。选择：帮助村民（战斗）/ 躲起来（艾琳出战）/ 离开（暂不考虑）。战斗输入：胜利、失败、逃跑。胜利后村民感谢并推荐找村长，解锁村庄任务。",
+          "children": []
+        },
+        {
+          "id": "plot-village-tasks",
+          "name": "村庄任务",
+          "description": "可选、可独立完成。包含：村长处获得信息与地图；探索商店/酒馆/码头/街道；找到南边哥布林洞穴（北边为死路）。",
           "children": [
             {
-              "id": "dev-short-1",
-              "name": "短期剧情 1",
-              "description": "节点 1 是找到哥布林巢穴在村庄南边。至于具体怎么达成由玩家随性发挥，可以询问村民，可以观察地貌，可以逐一探索东南西北最后试出来。",
+              "id": "plot-task-chief",
+              "name": "村长的任务",
+              "description": "在村长办公室了解哥布林情况，领取击败哥布林大王任务，获得地图（南边洞穴正确，陷阱标记不准）。完成后标记 [已完成]。",
               "children": []
             },
             {
-              "id": "dev-short-2",
-              "name": "短期剧情 2",
-              "description": "占位符界面 — 短期剧情 2。",
+              "id": "plot-task-explore",
+              "name": "探索村庄",
+              "description": "商店可买卖物资；酒馆可饮食闲聊；码头可坚持离开（艾琳劝阻，早期结束）；街道可与随机村民互动。",
               "children": []
             },
             {
-              "id": "dev-short-3",
-              "name": "短期剧情 3",
-              "description": "占位符界面 — 短期剧情 3。",
+              "id": "plot-task-cave-location",
+              "name": "找到哥布林洞穴",
+              "description": "南边通往洞穴，北边为死路。可通过村长地图、询问村民或自行探索获知。发现后标记 [已完成]，解锁洞穴任务。",
               "children": []
             }
           ]
         },
         {
-          "id": "dev-mid-2",
-          "name": "中期剧情 2",
-          "description": "占位符界面 — 中期剧情 2。",
+          "id": "plot-goblin-cave",
+          "name": "哥布林洞穴",
+          "description": "需火把或魔法照明（艾琳会提示）。战斗1中等哥布林→战斗2高等哥布林→岔路（左陷阱+大王先手 / 右正常大王战）→大王求饶可听勾结秘密。",
+          "children": [
+            {
+              "id": "plot-cave-boss",
+              "name": "哥布林大王",
+              "description": "Boss战。胜利后大王求饶；选择听秘密则揭露村长勾结，直接杀死则无法获知。",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "plot-return-village",
+          "name": "返回村庄",
+          "description": "击败大王后村民欢呼、商品五折；若知勾结可质问村长。未击败时村民鼓励继续挑战。码头仍可离开结束游戏。",
           "children": []
         }
       ]
     }
   ],
-  "defaultDevPlotEntryId": "dev-short-1"
+  "defaultDevPlotEntryId": "plot-village-entrance"
 }

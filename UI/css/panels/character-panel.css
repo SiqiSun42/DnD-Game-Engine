@@ -70,6 +70,105 @@
   color: var(--text-secondary);
   line-height: 1.65;
   margin: 0;
+  white-space: pre-wrap;
+}
+
+.character-detail-section {
+  margin-bottom: 12px;
+}
+
+.character-detail-inline {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.character-detail-label {
+  font-size: var(--font-action-panel-body);
+  font-weight: 600;
+  color: var(--text-heading);
+  margin: 0 0 4px;
+}
+
+.character-detail-sublabel {
+  font-size: calc(var(--font-action-panel-body) * 0.96);
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0 0 3px;
+  padding-bottom: 2px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+}
+
+.character-detail-nested {
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+}
+
+.character-detail-subsection {
+  margin-bottom: 10px;
+}
+
+.character-trait-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.character-trait-row {
+  margin: 0;
+}
+
+.character-relationship-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.character-relationship-item {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-bottom: 6px;
+}
+
+.character-relationship-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 4px 0 0;
+  color: var(--text-heading);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.character-relationship-link:disabled {
+  color: var(--text-muted);
+  cursor: default;
+  text-decoration: none;
+}
+
+.character-relationship-name {
+  color: var(--text-heading);
+  font-weight: 500;
+  margin-right: 4px;
+}
+
+.character-relationship-score {
+  color: var(--text-heading);
+  margin-right: 4px;
+}
+
+.character-relationship-score::before {
+  content: "· ";
+  color: var(--text-muted);
+}
+
+.character-relationship-desc {
+  color: var(--text-secondary);
 }
 
 .character-detail-empty {

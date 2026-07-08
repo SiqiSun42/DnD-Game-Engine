@@ -354,6 +354,132 @@ function appendChatMessage(message) {
   persistActiveSaveData();
 }
 
+const QUEST_SYNC_PATTERN = /\[QUEST_SYNC\]\s*([\s\S]*?)\s*\[\/QUEST_SYNC\]/;
+const INVENTORY_SYNC_PATTERN = /\[INVENTORY_SYNC\]\s*([\s\S]*?)\s*\[\/INVENTORY_SYNC\]/;
+const STATUS_SYNC_PATTERN = /\[STATUS_SYNC\]\s*([\s\S]*?)\s*\[\/STATUS_SYNC\]/;
+
+const COMBAT_ENTRY_PROMPT = '现在进入战斗！你希望这场战斗如何结束？可输入：**胜利** / **失败** / **逃跑**';
+
+function getCombatEntryPrompt() {
+  return COMBAT_ENTRY_PROMPT;
+}
+
+function parseQuestSyncPayload(parsed) {
+  if (Array.isArray(parsed)) {
+    return { currentQuests: parsed.map(item => String(item)) };
+  }
+  if (!parsed || typeof parsed !== 'object') {
+    return null;
+  }
+  const questSync = {};
+  if (Array.isArray(parsed.currentQuests)) {
+    questSync.currentQuests = parsed.currentQuests.map(item => String(item));
+  }
+  if (parsed.historyQuests && Array.isArray(parsed.historyQuests.pages)) {
+    questSync.historyQuests = parsed.historyQuests;
+  }
+  if (!questSync.currentQuests && !questSync.historyQuests) {
+    return null;
+  }
+  return questSync;
+}
+
+function extractGameSyncFromDmText(text) {
+  let displayText = String(text || '');
+  let questSync = null;
+  let inventorySync = null;
+  let statusSync = null;
+
+  const questMatch = displayText.match(QUEST_SYNC_PATTERN);
+  if (questMatch) {
+    try {
+      questSync = parseQuestSyncPayload(JSON.parse(questMatch[1].trim()));
+    } catch (_) {
+      questSync = null;
+    }
+    displayText = displayText.replace(QUEST_SYNC_PATTERN, '').trimEnd();
+  }
+
+  const inventoryMatch = displayText.match(INVENTORY_SYNC_PATTERN);
+  if (inventoryMatch) {
+    try {
+      const parsed = JSON.parse(inventoryMatch[1].trim());
+      if (parsed && typeof parsed === 'object') {
+        inventorySync = parsed;
+      }
+    } catch (_) {
+      inventorySync = null;
+    }
+    displayText = displayText.replace(INVENTORY_SYNC_PATTERN, '').trimEnd();
+  }
+
+  const statusMatch = displayText.match(STATUS_SYNC_PATTERN);
+  if (statusMatch) {
+    try {
+      const parsed = JSON.parse(statusMatch[1].trim());
+      if (parsed && typeof parsed === 'object') {
+        statusSync = parsed;
+      }
+    } catch (_) {
+      statusSync = null;
+    }
+    displayText = displayText.replace(STATUS_SYNC_PATTERN, '').trimEnd();
+  }
+
+  return { displayText, questSync, inventorySync, statusSync };
+}
+
+function extractQuestSyncFromDmText(text) {
+  const result = extractGameSyncFromDmText(text);
+  return {
+    displayText: result.displayText,
+    quests: result.questSync?.currentQuests || null,
+  };
+}
+
+function applyQuestSync(questSync) {
+  if (!questSync || !GameData.activeSaveData) return false;
+  if (!GameData.activeSaveData.notes) {
+    GameData.activeSaveData.notes = {};
+  }
+  if (Array.isArray(questSync.currentQuests)) {
+    GameData.activeSaveData.notes.currentQuests = questSync.currentQuests;
+  }
+  if (questSync.historyQuests && Array.isArray(questSync.historyQuests.pages)) {
+    GameData.activeSaveData.notes.historyQuests = questSync.historyQuests;
+  }
+  persistActiveSaveData();
+  return true;
+}
+
+function updateCurrentQuests(quests) {
+  return applyQuestSync({ currentQuests: quests });
+}
+
+function applyInventorySync(inventory) {
+  if (!inventory || typeof inventory !== 'object' || !GameData.activeSaveData) return false;
+  GameData.activeSaveData.inventory = inventory;
+  persistActiveSaveData();
+  return true;
+}
+
+function applyStatusSync(status) {
+  if (!status || typeof status !== 'object' || !GameData.activeSaveData) {
+    return { enteredCombat: false, leftCombat: false };
+  }
+  const prevInCombat = !!GameData.activeSaveData.status?.inCombat;
+  GameData.activeSaveData.status = {
+    ...GameData.activeSaveData.status,
+    ...status,
+  };
+  persistActiveSaveData();
+  const nextInCombat = !!GameData.activeSaveData.status.inCombat;
+  return {
+    enteredCombat: !prevInCombat && nextInCombat,
+    leftCombat: prevInCombat && !nextInCombat,
+  };
+}
+
 async function createSaveFromTemplate(name, docType = 'game') {
   const saveName = String(name || '').trim();
   if (!saveName) return null;

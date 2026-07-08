@@ -4,10 +4,14 @@ function initChat(root, options = {}) {
   const input = root.querySelector('.chat-input');
   const sendBtn = root.querySelector('.chat-send');
   const playerLabel = options.playerLabel || 'A';
+  const idlePlaceholder = input?.placeholder || '输入消息，Enter 发送，Shift+Enter 换行';
+  const busyPlaceholder = options.busyPlaceholder || 'DM回合，请耐心等待';
 
   if (options.initialMessages) {
     options.initialMessages.forEach(msg => {
-      appendMessage(messagesEl, msg.role, msg.text, msg.label);
+      appendMessage(messagesEl, msg.role, msg.text, msg.label, {
+        reasoning: msg.reasoning,
+      });
     });
     scrollToBottom(scrollEl);
   }
@@ -42,14 +46,22 @@ function initChat(root, options = {}) {
   }
 
   return {
-    addMessage(role, text, label) {
-      appendMessage(messagesEl, role, text, label || (role === 'dm' ? 'DM' : playerLabel));
+    addMessage(role, text, label, options = {}) {
+      appendMessage(
+        messagesEl,
+        role,
+        text,
+        label || (role === 'dm' ? 'DM' : playerLabel),
+        options,
+      );
       scrollToBottom(scrollEl);
     },
     setMessages(messages) {
       messagesEl.innerHTML = '';
       (messages || []).forEach(msg => {
-        appendMessage(messagesEl, msg.role, msg.text, msg.label);
+        appendMessage(messagesEl, msg.role, msg.text, msg.label, {
+          reasoning: msg.reasoning,
+        });
       });
       scrollToBottom(scrollEl);
     },
@@ -66,6 +78,7 @@ function initChat(root, options = {}) {
     setBusy(busy) {
       input.disabled = busy;
       if (sendBtn) sendBtn.disabled = busy;
+      input.placeholder = busy ? busyPlaceholder : idlePlaceholder;
       if (busy) {
         showThinkingIndicator(messagesEl, 'DM');
         scrollToBottom(scrollEl);
@@ -76,7 +89,49 @@ function initChat(root, options = {}) {
   };
 }
 
-function appendMessage(container, role, text, label) {
+function shouldShowReasoning(reasoning) {
+  if (!reasoning || !String(reasoning).trim()) return false;
+  if (typeof getAccountMode === 'function') {
+    return getAccountMode() === 'developer';
+  }
+  return true;
+}
+
+function createReasoningBlock(reasoning) {
+  const block = document.createElement('div');
+  block.className = 'chat-reasoning';
+
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'chat-reasoning-toggle';
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.innerHTML = `
+    <span class="chat-reasoning-chevron" aria-hidden="true">▸</span>
+    <span>思考过程</span>
+  `;
+
+  const panel = document.createElement('div');
+  panel.className = 'chat-reasoning-panel';
+  panel.hidden = true;
+
+  const text = document.createElement('div');
+  text.className = 'chat-reasoning-text';
+  text.textContent = reasoning;
+  panel.appendChild(text);
+
+  toggle.addEventListener('click', () => {
+    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+    panel.hidden = expanded;
+    toggle.classList.toggle('expanded', !expanded);
+  });
+
+  block.appendChild(toggle);
+  block.appendChild(panel);
+  return block;
+}
+
+function appendMessage(container, role, text, label, options = {}) {
   const row = document.createElement('div');
   row.className = 'chat-message chat-message-' + role;
 
@@ -104,6 +159,9 @@ function appendMessage(container, role, text, label) {
 
   const body = document.createElement('div');
   body.className = 'chat-message-body';
+  if (role === 'dm' && shouldShowReasoning(options.reasoning)) {
+    body.appendChild(createReasoningBlock(options.reasoning));
+  }
   body.appendChild(bubble);
   body.appendChild(createCopyButton(text));
 

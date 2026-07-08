@@ -3,9 +3,7 @@ from rag.core.engine import query_knowledge
 from rag.policies import CHANNEL_CONSULT, get_rag_policy
 from rag.triggers import should_retrieve
 from services.deepseek import deepseek_client
-from services.prompts import build_consult_system_prompt, load_prompt
-
-CONSULT_PROMPT_FILE = "咨询城主/system.md"
+from services.prompts import CONSULT_PROMPT_FILE, build_consult_system_prompt, load_prompt
 
 
 def extract_last_user_message(messages: list[dict]) -> str:
@@ -39,5 +37,5 @@ async def handle_consult(
         rag_hit = bool(result.get("retrieved"))
 
     system_prompt = build_consult_system_prompt(base_prompt, rag_context, rag_hit)
-    text = await deepseek_client.chat(llm_messages, system=system_prompt)
-    return {"text": text, "role": "dm", "label": "DM"}
+    result = await deepseek_client.chat(llm_messages, system=system_prompt)
+    return deepseek_client.to_handler_response(result)

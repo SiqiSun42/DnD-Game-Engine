@@ -22,6 +22,7 @@ class ChatResponse(BaseModel):
     text: str
     role: str = "dm"
     label: str = "DM"
+    reasoning: str | None = None
 
 
 async def process_chat_request(body: ChatRequest) -> ChatResponse:

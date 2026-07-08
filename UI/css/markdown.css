@@ -116,6 +116,13 @@
   margin: 0 0 12px;
   border-collapse: collapse;
   font-size: 0.95em;
+  table-layout: fixed;
+  overflow-x: auto;
+}
+
+.md-content table {
+  display: block;
+  overflow-x: auto;
 }
 
 .md-content th,
@@ -124,6 +131,8 @@
   border: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .md-content th {

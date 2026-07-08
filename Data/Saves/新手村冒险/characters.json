@@ -1,12 +1,55 @@
 {
   "party": [
-    { "id": "pc", "name": "主控", "tier": "player", "order": 0, "detail": "占位符界面 — 主控" },
-    { "id": "ally1", "name": "盟友 1", "tier": "ally", "order": 1, "detail": "占位符界面 — 盟友 1" },
-    { "id": "ally2", "name": "盟友 2", "tier": "ally", "order": 2, "detail": "占位符界面 — 盟友 2" }
+    {
+      "id": "pc",
+      "name": "凯文",
+      "tier": "player",
+      "order": 0,
+      "detail": "战士。流浪冒险者，与队友艾琳来到小渔村附近补充物资。由玩家控制。"
+    },
+    {
+      "id": "ally-ailin",
+      "name": "艾琳",
+      "tier": "ally",
+      "order": 1,
+      "detail": "精灵牧师。善良守序，关心弱者，性格温和体贴，常说「我们应该…」。村庄入口若玩家躲避，她会主动出战帮助村民；码头试图离开时会劝阻；玩家做不道德之事时会皱眉；洞穴探索时会提示检查环境。"
+    }
   ],
   "chapter": [
-    { "id": "key1", "name": "关键人物 1", "tier": "key", "order": 0, "detail": "占位符界面 — 关键人物 1" },
-    { "id": "npc1", "name": "普通人物 1", "tier": "normal", "order": 1, "detail": "占位符界面 — 普通人物 1" },
-    { "id": "npc2", "name": "普通人物 2", "tier": "normal", "order": 2, "detail": "占位符界面 — 普通人物 2" }
+    {
+      "id": "chief",
+      "name": "村长",
+      "tier": "key",
+      "order": 0,
+      "detail": "新手村的村长。可向玩家讲解哥布林情况，发放「击败哥布林大王」任务，并提供标记南边洞穴的地图（陷阱标记不准）。战胜大王并获知秘密后，可能涉及与哥布林大王勾结的后续剧情。"
+    },
+    {
+      "id": "merchant",
+      "name": "商人",
+      "tier": "normal",
+      "order": 1,
+      "detail": "村中商店老板，中立。出售食物、火把、药品等，收购任何物品。"
+    },
+    {
+      "id": "innkeeper",
+      "name": "酒保",
+      "tier": "normal",
+      "order": 2,
+      "detail": "酒馆经营者。出售饮料与食物，可与玩家闲聊，暂时无特殊剧情。"
+    },
+    {
+      "id": "fisherman",
+      "name": "渔民",
+      "tier": "normal",
+      "order": 3,
+      "detail": "码头上的渔民，中立。玩家可在此选择结束游戏离开村庄，艾琳会劝阻。"
+    },
+    {
+      "id": "goblin-king",
+      "name": "哥布林大王",
+      "tier": "key",
+      "order": 4,
+      "detail": "哥布林巢穴的 Boss。被击败后可能求饶并透露与村长勾结的秘密；若被直接杀死则无法获得该信息。"
+    }
   ]
 }

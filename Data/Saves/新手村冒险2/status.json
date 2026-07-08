@@ -1,0 +1,20 @@
+{
+  "inCombat": false,
+  "team": [
+    {
+      "id": "凯文",
+      "name": "凯文",
+      "tier": "player",
+      "order": 0,
+      "detail": "战士。流浪冒险者，当前位于村庄入口。"
+    },
+    {
+      "id": "艾琳",
+      "name": "艾琳",
+      "tier": "teammate",
+      "order": 1,
+      "detail": "精灵牧师，善良守序。与凯文同行，随时准备协助村民或给出建议。"
+    }
+  ],
+  "enemy": []
+}

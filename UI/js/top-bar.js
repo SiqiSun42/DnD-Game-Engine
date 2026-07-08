@@ -83,6 +83,39 @@ function renderActionPanelContent(container, tabId, tabInfo) {
   }
 }
 
+function refreshNotesPanelIfOpen() {
+  const panel = document.querySelector('#action-panel');
+  const activeTab = document.querySelector('.action-tab.active');
+  if (!panel || panel.classList.contains('hidden') || !activeTab || activeTab.dataset.tab !== 'notes') {
+    return;
+  }
+  const contentEl = document.querySelector('#action-panel-content');
+  if (!contentEl || typeof mountNotesPanel !== 'function') return;
+  mountNotesPanel(contentEl, getPanelSchema('notes'), getPanelData('notes'));
+}
+
+function refreshBackpackPanelIfOpen() {
+  const panel = document.querySelector('#action-panel');
+  const activeTab = document.querySelector('.action-tab.active');
+  if (!panel || panel.classList.contains('hidden') || !activeTab || activeTab.dataset.tab !== 'backpack') {
+    return;
+  }
+  const contentEl = document.querySelector('#action-panel-content');
+  if (!contentEl || typeof mountBackpackPanel !== 'function') return;
+  mountBackpackPanel(contentEl, getPanelSchema('backpack'), getPanelData('backpack'));
+}
+
+function refreshStatusPanelIfOpen() {
+  const panel = document.querySelector('#action-panel');
+  const activeTab = document.querySelector('.action-tab.active');
+  if (!panel || panel.classList.contains('hidden') || !activeTab || activeTab.dataset.tab !== 'status') {
+    return;
+  }
+  const contentEl = document.querySelector('#action-panel-content');
+  if (!contentEl || typeof mountStatusPanel !== 'function') return;
+  mountStatusPanel(contentEl, getPanelSchema('status'), getPanelData('status'));
+}
+
 function initActionPanel(container, tabs) {
   const tabEls = container.querySelectorAll('.action-tab');
   const panel = container.querySelector('#action-panel');

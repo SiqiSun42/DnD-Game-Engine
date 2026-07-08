@@ -1,0 +1,84 @@
+{
+  "currentQuests": [],
+  "historyQuests": {
+    "pages": []
+  },
+  "devPlotTree": [
+    {
+      "id": "plot-main",
+      "name": "新手村冒险",
+      "description": "凯文与艾琳来到小渔村补充物资。村庄被哥布林骚扰，游戏目标：击败哥布林大王。玩家可自由探索，不强制完成全部村庄任务再进洞。",
+      "children": [
+        {
+          "id": "plot-village-entrance",
+          "name": "村庄入口",
+          "description": "可见哥布林抢劫村民。选择：帮助村民（战斗）/ 躲起来（艾琳出战）/ 离开（暂不考虑）。战斗输入：胜利、失败、逃跑。胜利后村民感谢并推荐找村长，解锁村庄任务。",
+          "children": []
+        },
+        {
+          "id": "plot-village-tasks",
+          "name": "村庄任务",
+          "description": "三条彼此独立、可跳过。每完成一项即在 currentQuests 标（已完成）并输出 QUEST_SYNC。玩家抵达哥布林洞穴入口时立即切换为洞穴战斗任务，不要求三项全完成。",
+          "children": [
+            {
+              "id": "plot-task-chief",
+              "name": "村长的任务",
+              "description": "可选。在村长办公室了解哥布林情况，领取任务并拿到「村长手绘地图」。\n\n【隐藏真相】村长与大王勾结：诱人进洞、地图标反、伏击杀害、瓜分财物。\n\n【村长对外台词】可说来过佣兵/冒险者、进洞未归（归咎哥布林）；禁止说从没冒险者来过。交地图时指左路安全、右路避陷阱。\n\n完成后当轮 QUEST_SYNC 标（已完成）+ INVENTORY_SYNC 加入地图。",
+              "children": []
+            },
+            {
+              "id": "plot-task-explore",
+              "name": "探索村庄",
+              "description": "可选。到访商店、酒馆、码头或街道之一即完成。完成后当轮 QUEST_SYNC 标（已完成）。",
+              "children": []
+            },
+            {
+              "id": "plot-task-cave-location",
+              "name": "找到哥布林洞穴",
+              "description": "南边通往洞穴，北边死路。抵达洞口即完成。当轮 QUEST_SYNC：本条标（已完成），并将 currentQuests 切换为三场洞穴战斗，村庄任务列表移入 historyQuests（各条按实际完成情况保留是否带（已完成））。",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "plot-goblin-cave",
+          "name": "哥布林洞穴",
+          "description": "需火把（艾琳可提示）。严格线性：中等哥布林→高等哥布林→岔路→大王。不得生成档案外人类 NPC 或新派系。每场战斗用胜利/失败/逃跑，进入战斗须 STATUS_SYNC。",
+          "children": [
+            {
+              "id": "plot-cave-fight1",
+              "name": "打败中等哥布林",
+              "description": "洞穴第一场。遭遇中等哥布林，STATUS_SYNC 进入战斗。胜利深入；失败/逃跑可重来。完成后 QUEST_SYNC 标（已完成）。",
+              "children": []
+            },
+            {
+              "id": "plot-cave-fight2",
+              "name": "打败高等哥布林",
+              "description": "第二场，须先胜第一场。遭遇高等哥布林。胜利进入岔路。完成后标（已完成）。",
+              "children": []
+            },
+            {
+              "id": "plot-cave-fork",
+              "name": "岔路抉择",
+              "description": "左路：陷阱+大王先手（地图误导）。右路：正常大王战。",
+              "children": []
+            },
+            {
+              "id": "plot-cave-boss",
+              "name": "打败哥布林大王",
+              "description": "Boss 战。胜利后大王可求饶供出勾结。完成后标（已完成）。",
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "plot-return-village",
+          "name": "返回村庄",
+          "description": "击败大王后村民感谢。知勾结者可质问村长。",
+          "children": []
+        }
+      ]
+    }
+  ],
+  "defaultDevPlotEntryId": "plot-village-entrance"
+}

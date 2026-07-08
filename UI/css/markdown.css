@@ -103,26 +103,25 @@
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .md-content pre code {
   padding: 0;
   background: none;
   border-radius: 0;
+  white-space: inherit;
+  word-break: inherit;
 }
 
 .md-content table {
   width: 100%;
+  max-width: 100%;
   margin: 0 0 12px;
   border-collapse: collapse;
   font-size: 0.95em;
   table-layout: fixed;
-  overflow-x: auto;
-}
-
-.md-content table {
-  display: block;
-  overflow-x: auto;
 }
 
 .md-content th,

@@ -12,13 +12,7 @@ function mountGameTemplate(container, options = {}) {
               </div>
             </div>
           </div>
-          <div class="chat-input-area">
-            <div class="chat-column">
-              <div class="chat-input-shell">
-                <textarea class="chat-input" rows="4" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea>
-              </div>
-            </div>
-          </div>
+          ${buildChatInputAreaHtml()}
         </div>
       </div>
     </div>
@@ -31,9 +25,10 @@ function mountGameTemplate(container, options = {}) {
   const chat = initChat(container.querySelector('.chat-root'), {
     playerLabel,
     initialMessages: options.initialMessages || getChatMessages(),
-    onSend(text) {
+    onSend(text, modeTags) {
       handleChatSend({
         text,
+        modeTags,
         playerLabel,
         chat,
         channel: options.channel,

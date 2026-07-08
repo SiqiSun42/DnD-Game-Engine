@@ -1,5 +1,185 @@
 {
   "inCombat": false,
-  "team": [],
+  "statusFields": [
+    {
+      "key": "basics",
+      "label": "基础信息",
+      "type": "profile",
+      "fields": [
+        { "key": "occupation", "label": "职业" },
+        { "key": "level", "label": "等级" },
+        { "key": "race", "label": "种族" }
+      ]
+    },
+    {
+      "key": "hitPoints",
+      "label": "生命值",
+      "layout": "inline",
+      "fields": [
+        { "key": "current", "label": "当前HP" },
+        { "key": "max", "label": "最大HP" },
+        { "key": "temp", "label": "临时HP" }
+      ]
+    },
+    {
+      "key": "defense",
+      "label": "防御",
+      "layout": "inline",
+      "fields": [
+        { "key": "ac", "label": "护甲等级（AC）" },
+        { "key": "sources", "label": "防御来源" }
+      ]
+    },
+    {
+      "key": "abilities",
+      "label": "属性及修正值",
+      "type": "abilities",
+      "fields": [
+        { "key": "str", "label": "力量" },
+        { "key": "dex", "label": "敏捷" },
+        { "key": "con", "label": "体质" },
+        { "key": "int", "label": "智力" },
+        { "key": "wis", "label": "感知" },
+        { "key": "cha", "label": "魅力" }
+      ]
+    },
+    {
+      "key": "equipment",
+      "label": "装备",
+      "layout": "inline",
+      "fields": [
+        { "key": "mainWeapon", "label": "主武器" },
+        { "key": "armor", "label": "防具" },
+        { "key": "offhand", "label": "副防具" }
+      ]
+    },
+    {
+      "key": "resources",
+      "label": "本轮资源",
+      "layout": "inline",
+      "fields": [
+        { "key": "action", "label": "标准行动" },
+        { "key": "bonusAction", "label": "附加行动" },
+        { "key": "movement", "label": "移动距离" }
+      ]
+    },
+    {
+      "key": "spells",
+      "label": "法术",
+      "layout": "inline",
+      "fields": [
+        { "key": "summary", "label": "概况" },
+        { "key": "cantrips", "label": "戏法" },
+        { "key": "known", "label": "已学法术" },
+        { "key": "level1Slots", "label": "1级法术位" },
+        { "key": "usedSlots", "label": "已用法术位" }
+      ]
+    },
+    {
+      "key": "conditions",
+      "label": "当前状态",
+      "type": "conditions"
+    }
+  ],
+  "team": [
+    {
+      "id": "pc",
+      "name": "凯文",
+      "tier": "player",
+      "order": 0,
+      "basics": {
+        "occupation": "战士",
+        "level": "1",
+        "race": "人类"
+      },
+      "hitPoints": {
+        "current": "12",
+        "max": "12",
+        "temp": "0"
+      },
+      "defense": {
+        "ac": "16",
+        "sources": "链甲护甲（+5）+ 木盾（+2）"
+      },
+      "abilities": {
+        "str": "15（修正值+2）",
+        "dex": "10（修正值+0）",
+        "con": "14（修正值+2）",
+        "int": "10（修正值+0）",
+        "wis": "11（修正值+0）",
+        "cha": "12（修正值+1）"
+      },
+      "equipment": {
+        "mainWeapon": "长剑（1d8伤害，+2修正值）",
+        "armor": "链甲护甲",
+        "offhand": "木盾"
+      },
+      "resources": {
+        "action": "可用",
+        "bonusAction": "可用",
+        "movement": "30尺"
+      },
+      "spells": {
+        "summary": "无法术位"
+      },
+      "conditions": []
+    },
+    {
+      "id": "ally-ailin",
+      "name": "艾琳",
+      "tier": "teammate",
+      "order": 1,
+      "basics": {
+        "occupation": "牧师",
+        "level": "1",
+        "race": "精灵"
+      },
+      "hitPoints": {
+        "current": "7",
+        "max": "10",
+        "temp": "0"
+      },
+      "defense": {
+        "ac": "14",
+        "sources": "皮甲护甲（+2）+ 木盾（+2）"
+      },
+      "abilities": {
+        "str": "10（修正值+0）",
+        "dex": "12（修正值+1）",
+        "con": "12（修正值+1）",
+        "int": "13（修正值+1）",
+        "wis": "16（修正值+3）",
+        "cha": "14（修正值+2）"
+      },
+      "equipment": {
+        "mainWeapon": "木棍（1d6伤害，+0修正值）",
+        "armor": "皮甲护甲",
+        "offhand": "木盾"
+      },
+      "resources": {
+        "action": "可用",
+        "bonusAction": "可用",
+        "movement": "30尺"
+      },
+      "spells": {
+        "cantrips": "治疗术、神圣之火",
+        "known": "治疗伤口、庇护术、指引术",
+        "level1Slots": "3个",
+        "usedSlots": "1个（已使用治疗伤口）"
+      },
+      "conditions": [
+        {
+          "name": "中毒",
+          "duration": "持续2轮",
+          "effect": "每轮战斗开始时受1点伤害"
+        },
+        {
+          "name": "虚弱",
+          "duration": "持续1轮",
+          "effect": "攻击骰减1"
+        }
+      ]
+    }
+  ],
   "enemy": []
 }

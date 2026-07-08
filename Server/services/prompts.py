@@ -101,6 +101,7 @@ def build_game_system_prompt(
     base_prompt: str,
     rag_context: str,
     game_context: dict | None = None,
+    dice_results_block: str | None = None,
 ) -> str:
     prompt = base_prompt or (
         "You are the Dungeon Master. Reply in the same language as the player."
@@ -109,5 +110,8 @@ def build_game_system_prompt(
     prompt = f"{prompt.rstrip()}\n\n## 当前游戏状态\n\n{state_block}"
     prompt = append_quest_sync_reminder(prompt, game_context)
     prompt = append_combat_state_reminder(prompt, game_context)
-    return append_rag_context(prompt, rag_context)
+    prompt = append_rag_context(prompt, rag_context)
+    if dice_results_block and dice_results_block.strip():
+        prompt = f"{prompt.rstrip()}\n\n{dice_results_block.strip()}"
+    return prompt
 

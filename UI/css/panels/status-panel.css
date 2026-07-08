@@ -77,3 +77,31 @@
   color: var(--text-muted);
   padding: 8px 0;
 }
+
+.status-ability-grid {
+  display: grid;
+  grid-template-columns: repeat(12, max-content);
+  column-gap: 4px;
+  row-gap: 6px;
+  align-items: baseline;
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.status-ability-name {
+  text-align: right;
+  padding-right: 2px;
+}
+
+.status-ability-score,
+.status-ability-mod {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  min-width: 1.5em;
+}
+
+.status-ability-mod-label {
+  padding-left: 6px;
+  color: var(--text-muted);
+}

@@ -12,13 +12,7 @@ function mountChatTemplate(container, options = {}) {
               </div>
             </div>
           </div>
-          <div class="chat-input-area">
-            <div class="chat-column">
-              <div class="chat-input-shell">
-                <textarea class="chat-input" rows="4" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea>
-              </div>
-            </div>
-          </div>
+          ${buildChatInputAreaHtml()}
         </div>
       </div>
     </div>
@@ -36,9 +30,10 @@ function mountChatTemplate(container, options = {}) {
     playerLabel,
     busyPlaceholder: '请耐心等待回复…',
     initialMessages,
-    onSend(text) {
+    onSend(text, modeTags) {
       handleChatSend({
         text,
+        modeTags,
         playerLabel,
         chat,
         channel: options.channel,

@@ -5,10 +5,22 @@ if (typeof marked !== 'undefined') {
   });
 }
 
+function normalizeChatMarkdown(text) {
+  let result = String(text || '').replace(/\r\n/g, '\n').trimEnd();
+  result = result.replace(/^【([^】]+)】\s*$/gm, '### $1');
+  result = result.replace(/^[ \t]{4}/gm, '');
+  result = result.replace(/\n{3,}/g, '\n\n');
+  const fenceCount = (result.match(/```/g) || []).length;
+  if (fenceCount % 2 === 1) {
+    result += '\n```';
+  }
+  return result;
+}
+
 function renderMarkdown(text) {
   if (!text) return '';
 
-  const input = String(text);
+  const input = normalizeChatMarkdown(text);
 
   if (typeof marked === 'undefined') {
     return input

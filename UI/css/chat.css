@@ -315,6 +315,9 @@
 
 .chat-message-dm .chat-bubble {
   background: var(--bg-input);
+  flex: unset;
+  width: auto;
+  max-width: 100%;
 }
 
 .chat-message-player .chat-bubble {
@@ -331,6 +334,8 @@
 
 .chat-message-dm .chat-message-body {
   align-items: flex-start;
+  flex: unset;
+  max-width: 100%;
 }
 
 .chat-message-player .chat-message-body {
@@ -543,6 +548,43 @@
 
 .chat-input::placeholder {
   color: var(--text-muted);
+}
+
+.chat-mode-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.chat-mode-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: calc(var(--font-chat-input) - 2px);
+  font-family: inherit;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.chat-mode-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-heading);
+}
+
+.chat-mode-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--focus-ring);
+}
+
+.chat-mode-btn.active {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  border-color: var(--accent);
 }
 
 .placeholder {

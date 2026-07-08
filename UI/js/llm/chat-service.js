@@ -1,5 +1,14 @@
-async function handleChatSend({ text, playerLabel, chat, channel, saveName }) {
-  appendChatMessage({ role: 'player', label: playerLabel, text });
+async function handleChatSend({ text, playerLabel, chat, channel, saveName, modeTags = [] }) {
+  const activeModeTags = Array.isArray(modeTags)
+    ? modeTags.filter(tag => typeof tag === 'string' && tag.trim())
+    : [];
+
+  appendChatMessage({
+    role: 'player',
+    label: playerLabel,
+    text,
+    modeTags: activeModeTags.length ? activeModeTags : undefined,
+  });
 
   const resolvedChannel = channel || resolveChatChannel();
   const resolvedSaveName = saveName !== undefined

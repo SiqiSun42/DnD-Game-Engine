@@ -1,8 +1,72 @@
+const CHAT_MODE_ORDER = ['game', 'meta', 'check'];
+const CHAT_MODE_LABELS = {
+  game: '游戏',
+  meta: '元对话',
+  check: '鉴定',
+};
+
+function buildChatInputAreaHtml() {
+  return `
+    <div class="chat-input-area">
+      <div class="chat-column">
+        <div class="chat-input-shell">
+          <textarea class="chat-input" rows="4" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea>
+        </div>
+        <div class="chat-mode-bar" role="toolbar" aria-label="消息模式">
+          <button type="button" class="chat-mode-btn" data-mode="game" aria-pressed="false">游戏</button>
+          <button type="button" class="chat-mode-btn" data-mode="meta" aria-pressed="false">元对话</button>
+          <button type="button" class="chat-mode-btn" data-mode="check" aria-pressed="false">鉴定</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function initChatModeBar(root) {
+  const bar = root.querySelector('.chat-mode-bar');
+  if (!bar) {
+    return { getActiveModeTags: () => [] };
+  }
+
+  const active = new Set();
+
+  bar.querySelectorAll('.chat-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      if (active.has(mode)) {
+        active.delete(mode);
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      } else {
+        active.add(mode);
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+      }
+    });
+  });
+
+  return {
+    getActiveModeTags() {
+      return CHAT_MODE_ORDER
+        .filter(mode => active.has(mode))
+        .map(mode => CHAT_MODE_LABELS[mode]);
+    },
+    reset() {
+      active.clear();
+      bar.querySelectorAll('.chat-mode-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-pressed', 'false');
+      });
+    },
+  };
+}
+
 function initChat(root, options = {}) {
   const messagesEl = root.querySelector('.chat-messages');
   const scrollEl = root.querySelector('.chat-messages-scroll') || messagesEl;
   const input = root.querySelector('.chat-input');
   const sendBtn = root.querySelector('.chat-send');
+  const modeBar = initChatModeBar(root);
   const playerLabel = options.playerLabel || 'A';
   const idlePlaceholder = input?.placeholder || '输入消息，Enter 发送，Shift+Enter 换行';
   const busyPlaceholder = options.busyPlaceholder || 'DM回合，请耐心等待';
@@ -24,9 +88,11 @@ function initChat(root, options = {}) {
     input.style.height = '';
     scrollToBottom(scrollEl);
     input.focus();
+    const modeTags = modeBar.getActiveModeTags();
     if (options.onSend) {
-      options.onSend(text);
+      options.onSend(text, modeTags);
     }
+    modeBar.reset();
   }
 
   input.addEventListener('keydown', e => {
@@ -78,6 +144,9 @@ function initChat(root, options = {}) {
     setBusy(busy) {
       input.disabled = busy;
       if (sendBtn) sendBtn.disabled = busy;
+      root.querySelectorAll('.chat-mode-btn').forEach(btn => {
+        btn.disabled = busy;
+      });
       input.placeholder = busy ? busyPlaceholder : idlePlaceholder;
       if (busy) {
         showThinkingIndicator(messagesEl, 'DM');
@@ -257,13 +326,7 @@ function getChatHtml() {
           </div>
         </div>
       </div>
-      <div class="chat-input-area">
-        <div class="chat-column">
-          <div class="chat-input-shell">
-            <textarea class="chat-input" rows="4" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea>
-          </div>
-        </div>
-      </div>
+      ${buildChatInputAreaHtml()}
     </div>
   `;
 }

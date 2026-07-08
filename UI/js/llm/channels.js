@@ -28,10 +28,19 @@ function resolveChatChannel(options = {}) {
   return CHAT_CHANNELS.ADVENTURE;
 }
 
+function appendModeTags(text, modeTags) {
+  const visible = String(text || '');
+  if (!Array.isArray(modeTags) || !modeTags.length) {
+    return visible;
+  }
+  const suffix = modeTags.map(tag => `【${tag}】`).join('');
+  return `${visible}${suffix}`;
+}
+
 function buildApiMessages(messages) {
   return (messages || []).map(message => ({
     role: message.role,
-    content: message.text,
+    content: appendModeTags(message.text, message.modeTags),
     label: message.label || null,
   }));
 }

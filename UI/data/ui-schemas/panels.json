@@ -21,6 +21,9 @@
     "categories": [
       { "id": "team", "label": "团队", "combatOnly": false },
       { "id": "enemy", "label": "敌人", "combatOnly": true }
+    ],
+    "defaultStatusFields": [
+      { "key": "detail", "label": "状态" }
     ]
   },
   "world": {

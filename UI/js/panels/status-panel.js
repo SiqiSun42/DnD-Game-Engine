@@ -1,3 +1,5 @@
+const STATUS_COMBAT_ONLY_CATEGORIES_ENABLED = false;
+
 const STATUS_TIER_ORDER = {
   team: { player: 0, teammate: 1, ally: 2 },
   enemy: { boss: 0, normal: 1 },
@@ -21,8 +23,32 @@ function sortStatusCharacters(categoryId, list) {
   return [...list].sort((a, b) => {
     const tierDiff = (tierOrder[a.tier] ?? 9) - (tierOrder[b.tier] ?? 9);
     if (tierDiff !== 0) return tierDiff;
-    return a.order - b.order;
+    return (a.order ?? 0) - (b.order ?? 0);
   });
+}
+
+function isStatusEncounter(item) {
+  return Array.isArray(item?.members);
+}
+
+function getStatusEncounters(characters) {
+  return (characters || []).filter(isStatusEncounter);
+}
+
+function getActiveStatusCharacters(categoryId, cat, activeEncounterId) {
+  if (!cat) return [];
+  const encounters = getStatusEncounters(cat.characters);
+  if (categoryId === 'enemy' && encounters.length) {
+    if (!activeEncounterId) return [];
+    const encounter = encounters.find(item => item.id === activeEncounterId);
+    return sortStatusCharacters(categoryId, encounter?.members || []);
+  }
+  return sortStatusCharacters(categoryId, cat.characters || []);
+}
+
+function findActiveStatusCharacter(categoryId, cat, activeEncounterId, activeCharacterId) {
+  const chars = getActiveStatusCharacters(categoryId, cat, activeEncounterId);
+  return chars.find(item => item.id === activeCharacterId) || null;
 }
 
 function getStatusDetailFields(data, schema) {
@@ -246,12 +272,22 @@ function mountStatusPanel(container, schema, data) {
   const STATUS_CATEGORIES = buildStatusCategories(schema, data);
 
   function getVisibleStatusCategories() {
-    return Object.values(STATUS_CATEGORIES).filter(cat => !cat.combatOnly || STATUS_IN_COMBAT);
+    return Object.values(STATUS_CATEGORIES).filter(cat => {
+      if (!cat.combatOnly) return true;
+      if (!STATUS_COMBAT_ONLY_CATEGORIES_ENABLED) return true;
+      return STATUS_IN_COMBAT;
+    });
   }
 
   const visibleCategories = getVisibleStatusCategories();
   let activeCategory = visibleCategories[0]?.id || 'team';
-  let activeCharacterId = STATUS_CATEGORIES[activeCategory]?.characters[0]?.id || null;
+  let activeEncounterId = null;
+  let enemyExpanded = true;
+  let activeCharacterId = getActiveStatusCharacters(
+    activeCategory,
+    STATUS_CATEGORIES[activeCategory],
+    activeEncounterId,
+  )[0]?.id || null;
 
   container.innerHTML = `
     <div class="status-panel" id="status-panel">
@@ -268,18 +304,76 @@ function mountStatusPanel(container, schema, data) {
   function renderCategories() {
     categoriesEl.innerHTML = '';
     getVisibleStatusCategories().forEach(cat => {
+      const encounters = getStatusEncounters(cat.characters);
+      if (cat.id === 'enemy' && encounters.length) {
+        renderEnemyCategoryGroup(cat, encounters);
+        return;
+      }
+
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'status-panel-item' + (cat.id === activeCategory ? ' active' : '');
       btn.textContent = cat.label;
       btn.addEventListener('click', () => {
         activeCategory = cat.id;
-        const chars = sortStatusCharacters(activeCategory, STATUS_CATEGORIES[activeCategory].characters);
+        activeEncounterId = null;
+        const chars = getActiveStatusCharacters(activeCategory, STATUS_CATEGORIES[activeCategory], activeEncounterId);
         activeCharacterId = chars[0]?.id || null;
         renderAll();
       });
       categoriesEl.appendChild(btn);
     });
+  }
+
+  function renderEnemyCategoryGroup(cat, encounters) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'status-category-group';
+
+    const headerBtn = document.createElement('button');
+    headerBtn.type = 'button';
+    headerBtn.className = 'status-panel-item status-category-toggle'
+      + (activeCategory === 'enemy' ? ' active' : '');
+    headerBtn.innerHTML = `
+      <span class="status-category-chevron${enemyExpanded ? ' expanded' : ''}" aria-hidden="true">▸</span>
+      <span>${escapePanelText(cat.label)}</span>
+    `;
+    headerBtn.addEventListener('click', () => {
+      const nextExpanded = activeCategory === 'enemy' ? !enemyExpanded : true;
+      activeCategory = 'enemy';
+      enemyExpanded = nextExpanded;
+      if (!activeEncounterId) {
+        activeEncounterId = encounters[0]?.id || null;
+      }
+      const chars = getActiveStatusCharacters('enemy', cat, activeEncounterId);
+      activeCharacterId = chars[0]?.id || null;
+      renderAll();
+    });
+    wrapper.appendChild(headerBtn);
+
+    if (enemyExpanded) {
+      const subList = document.createElement('div');
+      subList.className = 'status-category-sublist';
+      encounters.forEach(encounter => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'status-panel-item status-encounter-item'
+          + (activeCategory === 'enemy' && activeEncounterId === encounter.id ? ' active' : '');
+        btn.textContent = encounter.name;
+        btn.addEventListener('click', event => {
+          event.stopPropagation();
+          activeCategory = 'enemy';
+          activeEncounterId = encounter.id;
+          enemyExpanded = true;
+          const chars = getActiveStatusCharacters('enemy', cat, activeEncounterId);
+          activeCharacterId = chars[0]?.id || null;
+          renderAll();
+        });
+        subList.appendChild(btn);
+      });
+      wrapper.appendChild(subList);
+    }
+
+    categoriesEl.appendChild(wrapper);
   }
 
   function renderList() {
@@ -289,10 +383,24 @@ function mountStatusPanel(container, schema, data) {
       detailEl.innerHTML = '<p class="status-detail-empty">请选择人物</p>';
       return;
     }
-    const chars = sortStatusCharacters(activeCategory, cat.characters);
-    if (!chars.find(c => c.id === activeCharacterId)) {
+
+    const encounters = getStatusEncounters(cat.characters);
+    if (activeCategory === 'enemy' && encounters.length && !activeEncounterId) {
+      listEl.innerHTML = '<p class="status-list-hint">请选择遭遇战</p>';
+      detailEl.innerHTML = '<p class="status-detail-empty">请选择遭遇战</p>';
+      return;
+    }
+
+    const chars = getActiveStatusCharacters(activeCategory, cat, activeEncounterId);
+    if (!chars.find(item => item.id === activeCharacterId)) {
       activeCharacterId = chars[0]?.id || null;
     }
+    if (!chars.length) {
+      listEl.innerHTML = '<p class="status-list-hint">暂无人物</p>';
+      detailEl.innerHTML = '<p class="status-detail-empty">暂无资料</p>';
+      return;
+    }
+
     chars.forEach(char => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -308,7 +416,7 @@ function mountStatusPanel(container, schema, data) {
 
   function renderDetail() {
     const cat = STATUS_CATEGORIES[activeCategory];
-    const char = cat?.characters.find(c => c.id === activeCharacterId);
+    const char = findActiveStatusCharacter(activeCategory, cat, activeEncounterId, activeCharacterId);
     if (!char) {
       detailEl.innerHTML = '<p class="status-detail-empty">请选择人物</p>';
       return;
@@ -326,7 +434,12 @@ function mountStatusPanel(container, schema, data) {
     const visible = getVisibleStatusCategories();
     if (!visible.find(cat => cat.id === activeCategory)) {
       activeCategory = visible[0]?.id || 'team';
-      const chars = sortStatusCharacters(activeCategory, STATUS_CATEGORIES[activeCategory]?.characters || []);
+      activeEncounterId = null;
+      const chars = getActiveStatusCharacters(
+        activeCategory,
+        STATUS_CATEGORIES[activeCategory],
+        activeEncounterId,
+      );
       activeCharacterId = chars[0]?.id || null;
     }
     renderCategories();

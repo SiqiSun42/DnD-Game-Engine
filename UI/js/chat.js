@@ -1,6 +1,6 @@
 const CHAT_MODE_ORDER = ['game', 'meta', 'check'];
 const CHAT_MODE_LABELS = {
-  game: '游戏',
+  game: '战斗',
   meta: '元对话',
   check: '鉴定',
 };
@@ -13,7 +13,7 @@ function buildChatInputAreaHtml() {
           <textarea class="chat-input" rows="4" placeholder="输入消息，Enter 发送，Shift+Enter 换行"></textarea>
         </div>
         <div class="chat-mode-bar" role="toolbar" aria-label="消息模式">
-          <button type="button" class="chat-mode-btn" data-mode="game" aria-pressed="false">游戏</button>
+          <button type="button" class="chat-mode-btn" data-mode="game" aria-pressed="false">战斗</button>
           <button type="button" class="chat-mode-btn" data-mode="meta" aria-pressed="false">元对话</button>
           <button type="button" class="chat-mode-btn" data-mode="check" aria-pressed="false">鉴定</button>
         </div>
@@ -75,6 +75,7 @@ function initChat(root, options = {}) {
     options.initialMessages.forEach(msg => {
       appendMessage(messagesEl, msg.role, msg.text, msg.label, {
         reasoning: msg.reasoning,
+        judgeResult: msg.judgeResult,
       });
     });
     scrollToBottom(scrollEl);
@@ -127,6 +128,7 @@ function initChat(root, options = {}) {
       (messages || []).forEach(msg => {
         appendMessage(messagesEl, msg.role, msg.text, msg.label, {
           reasoning: msg.reasoning,
+          judgeResult: msg.judgeResult,
         });
       });
       scrollToBottom(scrollEl);
@@ -164,6 +166,13 @@ function shouldShowReasoning(reasoning) {
     return getAccountMode() === 'developer';
   }
   return true;
+}
+
+function createJudgeResultBlock(judgeResult) {
+  const block = document.createElement('div');
+  block.className = 'chat-judge-result';
+  block.textContent = `掷骰判断：${judgeResult}`;
+  return block;
 }
 
 function createReasoningBlock(reasoning) {
@@ -228,6 +237,9 @@ function appendMessage(container, role, text, label, options = {}) {
 
   const body = document.createElement('div');
   body.className = 'chat-message-body';
+  if (role === 'dm' && options.judgeResult) {
+    body.appendChild(createJudgeResultBlock(options.judgeResult));
+  }
   if (role === 'dm' && shouldShowReasoning(options.reasoning)) {
     body.appendChild(createReasoningBlock(options.reasoning));
   }

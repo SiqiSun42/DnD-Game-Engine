@@ -1,6 +1,12 @@
 {
   "saves": [
     {
+      "name": "战斗测试",
+      "docType": "game",
+      "pinned": false,
+      "lastPlayed": 0
+    },
+    {
       "name": "骰子测试",
       "docType": "game",
       "pinned": false,

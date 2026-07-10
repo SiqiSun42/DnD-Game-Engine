@@ -5,6 +5,8 @@ from config import PROMPT_ROOT
 USER_PROMPT_PATCH_FILE = "游戏进程/降智提醒.md"
 CONSULT_PROMPT_FILE = "咨询城主/system.md"
 GAME_PROMPT_FILE = "游戏进程/游戏进程.md"
+ROLL_JUDGE_PROMPT_FILE = "游戏进程/掷骰判断.md"
+CHECK_TEST_NON_APPRAISAL_PROMPT_FILE = "游戏进程/非鉴定测试.md"
 GAME_PROMPT_FILE_KEY = "promptFile"
 
 
@@ -20,6 +22,28 @@ def resolve_game_prompt_file(context: dict | None) -> str | None:
         if isinstance(prompt_file, str) and prompt_file.strip():
             return prompt_file.strip()
     return None
+
+
+def load_roll_judge_prompt() -> str:
+    prompt = load_prompt(ROLL_JUDGE_PROMPT_FILE)
+    if prompt:
+        return prompt
+    return (
+        "判断本轮是否需要掷骰。不需要时只输出 {False}；"
+        "需要时每个骰子一行输出 {True, 面数}。不要输出其他内容。"
+    )
+
+
+def load_check_test_generation_prompt(context: dict | None, needs_roll: bool) -> str:
+    if needs_roll:
+        return load_game_base_prompt(context)
+    prompt = load_prompt(CHECK_TEST_NON_APPRAISAL_PROMPT_FILE)
+    if prompt:
+        return prompt
+    return (
+        "你是叙事生成器。本轮不需要鉴定，不要输出【鉴定类型】等鉴定格式，"
+        "不要自行生成或引用任何骰子数字，只根据对话推进叙述。"
+    )
 
 
 def load_game_base_prompt(context: dict | None = None) -> str:
@@ -97,20 +121,33 @@ def append_combat_state_reminder(prompt: str, game_context: dict | None) -> str:
     return f"{prompt.rstrip()}\n\n{notice}"
 
 
+def append_roll_judge_block(prompt: str, judge_display: str) -> str:
+    if not judge_display.strip():
+        return prompt
+    block = (
+        "## 本轮掷骰判断（系统）\n\n"
+        f"判断轮输出：{judge_display.strip()}"
+    )
+    return f"{prompt.rstrip()}\n\n{block}"
+
+
 def build_game_system_prompt(
     base_prompt: str,
     rag_context: str,
     game_context: dict | None = None,
     dice_results_block: str | None = None,
+    roll_judge_block: str | None = None,
 ) -> str:
     prompt = base_prompt or (
-        "You are the Dungeon Master. Reply in the same language as the player."
+        "Reply in the same language as the player."
     )
     state_block = format_game_context(game_context)
     prompt = f"{prompt.rstrip()}\n\n## 当前游戏状态\n\n{state_block}"
     prompt = append_quest_sync_reminder(prompt, game_context)
     prompt = append_combat_state_reminder(prompt, game_context)
     prompt = append_rag_context(prompt, rag_context)
+    if roll_judge_block and roll_judge_block.strip():
+        prompt = append_roll_judge_block(prompt, roll_judge_block)
     if dice_results_block and dice_results_block.strip():
         prompt = f"{prompt.rstrip()}\n\n{dice_results_block.strip()}"
     return prompt

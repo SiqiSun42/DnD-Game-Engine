@@ -1,5 +1,6 @@
 from collections.abc import Awaitable, Callable
 
+from handlers.check_test import handle_check_test
 from handlers.consult import handle_consult
 from handlers.game import handle_game
 from handlers.passthrough import handle_passthrough
@@ -11,6 +12,7 @@ ChatHandler = Callable[
 
 HANDLERS: dict[str, ChatHandler] = {
     "consult": handle_consult,
+    "check-test": handle_check_test,
     "game": handle_game,
     "start-game": handle_passthrough,
     "conversation": handle_passthrough,

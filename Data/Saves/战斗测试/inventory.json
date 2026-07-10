@@ -1,0 +1,48 @@
+{
+  "wealth": "80g",
+  "categories": {
+    "consumable": [
+      {
+        "id": "bread",
+        "name": "面包",
+        "quantity": 1,
+        "description": "普通的小麦面包，能够恢复少量生命值。第一场战斗后村民也可能赠送。"
+      },
+      {
+        "id": "potion",
+        "name": "治疗药水",
+        "quantity": 1,
+        "description": "红色的治疗药水，能够恢复生命值。可在商店购买更多。"
+      }
+    ],
+    "tool": [
+      {
+        "id": "rope",
+        "name": "绳子",
+        "quantity": 1,
+        "description": "结实的麻绳，可用于攀爬或捆绑。"
+      },
+      {
+        "id": "flint",
+        "name": "燧石",
+        "quantity": 1,
+        "description": "干燥的燧石，可用于生火。"
+      }
+    ],
+    "equipment": [
+      {
+        "id": "short-sword",
+        "name": "短剑",
+        "quantity": 1,
+        "description": "凯文的常用武器，轻型单手剑。"
+      },
+      {
+        "id": "leather-armor",
+        "name": "皮甲",
+        "quantity": 1,
+        "description": "磨损但可靠的皮甲，凯文随身穿着。"
+      }
+    ],
+    "key": []
+  }
+}

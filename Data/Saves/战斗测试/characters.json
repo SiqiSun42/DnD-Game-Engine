@@ -1,0 +1,201 @@
+{
+  "characterFields": [
+    {
+      "key": "profile",
+      "label": "基本信息",
+      "type": "profile",
+      "fields": [
+        { "key": "race", "label": "种族" },
+        { "key": "gender", "label": "性别" },
+        { "key": "occupation", "label": "职业" }
+      ]
+    },
+    { "key": "appearance", "label": "外观" },
+    {
+      "key": "personality",
+      "label": "性格与道德",
+      "fields": [
+        { "key": "moralAlignment", "label": "道德立场", "type": "moralAlignment" },
+        { "key": "traits", "label": "性格指标", "type": "traits" },
+        { "key": "speechStyle", "label": "语言风格" }
+      ]
+    },
+    { "key": "additionalInfo", "label": "附加信息" },
+    { "key": "relationships", "label": "人际关系", "type": "relationships" },
+    { "key": "background", "label": "过去经历与当前目标" },
+    { "key": "hiddenSecrets", "label": "刻意隐瞒的秘密" }
+  ],
+  "traitFields": [
+    { "key": "neatness", "label": "肮脏/整洁" },
+    { "key": "sociability", "label": "内向/外向" },
+    { "key": "temperament", "label": "平静/激烈" },
+    { "key": "planning", "label": "计划/直觉" },
+    { "key": "friendliness", "label": "友善/刻薄" },
+    { "key": "rationality", "label": "理性/感性" }
+  ],
+  "moralAlignmentAxes": {
+    "lawChaos": {
+      "label": "守序/混乱",
+      "low": "混乱",
+      "mid": "中立",
+      "high": "守序"
+    },
+    "goodEvil": {
+      "label": "善良/邪恶",
+      "low": "善良",
+      "mid": "中立",
+      "high": "邪恶"
+    }
+  },
+  "party": [
+      {
+        "id": "kevin",
+        "name": "凯文",
+        "tier": "player",
+        "order": 1,
+        "profile": {
+          "race": "人类",
+          "gender": "男",
+          "occupation": "战士"
+        },
+        "appearance": "由玩家自定义或游戏开始时随机生成。",
+        "personality": {
+          "moralAlignment": {
+            "lawChaos": 50,
+            "goodEvil": 35,
+            "alignment": "中立善良（初始，会根据玩家选择改变）",
+            "description": "会根据玩家行为动态改变。做善事向善良倾斜，做坏事向邪恶倾斜；遵守规则向守序倾斜，违反规则向混乱倾斜。"
+          },
+          "traits": {
+            "neatness": 5,
+            "sociability": 5,
+            "temperament": 5,
+            "planning": 5,
+            "friendliness": 5,
+            "rationality": 5
+          },
+          "speechStyle": "由玩家输入决定。"
+        },
+        "additionalInfo": "主角的性格和选择会影响其他NPC对他的态度。善良守序的NPC会被道德上的一致性吸引；混乱善良的NPC会被自由和勇气吸引；中立邪恶的NPC会评估利益是否一致。",
+        "relationships": [
+          { "characterId": "erin", "name": "艾琳", "affection": 50, "description": "信任的伙伴。会根据主角的道德选择而改变。" },
+          { "characterId": "sean", "name": "塞恩", "affection": 50, "description": "酒馆里认识的朋友。会根据主角是否鼓励他的冲动而改变。" },
+          { "characterId": "lyra", "name": "莱拉", "affection": 50, "description": "合作者。" }
+        ],
+        "background": "过去经历：流浪冒险者。\n\n当前目标：由玩家决定。",
+        "hiddenSecrets": "无。"
+      },
+      {
+        "id": "erin",
+        "name": "艾琳",
+        "tier": "ally",
+        "order": 2,
+        "profile": {
+          "race": "精灵",
+          "gender": "女",
+          "occupation": "牧师"
+        },
+        "appearance": "看起来大约三十多岁（实际精灵年龄不详）。长卷红发，眼神温暖而坚定。穿着简洁的白色和金色神圣衣袍，胸口戴着信仰的圣徽。",
+        "personality": {
+          "moralAlignment": {
+            "lawChaos": 25,
+            "goodEvil": 25,
+            "alignment": "守序善良",
+            "description": "强烈的道德感驱动她的每个决定。对弱势者有天生的同情，对不公正的事情无法容忍。"
+          },
+          "traits": {
+            "neatness": 7,
+            "sociability": 6,
+            "temperament": 2,
+            "planning": 8,
+            "friendliness": 8,
+            "rationality": 6
+          },
+          "speechStyle": "温暖而详细，经常说「我们应该……」，会给出道德建议。在试图劝阻他人时会变得啰嗦。偶尔会用柔和的语气说出很强硬的原则。"
+        },
+        "additionalInfo": "看起来很软弱，但在原则问题上异常强硬。会主动承担风险保护同伴。对塞恩的鲁莽感到无奈，但深层很在乎他。对莱拉的不道德行为会皱眉反对，但不会背弃她。",
+        "relationships": [
+          { "characterId": "kevin", "name": "凯文", "affection": 55, "description": "信任的伙伴。会根据主角的道德选择而改变。" },
+          { "characterId": "sean", "name": "塞恩", "affection": 35, "description": "性格不合但互相在乎。经常吵架，但当塞恩真正需要帮助时会毫不犹豫地出手。" },
+          { "characterId": "lyra", "name": "莱拉", "affection": 40, "description": "带着保留的尊重。承认她能力强，但对她的道德选择保持警惕。" }
+        ],
+        "background": "过去经历：在某个神圣的修道院长大，接受神圣的教导。曾经因为坚持原则而失去过一个亲密的朋友（对方选择了邪恶的道路）。这个经历让她更加坚定地相信坚持原则的重要性。\n\n当前目标：传播善良和正义。拯救小渔村免受哥布林威胁是她的首要目标。",
+        "hiddenSecrets": "无。她很坦诚，很少隐瞒自己的想法。"
+      },
+      {
+        "id": "sean",
+        "name": "塞恩",
+        "tier": "ally",
+        "order": 3,
+        "profile": {
+          "race": "精灵",
+          "gender": "男",
+          "occupation": "游侠"
+        },
+        "appearance": "看起来大约三十多岁（实际精灵年龄不详）。棕色长发散乱，脸上有条疤，左眼有点眯。穿着褴褛的皮甲，身上总带着酒味和灰尘的混合气息。",
+        "personality": {
+          "moralAlignment": {
+            "lawChaos": 75,
+            "goodEvil": 35,
+            "alignment": "混乱善良",
+            "description": "讨厌权威和压迫，但不会故意伤害好人。做事凭直觉和感情而不是原则。"
+          },
+          "traits": {
+            "neatness": 2,
+            "sociability": 8,
+            "temperament": 7,
+            "planning": 8,
+            "friendliness": 4,
+            "rationality": 8
+          },
+          "speechStyle": "爱自嘲，喜欢开不恰当的玩笑，讲话时夹杂下流词汇，但不至于令人厌恶。在战斗或被激怒时会变得粗暴直接。经常用幽默掩盖内心的伤痛。"
+        },
+        "additionalInfo": "看起来很无所谓，但对朋友的忠诚度极高。会用自嘲和玩笑掩盖深层的伤痛。对权力滥用或欺负弱者会直接发火，几乎无法克制。和艾琳经常吵架，但当艾琳真正危险时会毫不犹豫地救她。对莱拉的偷窃行为没什么意见，但如果她背叛队伍会感到被戏弄。",
+        "relationships": [
+          { "characterId": "kevin", "name": "凯文", "affection": 50, "description": "酒馆里认识的朋友。会根据主角是否鼓励他的冲动而改变。" },
+          { "characterId": "erin", "name": "艾琳", "affection": 35, "description": "性格不合但互相在乎。经常吵架，但私下里承认她「至少不会背刺」。" },
+          { "characterId": "lyra", "name": "莱拉", "affection": 25, "description": "互相尊重但保持距离。承认她能力强。" }
+        ],
+        "background": "过去经历：曾经在一个被暴君统治的国家长大，对不公正的事特别敏感。有一个青梅竹马叫艾蒙，在暴君的清洗中失踪了。塞恩不知道艾蒙死了还是被关起来了。现在四处游荡，到处惹麻烦，本质上是在逃避这段创伤。\n\n当前目标：活得自由，活得尽兴。对「打败哥布林大王」这种任务没兴趣，但如果能证明这会帮助被欺负的村民，他会很激动。",
+        "hiddenSecrets": "他不会主动说起艾蒙和他的过去。偶尔在醉酒时自言自语提起，但清醒后会装作不记得。只有在非常高的好感度（70+）或被激怒/被酒精彻底解除防线时，才会讲述完整的故事。如果游戏涉及寻找失踪者的剧情，这会是他的触发点。"
+      },
+      {
+        "id": "lyra",
+        "name": "莱拉",
+        "tier": "ally",
+        "order": 0,
+        "profile": {
+          "race": "人类",
+          "gender": "女",
+          "occupation": "盗贼"
+        },
+        "appearance": "看起来大约二十五六岁。黑色短发，眼神敏锐。穿着剪裁得体的深色皮衣。手指上有几道新旧不一的疤痕。",
+        "personality": {
+          "moralAlignment": {
+            "lawChaos": 45,
+            "goodEvil": 73,
+            "alignment": "中立邪恶",
+            "description": "只考虑自己的利益，不会故意伤害无辜者，但也不会为了救人而吃亏。"
+          },
+          "traits": {
+            "neatness": 8,
+            "sociability": 5,
+            "temperament": 3,
+            "planning": 2,
+            "friendliness": 2,
+            "rationality": 1
+          },
+          "speechStyle": "讲话很少，说的都是有用的信息。偶尔会有干燥的黑色幽默。很少直接回答别人的问题，反而会用反问。"
+        },
+        "additionalInfo": "表面上显得友善，但很多时候是伪装，对绝大多数人保持距离。听到「你会因为这赔钱」会立即反对。如果有机会占便宜不会放过。如果发现被欺骗，会非常冷淡，可能选择离队。但如果你们的利益一致，她会出奇地可靠。",
+        "relationships": [
+          { "characterId": "kevin", "name": "凯文", "affection": 22, "description": "合作者。" },
+          { "characterId": "sean", "name": "塞恩", "affection": 18, "description": "看不起他的浪费和鲁莽。" },
+          { "characterId": "erin", "name": "艾琳", "affection": 20, "description": "表面上尊重她，实际上觉得她太天真。" }
+        ],
+        "background": "过去经历：在克洛斯城的黑帮组织中长大，被训练成盗贼。曾经有个搭档叫沃克，两人一起做过很多事，但沃克在一次任务中被抓了。莱拉逃了出来，一直在尝试找到线索——沃克是死了还是被关起来了。\n\n当前目标：积累足够的金钱和信息，有朝一日能救出沃克（如果还活着）或替他报仇。表面上只是跟着主角赚点外快。",
+        "hiddenSecrets": "她不会告诉任何人她在找什么或为了谁。只有在非常高的好感度（70+）或别无选择的情况下，才会透露沃克的事。"
+      }
+    ],
+  "chapter": []
+}

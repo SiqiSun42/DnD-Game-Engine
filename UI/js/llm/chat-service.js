@@ -28,7 +28,10 @@ async function handleChatSend({ text, playerLabel, chat, channel, saveName, mode
       saveName: resolvedSaveName,
     };
 
-    if (resolvedChannel === CHAT_CHANNELS.GAME && typeof buildGameContext === 'function') {
+    const usesGamePipeline = resolvedChannel === CHAT_CHANNELS.GAME
+      || resolvedChannel === CHAT_CHANNELS.CHECK_TEST;
+
+    if (usesGamePipeline && typeof buildGameContext === 'function') {
       const gameContext = buildGameContext();
       if (gameContext) {
         request.gameContext = gameContext;
@@ -40,9 +43,10 @@ async function handleChatSend({ text, playerLabel, chat, channel, saveName, mode
     const dmLabel = reply.label || 'DM';
     let dmText = reply.text || '';
     const dmReasoning = reply.reasoning || '';
+    const dmJudgeResult = reply.judgeResult || '';
     let enteredCombat = false;
 
-    if (resolvedChannel === CHAT_CHANNELS.GAME && typeof extractGameSyncFromDmText === 'function') {
+    if (usesGamePipeline && typeof extractGameSyncFromDmText === 'function') {
       const gameSync = extractGameSyncFromDmText(dmText);
       dmText = gameSync.displayText;
       if (gameSync.questSync && typeof applyQuestSync === 'function') {
@@ -66,15 +70,19 @@ async function handleChatSend({ text, playerLabel, chat, channel, saveName, mode
       }
     }
 
-    chat.addMessage('dm', dmText, dmLabel, { reasoning: dmReasoning });
+    chat.addMessage('dm', dmText, dmLabel, {
+      reasoning: dmReasoning,
+      judgeResult: dmJudgeResult || undefined,
+    });
     appendChatMessage({
       role: 'dm',
       label: dmLabel,
       text: dmText,
       reasoning: dmReasoning || undefined,
+      judgeResult: dmJudgeResult || undefined,
     });
 
-    if (resolvedChannel === CHAT_CHANNELS.GAME && enteredCombat) {
+    if (usesGamePipeline && enteredCombat) {
       const combatPrompt = typeof getCombatEntryPrompt === 'function'
         ? getCombatEntryPrompt()
         : '现在进入战斗！你希望这场战斗如何结束？可输入：胜利 / 失败 / 逃跑';

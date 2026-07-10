@@ -22,9 +22,6 @@ ROLL_COUNT_DIGIT = re.compile(r"(?:投|掷)掷?\s*(\d+)\s*次")
 ROLL_COUNT_CHINESE = re.compile(r"(?:投|掷)掷?\s*([一二两三四五六七八九十]+)\s*次")
 ROLL_ONCE = re.compile(r"投一次|投1次|投\s*一\s*次")
 CHECK_MARKER = re.compile(r"【鉴定】|鉴定")
-ROLL_JUDGE_TRUE = re.compile(r"\{True,\s*(\d+)\s*\}", re.IGNORECASE)
-ROLL_JUDGE_FALSE = re.compile(r"\{False\b", re.IGNORECASE)
-ROLL_JUDGE_APPRAISAL_LEAK = re.compile(r"【鉴定类型】|【计算过程】|【判定】|【结果描述】")
 
 
 @dataclass(frozen=True)
@@ -87,49 +84,6 @@ def _parse_sides(text: str) -> int:
 
 def _has_check_marker(text: str) -> bool:
     return bool(CHECK_MARKER.search(text))
-
-
-def parse_roll_judge_response(text: str) -> list[DiceRollSpec] | None:
-    cleaned = (text or "").strip()
-    matches = list(ROLL_JUDGE_TRUE.finditer(cleaned))
-    if matches:
-        return [
-            DiceRollSpec(id=f"roll{index}", sides=max(1, int(match.group(1))))
-            for index, match in enumerate(matches, start=1)
-        ]
-    if ROLL_JUDGE_FALSE.search(cleaned):
-        return None
-    return None
-
-
-def extract_roll_judge_tokens(text: str) -> str | None:
-    cleaned = (text or "").strip()
-    if not cleaned:
-        return None
-    true_lines = [
-        match.group(0)
-        for match in ROLL_JUDGE_TRUE.finditer(cleaned)
-    ]
-    if true_lines:
-        return "\n".join(true_lines)
-    if ROLL_JUDGE_FALSE.search(cleaned):
-        return "{False}"
-    return None
-
-
-def format_roll_judge_display(
-    roll_specs: list[DiceRollSpec] | None,
-    raw: str = "",
-) -> str:
-    if roll_specs:
-        return "\n".join(f"{{True, {spec.sides}}}" for spec in roll_specs)
-    extracted = extract_roll_judge_tokens(raw)
-    if extracted:
-        return extracted
-    cleaned = (raw or "").strip()
-    if ROLL_JUDGE_APPRAISAL_LEAK.search(cleaned) or cleaned:
-        return "{未识别}"
-    return "{False}"
 
 
 def parse_roll_request(text: str) -> list[DiceRollSpec] | None:

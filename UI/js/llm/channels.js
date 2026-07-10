@@ -1,7 +1,9 @@
 const CONSULT_SAVE_NAME = '咨询城主';
+const CHECK_TEST_SAVE_NAME = '鉴定测试';
 
 const CHAT_CHANNELS = {
   CONSULT: 'consult',
+  CHECK_TEST: 'check-test',
   GAME: 'game',
   START_GAME: 'start-game',
   CONVERSATION: 'conversation',
@@ -18,6 +20,9 @@ function resolveChatChannel(options = {}) {
 
   if (saveName === CONSULT_SAVE_NAME) {
     return CHAT_CHANNELS.CONSULT;
+  }
+  if (saveName === CHECK_TEST_SAVE_NAME) {
+    return CHAT_CHANNELS.CHECK_TEST;
   }
   if (meta?.docType === 'game') {
     return CHAT_CHANNELS.GAME;

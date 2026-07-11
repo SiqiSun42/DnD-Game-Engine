@@ -29,7 +29,8 @@ async function handleChatSend({ text, playerLabel, chat, channel, saveName, mode
     };
 
     const usesGamePipeline = resolvedChannel === CHAT_CHANNELS.GAME
-      || resolvedChannel === CHAT_CHANNELS.CHECK_TEST;
+      || resolvedChannel === CHAT_CHANNELS.CHECK_TEST
+      || resolvedChannel === CHAT_CHANNELS.COMBAT_TEST;
 
     if (usesGamePipeline && typeof buildGameContext === 'function') {
       const gameContext = buildGameContext();
@@ -44,45 +45,103 @@ async function handleChatSend({ text, playerLabel, chat, channel, saveName, mode
     let dmText = reply.text || '';
     const dmReasoning = reply.reasoning || '';
     const dmJudgeResult = reply.judgeResult || '';
+    const pipelineMessages = Array.isArray(reply.pipelineMessages) ? reply.pipelineMessages : [];
     let enteredCombat = false;
 
-    if (usesGamePipeline && typeof extractGameSyncFromDmText === 'function') {
-      const gameSync = extractGameSyncFromDmText(dmText);
-      dmText = gameSync.displayText;
-      if (gameSync.questSync && typeof applyQuestSync === 'function') {
-        applyQuestSync(gameSync.questSync);
-        if (typeof refreshNotesPanelIfOpen === 'function') {
-          refreshNotesPanelIfOpen();
-        }
-      }
-      if (gameSync.inventorySync && typeof applyInventorySync === 'function') {
-        applyInventorySync(gameSync.inventorySync);
-        if (typeof refreshBackpackPanelIfOpen === 'function') {
-          refreshBackpackPanelIfOpen();
-        }
-      }
-      if (gameSync.statusSync && typeof applyStatusSync === 'function') {
-        const statusResult = applyStatusSync(gameSync.statusSync);
-        enteredCombat = statusResult.enteredCombat;
-        if (typeof refreshStatusPanelIfOpen === 'function') {
-          refreshStatusPanelIfOpen();
-        }
+    if (reply.statusSync && typeof applyStatusSync === 'function') {
+      const statusResult = applyStatusSync(reply.statusSync);
+      enteredCombat = statusResult.enteredCombat;
+      if (typeof refreshStatusPanelIfOpen === 'function') {
+        refreshStatusPanelIfOpen();
       }
     }
 
-    chat.addMessage('dm', dmText, dmLabel, {
-      reasoning: dmReasoning,
-      judgeResult: dmJudgeResult || undefined,
-    });
-    appendChatMessage({
-      role: 'dm',
-      label: dmLabel,
-      text: dmText,
-      reasoning: dmReasoning || undefined,
-      judgeResult: dmJudgeResult || undefined,
-    });
+    if (pipelineMessages.length) {
+      pipelineMessages.forEach((segment, index) => {
+        const segmentText = segment.text || '';
+        const segmentLabel = segment.label || dmLabel;
+        const isLast = index === pipelineMessages.length - 1;
+        let segmentDisplayText = segmentText;
 
-    if (usesGamePipeline && enteredCombat) {
+        if (usesGamePipeline && typeof extractGameSyncFromDmText === 'function') {
+          const gameSync = extractGameSyncFromDmText(segmentText);
+          segmentDisplayText = gameSync.displayText;
+          if (gameSync.questSync && typeof applyQuestSync === 'function') {
+            applyQuestSync(gameSync.questSync);
+            if (typeof refreshNotesPanelIfOpen === 'function') {
+              refreshNotesPanelIfOpen();
+            }
+          }
+          if (gameSync.inventorySync && typeof applyInventorySync === 'function') {
+            applyInventorySync(gameSync.inventorySync);
+            if (typeof refreshBackpackPanelIfOpen === 'function') {
+              refreshBackpackPanelIfOpen();
+            }
+          }
+          if (gameSync.statusSync && typeof applyStatusSync === 'function') {
+            const statusResult = applyStatusSync(gameSync.statusSync);
+            enteredCombat = enteredCombat || statusResult.enteredCombat;
+            if (typeof refreshStatusPanelIfOpen === 'function') {
+              refreshStatusPanelIfOpen();
+            }
+          }
+        }
+
+        const segmentReasoning = segment.reasoning
+          || (isLast ? dmReasoning : undefined);
+
+        chat.addMessage('dm', segmentDisplayText, segmentLabel, {
+          reasoning: segmentReasoning,
+          judgeResult: isLast ? (dmJudgeResult || undefined) : undefined,
+        });
+        appendChatMessage({
+          role: 'dm',
+          label: segmentLabel,
+          text: segmentDisplayText,
+          reasoning: segmentReasoning || undefined,
+          judgeResult: isLast ? (dmJudgeResult || undefined) : undefined,
+        });
+      });
+      dmText = pipelineMessages[pipelineMessages.length - 1]?.text || dmText;
+    } else {
+      if (usesGamePipeline && typeof extractGameSyncFromDmText === 'function') {
+        const gameSync = extractGameSyncFromDmText(dmText);
+        dmText = gameSync.displayText;
+        if (gameSync.questSync && typeof applyQuestSync === 'function') {
+          applyQuestSync(gameSync.questSync);
+          if (typeof refreshNotesPanelIfOpen === 'function') {
+            refreshNotesPanelIfOpen();
+          }
+        }
+        if (gameSync.inventorySync && typeof applyInventorySync === 'function') {
+          applyInventorySync(gameSync.inventorySync);
+          if (typeof refreshBackpackPanelIfOpen === 'function') {
+            refreshBackpackPanelIfOpen();
+          }
+        }
+        if (gameSync.statusSync && typeof applyStatusSync === 'function') {
+          const statusResult = applyStatusSync(gameSync.statusSync);
+          enteredCombat = enteredCombat || statusResult.enteredCombat;
+          if (typeof refreshStatusPanelIfOpen === 'function') {
+            refreshStatusPanelIfOpen();
+          }
+        }
+      }
+
+      chat.addMessage('dm', dmText, dmLabel, {
+        reasoning: dmReasoning,
+        judgeResult: dmJudgeResult || undefined,
+      });
+      appendChatMessage({
+        role: 'dm',
+        label: dmLabel,
+        text: dmText,
+        reasoning: dmReasoning || undefined,
+        judgeResult: dmJudgeResult || undefined,
+      });
+    }
+
+    if (usesGamePipeline && enteredCombat && resolvedChannel !== CHAT_CHANNELS.COMBAT_TEST) {
       const combatPrompt = typeof getCombatEntryPrompt === 'function'
         ? getCombatEntryPrompt()
         : '现在进入战斗！你希望这场战斗如何结束？可输入：胜利 / 失败 / 逃跑';

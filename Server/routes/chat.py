@@ -18,12 +18,22 @@ class ChatRequest(BaseModel):
     gameContext: dict | None = None
 
 
+class PipelineMessage(BaseModel):
+    text: str
+    label: str = "DM"
+    role: str = "dm"
+    reasoning: str | None = None
+
+
 class ChatResponse(BaseModel):
     text: str
     role: str = "dm"
     label: str = "DM"
     reasoning: str | None = None
     judgeResult: str | None = None
+    statusSync: dict | None = None
+    pipelineMessages: list[PipelineMessage] | None = None
+    battleState: str | None = None
 
 
 async def process_chat_request(body: ChatRequest) -> ChatResponse:

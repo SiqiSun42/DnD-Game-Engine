@@ -28,6 +28,8 @@ async def handle_game(
         rag_context,
         context,
         dice_results_block=dice_results_block,
+        channel="game",
+        last_user=last_user,
     )
     user_patch = load_user_prompt_patch() if DEEPSEEK_USER_PROMPT_PATCH else None
     result = await deepseek_client.chat(

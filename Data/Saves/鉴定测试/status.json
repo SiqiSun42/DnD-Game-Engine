@@ -6,9 +6,18 @@
       "label": "基础信息",
       "type": "profile",
       "fields": [
-        { "key": "occupation", "label": "职业" },
-        { "key": "level", "label": "等级" },
-        { "key": "race", "label": "种族" }
+        {
+          "key": "occupation",
+          "label": "职业"
+        },
+        {
+          "key": "level",
+          "label": "等级"
+        },
+        {
+          "key": "race",
+          "label": "种族"
+        }
       ]
     },
     {
@@ -16,9 +25,18 @@
       "label": "生命值",
       "layout": "inline",
       "fields": [
-        { "key": "current", "label": "当前HP" },
-        { "key": "max", "label": "最大HP" },
-        { "key": "temp", "label": "临时HP" }
+        {
+          "key": "current",
+          "label": "当前HP"
+        },
+        {
+          "key": "max",
+          "label": "最大HP"
+        },
+        {
+          "key": "temp",
+          "label": "临时HP"
+        }
       ]
     },
     {
@@ -26,8 +44,14 @@
       "label": "防御",
       "layout": "inline",
       "fields": [
-        { "key": "ac", "label": "护甲等级（AC）" },
-        { "key": "sources", "label": "防御来源" }
+        {
+          "key": "ac",
+          "label": "护甲等级（AC）"
+        },
+        {
+          "key": "sources",
+          "label": "防御来源"
+        }
       ]
     },
     {
@@ -35,12 +59,30 @@
       "label": "属性及修正值",
       "type": "abilities",
       "fields": [
-        { "key": "str", "label": "力量" },
-        { "key": "dex", "label": "敏捷" },
-        { "key": "con", "label": "体质" },
-        { "key": "int", "label": "智力" },
-        { "key": "wis", "label": "感知" },
-        { "key": "cha", "label": "魅力" }
+        {
+          "key": "str",
+          "label": "力量"
+        },
+        {
+          "key": "dex",
+          "label": "敏捷"
+        },
+        {
+          "key": "con",
+          "label": "体质"
+        },
+        {
+          "key": "int",
+          "label": "智力"
+        },
+        {
+          "key": "wis",
+          "label": "感知"
+        },
+        {
+          "key": "cha",
+          "label": "魅力"
+        }
       ]
     },
     {
@@ -48,9 +90,18 @@
       "label": "装备",
       "layout": "inline",
       "fields": [
-        { "key": "mainWeapon", "label": "主武器" },
-        { "key": "armor", "label": "防具" },
-        { "key": "offhand", "label": "副防具" }
+        {
+          "key": "mainWeapon",
+          "label": "主武器"
+        },
+        {
+          "key": "armor",
+          "label": "防具"
+        },
+        {
+          "key": "offhand",
+          "label": "副防具"
+        }
       ]
     },
     {
@@ -58,9 +109,22 @@
       "label": "本轮资源",
       "layout": "inline",
       "fields": [
-        { "key": "action", "label": "标准行动" },
-        { "key": "bonusAction", "label": "附加行动" },
-        { "key": "movement", "label": "移动距离" }
+        {
+          "key": "initiative",
+          "label": "先攻顺序"
+        },
+        {
+          "key": "action",
+          "label": "标准行动"
+        },
+        {
+          "key": "bonusAction",
+          "label": "附加行动"
+        },
+        {
+          "key": "movement",
+          "label": "移动距离"
+        }
       ]
     },
     {
@@ -68,11 +132,26 @@
       "label": "法术",
       "layout": "inline",
       "fields": [
-        { "key": "summary", "label": "概况" },
-        { "key": "cantrips", "label": "戏法" },
-        { "key": "known", "label": "已学法术" },
-        { "key": "level1Slots", "label": "1级法术位" },
-        { "key": "usedSlots", "label": "已用法术位" }
+        {
+          "key": "summary",
+          "label": "概况"
+        },
+        {
+          "key": "cantrips",
+          "label": "戏法"
+        },
+        {
+          "key": "known",
+          "label": "已学法术"
+        },
+        {
+          "key": "level1Slots",
+          "label": "1级法术位"
+        },
+        {
+          "key": "usedSlots",
+          "label": "已用法术位"
+        }
       ]
     },
     {
@@ -99,7 +178,24 @@
       },
       "defense": {
         "ac": "16",
-        "sources": "链甲护甲（+5）+ 木盾（+2）"
+        "sources": [
+          {
+            "name": "链甲护甲（",
+            "modifier": 0
+          },
+          {
+            "name": "5）",
+            "modifier": 0
+          },
+          {
+            "name": "木盾（",
+            "modifier": 0
+          },
+          {
+            "name": "2）",
+            "modifier": 0
+          }
+        ]
       },
       "abilities": {
         "str": "15（修正值+2）",
@@ -110,9 +206,28 @@
         "cha": "12（修正值+1）"
       },
       "equipment": {
-        "mainWeapon": "长剑（1d8伤害，+2修正值）",
-        "armor": "链甲护甲",
-        "offhand": "木盾"
+        "mainWeapon": {
+          "id": "item",
+          "name": "长剑",
+          "tag": "weapon",
+          "damage": "1d8",
+          "modifier": 2,
+          "description": ""
+        },
+        "armor": {
+          "id": "item",
+          "name": "链甲护甲",
+          "tag": "armor",
+          "modifier": 0,
+          "description": ""
+        },
+        "offhand": {
+          "id": "item",
+          "name": "木盾",
+          "tag": "armor",
+          "modifier": 0,
+          "description": ""
+        }
       },
       "resources": {
         "action": "可用",
@@ -122,7 +237,8 @@
       "spells": {
         "summary": "无法术位"
       },
-      "conditions": []
+      "conditions": [],
+      "initiative": -1
     },
     {
       "id": "ally-ailin",
@@ -141,7 +257,24 @@
       },
       "defense": {
         "ac": "14",
-        "sources": "皮甲护甲（+2）+ 木盾（+2）"
+        "sources": [
+          {
+            "name": "皮甲护甲（",
+            "modifier": 0
+          },
+          {
+            "name": "2）",
+            "modifier": 0
+          },
+          {
+            "name": "木盾（",
+            "modifier": 0
+          },
+          {
+            "name": "2）",
+            "modifier": 0
+          }
+        ]
       },
       "abilities": {
         "str": "10（修正值+0）",
@@ -152,9 +285,28 @@
         "cha": "14（修正值+2）"
       },
       "equipment": {
-        "mainWeapon": "木棍（1d6伤害，+0修正值）",
-        "armor": "皮甲护甲",
-        "offhand": "木盾"
+        "mainWeapon": {
+          "id": "item",
+          "name": "木棍",
+          "tag": "weapon",
+          "damage": "1d6",
+          "modifier": 0,
+          "description": ""
+        },
+        "armor": {
+          "id": "item",
+          "name": "皮甲护甲",
+          "tag": "armor",
+          "modifier": 0,
+          "description": ""
+        },
+        "offhand": {
+          "id": "item",
+          "name": "木盾",
+          "tag": "armor",
+          "modifier": 0,
+          "description": ""
+        }
       },
       "resources": {
         "action": "可用",
@@ -178,7 +330,8 @@
           "duration": "持续1轮",
           "effect": "攻击骰减1"
         }
-      ]
+      ],
+      "initiative": -1
     }
   ],
   "enemy": []

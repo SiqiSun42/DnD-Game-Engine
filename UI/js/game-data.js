@@ -356,7 +356,107 @@ function appendChatMessage(message) {
 
 const QUEST_SYNC_PATTERN = /\[QUEST_SYNC\]\s*([\s\S]*?)\s*\[\/QUEST_SYNC\]/;
 const INVENTORY_SYNC_PATTERN = /\[INVENTORY_SYNC\]\s*([\s\S]*?)\s*\[\/INVENTORY_SYNC\]/;
-const STATUS_SYNC_PATTERN = /\[STATUS_SYNC\]\s*([\s\S]*?)\s*\[\/STATUS_SYNC\]/;
+const STATUS_SYNC_PATTERN = /\[STATUS_SYNC\]\s*([\s\S]*?)\s*\[\/STATUS_SYNC\]/i;
+const STATUS_SYNC_VARIANT_PATTERN = /(?:\[STATUS_SYNC\]|#{1,6}\s*STATUS_SYNC|(?:^|\n)\s*STATUS_SYNC\s*(?:\n|$))\s*(\{[\s\S]*\})\s*\[\/STATUS_SYNC\]/i;
+const STATUS_SYNC_CLOSE_TAG = '[/STATUS_SYNC]';
+
+function findStatusSyncCloseIndex(text) {
+  const upper = String(text || '').toUpperCase();
+  return upper.lastIndexOf(STATUS_SYNC_CLOSE_TAG.toUpperCase());
+}
+
+function findStatusSyncOpenIndex(head) {
+  const patterns = [
+    /\[STATUS_SYNC\]/ig,
+    /#{1,6}\s*STATUS_SYNC\b/ig,
+    /(?:^|\n)\s*STATUS_SYNC\s*(?:\n|$)/ig,
+  ];
+  let best = -1;
+  patterns.forEach((pattern) => {
+    pattern.lastIndex = 0;
+    let match = pattern.exec(head);
+    while (match) {
+      if (match.index > best) best = match.index;
+      match = pattern.exec(head);
+    }
+  });
+  return best;
+}
+
+function findOpenMarkerEnd(head, openIdx) {
+  const patterns = [
+    /\[STATUS_SYNC\]/ig,
+    /#{1,6}\s*STATUS_SYNC\b/ig,
+    /(?:^|\n)\s*STATUS_SYNC\s*(?:\n|$)/ig,
+  ];
+  for (const pattern of patterns) {
+    pattern.lastIndex = 0;
+    let match = pattern.exec(head);
+    while (match) {
+      if (match.index === openIdx) return match.index + match[0].length;
+      match = pattern.exec(head);
+    }
+  }
+  return 0;
+}
+
+function extractBalancedJsonRange(text, start, end) {
+  const source = String(text || '');
+  const jsonStart = source.indexOf('{', start);
+  if (jsonStart < 0 || jsonStart >= end) return null;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let index = jsonStart; index < end; index += 1) {
+    const char = source[index];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (char === '\\') escaped = true;
+      else if (char === '"') inString = false;
+      continue;
+    }
+    if (char === '"') inString = true;
+    else if (char === '{') depth += 1;
+    else if (char === '}') {
+      depth -= 1;
+      if (depth === 0) return [jsonStart, index + 1];
+    }
+  }
+  return null;
+}
+
+function extractLooseStatusSyncPayload(text) {
+  const closeIdx = findStatusSyncCloseIndex(text);
+  if (closeIdx < 0) return null;
+  const head = String(text).slice(0, closeIdx);
+  const openIdx = findStatusSyncOpenIndex(head);
+  const searchFrom = openIdx >= 0 ? findOpenMarkerEnd(head, openIdx) : 0;
+  const jsonRange = extractBalancedJsonRange(text, searchFrom, closeIdx);
+  if (!jsonRange) return null;
+  return String(text).slice(jsonRange[0], jsonRange[1]).trim();
+}
+
+function parseStatusSyncPayload(payload) {
+  try {
+    const parsed = JSON.parse(String(payload || '').trim());
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch (_) {
+    return null;
+  }
+}
+
+function stripLooseStatusSync(text) {
+  const closeIdx = findStatusSyncCloseIndex(text);
+  if (closeIdx < 0) return String(text || '');
+  const head = String(text).slice(0, closeIdx);
+  const openIdx = findStatusSyncOpenIndex(head);
+  const searchFrom = openIdx >= 0 ? findOpenMarkerEnd(head, openIdx) : 0;
+  const jsonRange = extractBalancedJsonRange(text, searchFrom, closeIdx);
+  if (!jsonRange) return String(text || '');
+  const stripStart = openIdx >= 0 ? openIdx : jsonRange[0];
+  const tail = String(text).slice(closeIdx + STATUS_SYNC_CLOSE_TAG.length);
+  return `${String(text).slice(0, stripStart)}${tail}`.trim();
+}
 
 const COMBAT_ENTRY_PROMPT = '现在进入战斗！你希望这场战斗如何结束？可输入：**胜利** / **失败** / **逃跑**';
 
@@ -415,15 +515,20 @@ function extractGameSyncFromDmText(text) {
 
   const statusMatch = displayText.match(STATUS_SYNC_PATTERN);
   if (statusMatch) {
-    try {
-      const parsed = JSON.parse(statusMatch[1].trim());
-      if (parsed && typeof parsed === 'object') {
-        statusSync = parsed;
-      }
-    } catch (_) {
-      statusSync = null;
-    }
+    statusSync = parseStatusSyncPayload(statusMatch[1]);
     displayText = displayText.replace(STATUS_SYNC_PATTERN, '').trimEnd();
+  } else {
+    const variantMatch = displayText.match(STATUS_SYNC_VARIANT_PATTERN);
+    if (variantMatch) {
+      statusSync = parseStatusSyncPayload(variantMatch[1]);
+      displayText = displayText.replace(STATUS_SYNC_VARIANT_PATTERN, '').trimEnd();
+    } else {
+      const loosePayload = extractLooseStatusSyncPayload(displayText);
+      if (loosePayload) {
+        statusSync = parseStatusSyncPayload(loosePayload);
+        displayText = stripLooseStatusSync(displayText).trimEnd();
+      }
+    }
   }
 
   return { displayText, questSync, inventorySync, statusSync };
@@ -463,15 +568,96 @@ function applyInventorySync(inventory) {
   return true;
 }
 
+function mergeStatusCharacterPatch(currentChar, patchChar) {
+  const merged = { ...currentChar, ...patchChar };
+  for (const key of ['hitPoints', 'defense', 'abilities', 'equipment', 'basics']) {
+    if (patchChar[key] && typeof patchChar[key] === 'object' && !Array.isArray(patchChar[key])) {
+      merged[key] = { ...(currentChar[key] || {}), ...patchChar[key] };
+    }
+  }
+  if (Array.isArray(patchChar.conditions)) {
+    merged.conditions = patchChar.conditions;
+  }
+  return merged;
+}
+
+function mergeStatusCharacterList(currentList, patchList) {
+  if (!Array.isArray(patchList)) return currentList;
+  if (!Array.isArray(currentList)) return patchList;
+
+  const merged = currentList.map(char => ({ ...char }));
+  patchList.forEach(patchChar => {
+    if (!patchChar || typeof patchChar !== 'object') return;
+    const patchId = patchChar.id;
+    let index = patchId ? merged.findIndex(char => char.id === patchId) : -1;
+    if (index < 0 && patchChar.name) {
+      index = merged.findIndex(char => char.name === patchChar.name);
+    }
+    if (index < 0) {
+      merged.push({ ...patchChar });
+      return;
+    }
+    merged[index] = mergeStatusCharacterPatch(merged[index], patchChar);
+  });
+  return merged;
+}
+
+function mergeStatusEnemyList(currentList, patchList) {
+  if (!Array.isArray(patchList)) return currentList;
+  if (!Array.isArray(currentList)) return patchList;
+
+  const merged = currentList.map(encounter => ({
+    ...encounter,
+    members: Array.isArray(encounter.members)
+      ? encounter.members.map(member => ({ ...member }))
+      : [],
+  }));
+
+  patchList.forEach(patchEncounter => {
+    if (!patchEncounter || typeof patchEncounter !== 'object') return;
+    const patchId = patchEncounter.id;
+    if (!patchId) return;
+    const index = merged.findIndex(encounter => encounter.id === patchId);
+    if (index < 0) {
+      merged.push({ ...patchEncounter });
+      return;
+    }
+    const currentEncounter = merged[index];
+    const patchMembers = Array.isArray(patchEncounter.members) ? patchEncounter.members : null;
+    merged[index] = {
+      ...currentEncounter,
+      ...patchEncounter,
+      members: patchMembers
+        ? mergeStatusCharacterList(currentEncounter.members || [], patchMembers)
+        : currentEncounter.members,
+    };
+  });
+  return merged;
+}
+
+function mergeStatusSync(current, patch) {
+  const next = {
+    ...(current || {}),
+    ...(patch || {}),
+  };
+  if (Array.isArray(patch?.team)) {
+    next.team = mergeStatusCharacterList(current?.team || [], patch.team);
+  }
+  if (Array.isArray(patch?.enemy)) {
+    next.enemy = mergeStatusEnemyList(current?.enemy || [], patch.enemy);
+  }
+  return next;
+}
+
 function applyStatusSync(status) {
   if (!status || typeof status !== 'object' || !GameData.activeSaveData) {
     return { enteredCombat: false, leftCombat: false };
   }
   const prevInCombat = !!GameData.activeSaveData.status?.inCombat;
-  GameData.activeSaveData.status = {
-    ...GameData.activeSaveData.status,
-    ...status,
-  };
+  GameData.activeSaveData.status = mergeStatusSync(
+    GameData.activeSaveData.status,
+    status,
+  );
   persistActiveSaveData();
   const nextInCombat = !!GameData.activeSaveData.status.inCombat;
   return {

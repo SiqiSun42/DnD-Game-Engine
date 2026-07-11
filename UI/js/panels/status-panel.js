@@ -66,35 +66,91 @@ function formatStatusFieldValue(value) {
   return String(value);
 }
 
+function parseAbilityScore(value) {
+  if (value === undefined || value === null || value === '') return '';
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return String(Math.trunc(value));
+  }
+  if (typeof value === 'object') {
+    const raw = value.score ?? value.value;
+    if (raw === undefined || raw === null || raw === '') return '';
+    return parseAbilityScore(raw);
+  }
+  const text = String(value).trim();
+  if (!text) return '';
+  const match = text.match(/^(\d+)/);
+  if (match) return match[1];
+  return '';
+}
+
+function formatAbilityModifier(score) {
+  const numeric = Number.parseInt(String(score), 10);
+  if (Number.isNaN(numeric)) return '';
+  const mod = Math.floor((numeric - 10) / 2);
+  return mod >= 0 ? `+${mod}` : `${mod}`;
+}
+
 function parseAbilityEntry(value) {
-  if (value && typeof value === 'object') {
-    const score = formatStatusFieldValue(value.score ?? value.value);
-    let modifier = formatStatusFieldValue(value.modifier);
-    if (modifier && !/^[+\-]/.test(modifier)) {
-      modifier = `+${modifier}`;
-    }
-    return { score, modifier };
-  }
-
-  const text = formatStatusFieldValue(value);
-  if (!text) return { score: '', modifier: '' };
-
-  const match = text.match(/^(\d+)\s*(?:[（(]\s*修正值\s*([+\-]?\d+)\s*[）)])?\s*$/);
-  if (match) {
-    let modifier = match[2] || '';
-    if (modifier && !/^[+\-]/.test(modifier)) {
-      modifier = `+${modifier}`;
-    }
-    return { score: match[1], modifier };
-  }
-
-  return { score: text, modifier: '' };
+  const score = parseAbilityScore(value);
+  if (!score) return { score: '', modifier: '' };
+  return {
+    score,
+    modifier: formatAbilityModifier(score),
+  };
 }
 
 function buildStatusInlineParts(subFields, value) {
   return subFields
     .map(subField => {
       const partValue = formatStatusFieldValue(value?.[subField.key]);
+      if (!partValue) return '';
+      return `${escapePanelText(subField.label)}：${escapePanelText(partValue)}`;
+    })
+    .filter(Boolean);
+}
+
+function buildEquipmentInlineParts(subFields, value) {
+  return subFields
+    .map(subField => {
+      const partValue = formatEquipmentSlotDisplay(subField.key, value?.[subField.key]);
+      if (!partValue) return '';
+      return `${escapePanelText(subField.label)}：${escapePanelText(partValue)}`;
+    })
+    .filter(Boolean);
+}
+
+function buildDefenseInlineParts(subFields, value) {
+  return subFields
+    .map(subField => {
+      let partValue = '';
+      if (subField.key === 'sources') {
+        partValue = formatDefenseSourcesDisplay(value?.sources);
+      } else {
+        partValue = formatStatusFieldValue(value?.[subField.key]);
+      }
+      if (!partValue) return '';
+      return `${escapePanelText(subField.label)}：${escapePanelText(partValue)}`;
+    })
+    .filter(Boolean);
+}
+
+function formatInitiativeOrder(char) {
+  const raw = char?.initiative;
+  if (raw === undefined || raw === null || raw === '') return '无';
+  const numeric = Number(raw);
+  if (!Number.isNaN(numeric) && numeric < 0) return '无';
+  return formatStatusFieldValue(raw);
+}
+
+function buildResourceInlineParts(subFields, value, char) {
+  return subFields
+    .map(subField => {
+      let partValue = '';
+      if (subField.key === 'initiative') {
+        partValue = formatInitiativeOrder(char);
+      } else {
+        partValue = formatStatusFieldValue(value?.[subField.key]);
+      }
       if (!partValue) return '';
       return `${escapePanelText(subField.label)}：${escapePanelText(partValue)}`;
     })
@@ -175,7 +231,7 @@ function renderStatusAbilitiesSection(field, value) {
   `;
 }
 
-function renderStatusNestedSection(field, value) {
+function renderStatusNestedSection(field, value, context = {}) {
   if (!value || typeof value !== 'object') return '';
 
   const summary = formatStatusFieldValue(value.summary);
@@ -187,10 +243,17 @@ function renderStatusNestedSection(field, value) {
   if (!subFields.length) return renderStatusTextSection(field.label, String(value));
 
   if (field.layout === 'inline') {
-    const parts = buildStatusInlineParts(
-      subFields.filter(subField => subField.key !== 'summary'),
-      value,
-    );
+    const filteredSubFields = subFields.filter(subField => subField.key !== 'summary');
+    let parts;
+    if (field.key === 'resources') {
+      parts = buildResourceInlineParts(filteredSubFields, value, context.char);
+    } else if (field.key === 'equipment') {
+      parts = buildEquipmentInlineParts(filteredSubFields, value);
+    } else if (field.key === 'defense') {
+      parts = buildDefenseInlineParts(filteredSubFields, value);
+    } else {
+      parts = buildStatusInlineParts(filteredSubFields, value);
+    }
     return renderStatusInlineSection(field.label, parts);
   }
 
@@ -237,6 +300,9 @@ function renderStatusConditionsSection(field, value) {
 
 function renderStatusDetailSections(char, data, schema) {
   const fields = getStatusDetailFields(data, schema);
+  const detailContext = {
+    char,
+  };
   if (!fields.length) {
     if (char.detail) {
       return `<p class="character-detail-body">${escapePanelText(char.detail)}</p>`;
@@ -256,7 +322,7 @@ function renderStatusDetailSections(char, data, schema) {
       return renderStatusConditionsSection(field, value);
     }
     if (Array.isArray(field.fields) && field.fields.length) {
-      return renderStatusNestedSection(field, value);
+      return renderStatusNestedSection(field, value, detailContext);
     }
     return renderStatusTextSection(field.label, value);
   }).filter(Boolean).join('');
@@ -404,8 +470,13 @@ function mountStatusPanel(container, schema, data) {
     chars.forEach(char => {
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = 'status-panel-item' + (char.id === activeCharacterId ? ' active' : '');
-      btn.textContent = char.name;
+      const fighting = char.fighting === true;
+      btn.className = 'status-panel-item status-list-character'
+        + (char.id === activeCharacterId ? ' active' : '');
+      btn.innerHTML = `
+        <span class="status-list-item-label">${escapePanelText(char.name)}</span>
+        ${fighting ? '<span class="status-fighting-badge" aria-label="参战中">⚔</span>' : ''}
+      `;
       btn.addEventListener('click', () => {
         activeCharacterId = char.id;
         renderAll();

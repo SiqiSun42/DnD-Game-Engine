@@ -7,6 +7,13 @@ CONSULT_PROMPT_FILE = "咨询城主/system.md"
 GAME_PROMPT_FILE = "游戏进程/游戏进程.md"
 ROLL_JUDGE_PROMPT_FILE = "游戏进程/掷骰判断.md"
 CHECK_TEST_NON_APPRAISAL_PROMPT_FILE = "游戏进程/非鉴定测试.md"
+BATTLE_TRIGGER_PROMPT_FILE = "游戏进程/战斗/1.触发战斗.md"
+BATTLE_COUNT_PROMPT_FILE = "游戏进程/战斗/2.参战人数.md"
+BATTLE_INITIATIVE_PROMPT_FILE = "游戏进程/战斗/3.先攻顺序.md"
+BATTLE_ROUND_0_PROMPT_FILE = "游戏进程/战斗/4.第0回合.md"
+BATTLE_ROUND_NORMAL_PROMPT_FILE = "游戏进程/战斗/5.战斗回合.md"
+BATTLE_END_PROMPT_FILE = "游戏进程/战斗/6.战斗结束.md"
+BATTLE_NO_TRIGGER_PROMPT_FILE = "游戏进程/战斗/7.未触发战斗.md"
 GAME_PROMPT_FILE_KEY = "promptFile"
 
 
@@ -51,6 +58,60 @@ def load_game_base_prompt(context: dict | None = None) -> str:
     if dedicated:
         return load_prompt(dedicated)
     return load_prompt(GAME_PROMPT_FILE)
+
+
+def _load_battle_prompt(path: str, fallback: str) -> str:
+    prompt = load_prompt(path)
+    return prompt if prompt else fallback
+
+
+def load_battle_trigger_prompt() -> str:
+    return _load_battle_prompt(
+        BATTLE_TRIGGER_PROMPT_FILE,
+        "判断是否触发战斗。只输出 {True} 或 {False}。",
+    )
+
+
+def load_battle_count_prompt() -> str:
+    return _load_battle_prompt(
+        BATTLE_COUNT_PROMPT_FILE,
+        "统计参战人数。只输出一个正整数。",
+    )
+
+
+def load_initiative_order_prompt() -> str:
+    return _load_battle_prompt(
+        BATTLE_INITIATIVE_PROMPT_FILE,
+        "根据系统提供的骰子与对话，生成先攻顺序。",
+    )
+
+
+def load_battle_round_0_prompt() -> str:
+    return _load_battle_prompt(
+        BATTLE_ROUND_0_PROMPT_FILE,
+        "生成第0回合：玩家顺位之前的 NPC 行动，末尾提示玩家要做什么。",
+    )
+
+
+def load_battle_round_normal_prompt() -> str:
+    return _load_battle_prompt(
+        BATTLE_ROUND_NORMAL_PROMPT_FILE,
+        "处理玩家回合到下一个玩家顺位前的所有战斗行动，末尾提示玩家要做什么。",
+    )
+
+
+def load_battle_end_prompt() -> str:
+    return _load_battle_prompt(
+        BATTLE_END_PROMPT_FILE,
+        "判断战斗是否结束。只输出 {True} 或 {False}。",
+    )
+
+
+def load_no_trigger_prompt() -> str:
+    return _load_battle_prompt(
+        BATTLE_NO_TRIGGER_PROMPT_FILE,
+        "未触发战斗。先输出一句「未触发战斗」，再正常推进叙述。",
+    )
 
 
 def load_prompt(relative_path: str) -> str:
@@ -113,10 +174,11 @@ def append_combat_state_reminder(prompt: str, game_context: dict | None) -> str:
         return prompt
     notice = (
         "## 战斗状态提醒\n\n"
-        "当前 `inCombat` 为 **true**，玩家尚未宣告战斗结果。\n"
-        "- 不要推进战后剧情或结束战斗\n"
-        "- 将玩家输入优先理解为：胜利 / 失败 / 逃跑\n"
-        "- 战斗结束后必须在 `[STATUS_SYNC]` 中将 `inCombat` 设为 false"
+        f"当前 `inCombat` 为 **true**，`participants` = {game_context.get('participants', -1)}，"
+        f"`combatRound` = {game_context.get('status', {}).get('combatRound', 1)}。\n"
+        "- 使用系统提供的战斗骰数据，禁止自行随机\n"
+        "- 每轮骰子均为新生成，主动作使用本次第一组\n"
+        "- 战斗结束后必须在 `[STATUS_SYNC]` 中将 `inCombat` 设为 false、`participants` 设为 -1"
     )
     return f"{prompt.rstrip()}\n\n{notice}"
 
@@ -137,11 +199,22 @@ def build_game_system_prompt(
     game_context: dict | None = None,
     dice_results_block: str | None = None,
     roll_judge_block: str | None = None,
+    *,
+    channel: str = "game",
+    last_user: str = "",
+    panels: list[str] | None = None,
 ) -> str:
+    from services.game_panels import format_game_panels_block
+
     prompt = base_prompt or (
         "Reply in the same language as the player."
     )
-    state_block = format_game_context(game_context)
+    state_block = format_game_panels_block(
+        game_context,
+        channel=channel,
+        last_user=last_user,
+        panels=panels,
+    )
     prompt = f"{prompt.rstrip()}\n\n## 当前游戏状态\n\n{state_block}"
     prompt = append_quest_sync_reminder(prompt, game_context)
     prompt = append_combat_state_reminder(prompt, game_context)

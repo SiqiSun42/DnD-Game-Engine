@@ -51,6 +51,26 @@
   color: var(--text-heading);
 }
 
+.status-list-character {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.status-list-item-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-fighting-badge {
+  flex-shrink: 0;
+  opacity: 0.8;
+  line-height: 1;
+}
+
 .status-category-group {
   margin-bottom: 2px;
 }

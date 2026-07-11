@@ -34,13 +34,18 @@
         "id": "short-sword",
         "name": "短剑",
         "quantity": 1,
-        "description": "凯文的常用武器，轻型单手剑。"
+        "description": "轻型单手剑，适合快速挥击。",
+        "tag": "weapon",
+        "damage": "1d6",
+        "modifier": 0
       },
       {
         "id": "leather-armor",
         "name": "皮甲",
         "quantity": 1,
-        "description": "磨损但可靠的皮甲，凯文随身穿着。"
+        "description": "磨损但可靠的皮甲。",
+        "tag": "armor",
+        "modifier": 1
       }
     ],
     "key": []

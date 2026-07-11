@@ -1,9 +1,11 @@
 const CONSULT_SAVE_NAME = '咨询城主';
 const CHECK_TEST_SAVE_NAME = '鉴定测试';
+const COMBAT_TEST_SAVE_NAME = '战斗测试';
 
 const CHAT_CHANNELS = {
   CONSULT: 'consult',
   CHECK_TEST: 'check-test',
+  COMBAT_TEST: 'combat-test',
   GAME: 'game',
   START_GAME: 'start-game',
   CONVERSATION: 'conversation',
@@ -23,6 +25,9 @@ function resolveChatChannel(options = {}) {
   }
   if (saveName === CHECK_TEST_SAVE_NAME) {
     return CHAT_CHANNELS.CHECK_TEST;
+  }
+  if (saveName === COMBAT_TEST_SAVE_NAME) {
+    return CHAT_CHANNELS.COMBAT_TEST;
   }
   if (meta?.docType === 'game') {
     return CHAT_CHANNELS.GAME;
@@ -70,6 +75,7 @@ function buildGameContext() {
     inventory: data.inventory || null,
     status: data.status || null,
     inCombat: data.status?.inCombat ?? false,
+    participants: data.status?.participants ?? -1,
     currentQuests: data.notes?.currentQuests || [],
     historyQuests: data.notes?.historyQuests || { pages: [] },
     characters: data.characters || null,

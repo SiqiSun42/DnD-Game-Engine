@@ -35,7 +35,8 @@ async def chat_endpoint(body: ChatRequest) -> ChatResponse:
     except DeepSeekError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail="Chat request failed") from exc
+        detail = str(exc).strip() or "Chat request failed"
+        raise HTTPException(status_code=500, detail=detail) from exc
 
 
 if UI_ROOT.is_dir():

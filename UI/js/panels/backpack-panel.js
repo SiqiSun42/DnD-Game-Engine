@@ -83,10 +83,26 @@ function mountBackpackPanel(container, schema, data) {
       detailEl.innerHTML = '<p class="backpack-detail-empty">请选择物品</p>';
       return;
     }
+    const equipmentLines = [];
+    if (item.tag) {
+      const tagLabel = formatEquipmentTagLabel(item.tag);
+      if (tagLabel) equipmentLines.push(`类型：${tagLabel}`);
+      if (item.tag === 'weapon' && item.damage) {
+        equipmentLines.push(`伤害：${item.damage}`);
+      }
+      if (item.modifier !== undefined && item.modifier !== null && item.modifier !== '') {
+        equipmentLines.push(`修正值：${formatModifierDisplay(item.modifier)}`);
+      }
+    }
+    const equipmentHtml = equipmentLines
+      .map(line => `<p class="backpack-detail-body">${escapePanelText(line)}</p>`)
+      .join('');
+
     detailEl.innerHTML = `
       <div class="backpack-detail-inner">
         <h3 class="backpack-detail-title">${escapePanelText(item.name)}</h3>
         <p class="backpack-detail-body">数量：${escapePanelText(String(item.quantity))}</p>
+        ${equipmentHtml}
         <p class="backpack-detail-body">介绍：${escapePanelText(item.description)}</p>
       </div>
     `;

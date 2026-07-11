@@ -1,14 +1,24 @@
 {
-  "inCombat": "False",
+  "inCombat": false,
+  "participants": -1,
   "statusFields": [
     {
       "key": "basics",
       "label": "基础信息",
       "type": "profile",
       "fields": [
-        { "key": "occupation", "label": "职业" },
-        { "key": "level", "label": "等级" },
-        { "key": "race", "label": "种族" }
+        {
+          "key": "occupation",
+          "label": "职业"
+        },
+        {
+          "key": "level",
+          "label": "等级"
+        },
+        {
+          "key": "race",
+          "label": "种族"
+        }
       ]
     },
     {
@@ -16,9 +26,18 @@
       "label": "生命值",
       "layout": "inline",
       "fields": [
-        { "key": "current", "label": "当前HP" },
-        { "key": "max", "label": "最大HP" },
-        { "key": "temp", "label": "临时HP" }
+        {
+          "key": "current",
+          "label": "当前HP"
+        },
+        {
+          "key": "max",
+          "label": "最大HP"
+        },
+        {
+          "key": "temp",
+          "label": "临时HP"
+        }
       ]
     },
     {
@@ -26,8 +45,14 @@
       "label": "防御",
       "layout": "inline",
       "fields": [
-        { "key": "ac", "label": "护甲等级（AC）" },
-        { "key": "sources", "label": "防御来源" }
+        {
+          "key": "ac",
+          "label": "护甲等级（AC）"
+        },
+        {
+          "key": "sources",
+          "label": "防御来源"
+        }
       ]
     },
     {
@@ -35,12 +60,30 @@
       "label": "属性及修正值",
       "type": "abilities",
       "fields": [
-        { "key": "str", "label": "力量" },
-        { "key": "dex", "label": "敏捷" },
-        { "key": "con", "label": "体质" },
-        { "key": "int", "label": "智力" },
-        { "key": "wis", "label": "感知" },
-        { "key": "cha", "label": "魅力" }
+        {
+          "key": "str",
+          "label": "力量"
+        },
+        {
+          "key": "dex",
+          "label": "敏捷"
+        },
+        {
+          "key": "con",
+          "label": "体质"
+        },
+        {
+          "key": "int",
+          "label": "智力"
+        },
+        {
+          "key": "wis",
+          "label": "感知"
+        },
+        {
+          "key": "cha",
+          "label": "魅力"
+        }
       ]
     },
     {
@@ -48,9 +91,18 @@
       "label": "装备",
       "layout": "inline",
       "fields": [
-        { "key": "mainWeapon", "label": "主武器" },
-        { "key": "armor", "label": "防具" },
-        { "key": "offhand", "label": "副防具" }
+        {
+          "key": "mainWeapon",
+          "label": "主武器"
+        },
+        {
+          "key": "armor",
+          "label": "防具"
+        },
+        {
+          "key": "offhand",
+          "label": "副防具"
+        }
       ]
     },
     {
@@ -58,9 +110,22 @@
       "label": "本轮资源",
       "layout": "inline",
       "fields": [
-        { "key": "action", "label": "标准行动" },
-        { "key": "bonusAction", "label": "附加行动" },
-        { "key": "movement", "label": "移动距离" }
+        {
+          "key": "initiative",
+          "label": "先攻顺序"
+        },
+        {
+          "key": "action",
+          "label": "标准行动"
+        },
+        {
+          "key": "bonusAction",
+          "label": "附加行动"
+        },
+        {
+          "key": "movement",
+          "label": "移动距离"
+        }
       ]
     },
     {
@@ -68,11 +133,26 @@
       "label": "法术",
       "layout": "inline",
       "fields": [
-        { "key": "summary", "label": "概况" },
-        { "key": "cantrips", "label": "戏法" },
-        { "key": "known", "label": "已学法术" },
-        { "key": "level1Slots", "label": "1级法术位" },
-        { "key": "usedSlots", "label": "已用法术位" }
+        {
+          "key": "summary",
+          "label": "概况"
+        },
+        {
+          "key": "cantrips",
+          "label": "戏法"
+        },
+        {
+          "key": "known",
+          "label": "已学法术"
+        },
+        {
+          "key": "level1Slots",
+          "label": "1级法术位"
+        },
+        {
+          "key": "usedSlots",
+          "label": "已用法术位"
+        }
       ]
     },
     {
@@ -99,20 +179,48 @@
       },
       "defense": {
         "ac": "16",
-        "sources": "链甲护甲（+5）+ 木盾（+2）"
+        "sources": [
+          {
+            "name": "链甲护甲",
+            "modifier": 5
+          },
+          {
+            "name": "木盾",
+            "modifier": 2
+          }
+        ]
       },
       "abilities": {
-        "str": "15（修正值+2）",
-        "dex": "10（修正值+0）",
-        "con": "14（修正值+2）",
-        "int": "10（修正值+0）",
-        "wis": "11（修正值+0）",
-        "cha": "12（修正值+1）"
+        "str": "15",
+        "dex": "10",
+        "con": "14",
+        "int": "10",
+        "wis": "11",
+        "cha": "12"
       },
       "equipment": {
-        "mainWeapon": "长剑（1d8伤害，+2修正值）",
-        "armor": "链甲护甲",
-        "offhand": "木盾"
+        "mainWeapon": {
+          "id": "longsword",
+          "name": "长剑",
+          "tag": "weapon",
+          "damage": "1d8",
+          "modifier": 2,
+          "description": "精钢打造的长剑，凯文的主武器。"
+        },
+        "armor": {
+          "id": "chain-mail",
+          "name": "链甲护甲",
+          "tag": "armor",
+          "modifier": 5,
+          "description": "链环编织的中型护甲，提供可靠防护。"
+        },
+        "offhand": {
+          "id": "wooden-shield",
+          "name": "木盾",
+          "tag": "armor",
+          "modifier": 2,
+          "description": "木质圆盾，可格挡攻击。"
+        }
       },
       "resources": {
         "action": "可用",
@@ -122,7 +230,8 @@
       "spells": {
         "summary": "无法术位"
       },
-      "conditions": []
+      "conditions": [],
+      "initiative": -1
     },
     {
       "id": "ally-ailin",
@@ -141,20 +250,56 @@
       },
       "defense": {
         "ac": "14",
-        "sources": "皮甲护甲（+2）+ 木盾（+2）"
+        "sources": [
+          {
+            "name": "皮甲护甲（",
+            "modifier": 0
+          },
+          {
+            "name": "2）",
+            "modifier": 0
+          },
+          {
+            "name": "木盾（",
+            "modifier": 0
+          },
+          {
+            "name": "2）",
+            "modifier": 0
+          }
+        ]
       },
       "abilities": {
-        "str": "10（修正值+0）",
-        "dex": "12（修正值+1）",
-        "con": "12（修正值+1）",
-        "int": "13（修正值+1）",
-        "wis": "16（修正值+3）",
-        "cha": "14（修正值+2）"
+        "str": "10",
+        "dex": "12",
+        "con": "12",
+        "int": "13",
+        "wis": "16",
+        "cha": "14"
       },
       "equipment": {
-        "mainWeapon": "木棍（1d6伤害，+0修正值）",
-        "armor": "皮甲护甲",
-        "offhand": "木盾"
+        "mainWeapon": {
+          "id": "club",
+          "name": "木棍",
+          "tag": "weapon",
+          "damage": "1d6",
+          "modifier": 0,
+          "description": "简单的木棍，艾琳的备用武器。"
+        },
+        "armor": {
+          "id": "leather-armor-ailin",
+          "name": "皮甲护甲",
+          "tag": "armor",
+          "modifier": 2,
+          "description": "精灵工匠缝制的皮甲护甲。"
+        },
+        "offhand": {
+          "id": "wooden-shield-ailin",
+          "name": "木盾",
+          "tag": "armor",
+          "modifier": 2,
+          "description": "轻便木盾。"
+        }
       },
       "resources": {
         "action": "可用",
@@ -167,18 +312,8 @@
         "level1Slots": "3个",
         "usedSlots": "1个（已使用治疗伤口）"
       },
-      "conditions": [
-        {
-          "name": "中毒",
-          "duration": "持续2轮",
-          "effect": "每轮战斗开始时受1点伤害"
-        },
-        {
-          "name": "虚弱",
-          "duration": "持续1轮",
-          "effect": "攻击骰减1"
-        }
-      ]
+      "conditions": [],
+      "initiative": -1
     }
   ],
   "enemy": [
@@ -204,20 +339,56 @@
           },
           "defense": {
             "ac": "15",
-            "sources": "皮甲（+1）+ 短盾（+2）"
+            "sources": [
+              {
+                "name": "皮甲（",
+                "modifier": 0
+              },
+              {
+                "name": "1）",
+                "modifier": 0
+              },
+              {
+                "name": "短盾（",
+                "modifier": 0
+              },
+              {
+                "name": "2）",
+                "modifier": 0
+              }
+            ]
           },
           "abilities": {
-            "str": "8（修正值-1）",
-            "dex": "14（修正值+2）",
-            "con": "10（修正值+0）",
-            "int": "10（修正值+0）",
-            "wis": "8（修正值-1）",
-            "cha": "8（修正值-1）"
+            "str": "8",
+            "dex": "14",
+            "con": "10",
+            "int": "10",
+            "wis": "8",
+            "cha": "8"
           },
           "equipment": {
-            "mainWeapon": "弯刀（1d6+2）",
-            "armor": "皮甲",
-            "offhand": "短盾"
+            "mainWeapon": {
+              "id": "item",
+              "name": "弯刀",
+              "tag": "weapon",
+              "damage": "1d6",
+              "modifier": 2,
+              "description": ""
+            },
+            "armor": {
+              "id": "item",
+              "name": "皮甲",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            },
+            "offhand": {
+              "id": "item",
+              "name": "短盾",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            }
           },
           "resources": {
             "action": "可用",
@@ -227,7 +398,8 @@
           "spells": {
             "summary": "无法术"
           },
-          "conditions": []
+          "conditions": [],
+          "initiative": -1
         },
         {
           "id": "goblin-2",
@@ -246,20 +418,56 @@
           },
           "defense": {
             "ac": "15",
-            "sources": "皮甲（+1）+ 短盾（+2）"
+            "sources": [
+              {
+                "name": "皮甲（",
+                "modifier": 0
+              },
+              {
+                "name": "1）",
+                "modifier": 0
+              },
+              {
+                "name": "短盾（",
+                "modifier": 0
+              },
+              {
+                "name": "2）",
+                "modifier": 0
+              }
+            ]
           },
           "abilities": {
-            "str": "8（修正值-1）",
-            "dex": "14（修正值+2）",
-            "con": "10（修正值+0）",
-            "int": "10（修正值+0）",
-            "wis": "8（修正值-1）",
-            "cha": "8（修正值-1）"
+            "str": "8",
+            "dex": "14",
+            "con": "10",
+            "int": "10",
+            "wis": "8",
+            "cha": "8"
           },
           "equipment": {
-            "mainWeapon": "弯刀（1d6+2）",
-            "armor": "皮甲",
-            "offhand": "短盾"
+            "mainWeapon": {
+              "id": "item",
+              "name": "弯刀",
+              "tag": "weapon",
+              "damage": "1d6",
+              "modifier": 2,
+              "description": ""
+            },
+            "armor": {
+              "id": "item",
+              "name": "皮甲",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            },
+            "offhand": {
+              "id": "item",
+              "name": "短盾",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            }
           },
           "resources": {
             "action": "可用",
@@ -269,7 +477,8 @@
           "spells": {
             "summary": "无法术"
           },
-          "conditions": []
+          "conditions": [],
+          "initiative": -1
         },
         {
           "id": "goblin-3",
@@ -288,20 +497,56 @@
           },
           "defense": {
             "ac": "15",
-            "sources": "皮甲（+1）+ 短盾（+2）"
+            "sources": [
+              {
+                "name": "皮甲（",
+                "modifier": 0
+              },
+              {
+                "name": "1）",
+                "modifier": 0
+              },
+              {
+                "name": "短盾（",
+                "modifier": 0
+              },
+              {
+                "name": "2）",
+                "modifier": 0
+              }
+            ]
           },
           "abilities": {
-            "str": "8（修正值-1）",
-            "dex": "14（修正值+2）",
-            "con": "10（修正值+0）",
-            "int": "10（修正值+0）",
-            "wis": "8（修正值-1）",
-            "cha": "8（修正值-1）"
+            "str": "8",
+            "dex": "14",
+            "con": "10",
+            "int": "10",
+            "wis": "8",
+            "cha": "8"
           },
           "equipment": {
-            "mainWeapon": "弯刀（1d6+2）",
-            "armor": "皮甲",
-            "offhand": "短盾"
+            "mainWeapon": {
+              "id": "item",
+              "name": "弯刀",
+              "tag": "weapon",
+              "damage": "1d6",
+              "modifier": 2,
+              "description": ""
+            },
+            "armor": {
+              "id": "item",
+              "name": "皮甲",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            },
+            "offhand": {
+              "id": "item",
+              "name": "短盾",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            }
           },
           "resources": {
             "action": "可用",
@@ -311,7 +556,8 @@
           "spells": {
             "summary": "无法术"
           },
-          "conditions": []
+          "conditions": [],
+          "initiative": -1
         }
       ]
     },
@@ -337,20 +583,50 @@
           },
           "defense": {
             "ac": "17",
-            "sources": "镶钉皮甲（+2）+ 首领护符（+1）"
+            "sources": [
+              {
+                "name": "镶钉皮甲（",
+                "modifier": 0
+              },
+              {
+                "name": "2）",
+                "modifier": 0
+              },
+              {
+                "name": "首领护符（",
+                "modifier": 0
+              },
+              {
+                "name": "1）",
+                "modifier": 0
+              }
+            ]
           },
           "abilities": {
-            "str": "14（修正值+2）",
-            "dex": "12（修正值+1）",
-            "con": "14（修正值+2）",
-            "int": "10（修正值+0）",
-            "wis": "10（修正值+0）",
-            "cha": "12（修正值+1）"
+            "str": "14",
+            "dex": "12",
+            "con": "14",
+            "int": "10",
+            "wis": "10",
+            "cha": "12"
           },
           "equipment": {
-            "mainWeapon": "巨斧（1d12+2）",
-            "armor": "镶钉皮甲",
-            "offhand": "无"
+            "mainWeapon": {
+              "id": "item",
+              "name": "巨斧",
+              "tag": "weapon",
+              "damage": "1d12",
+              "modifier": 2,
+              "description": ""
+            },
+            "armor": {
+              "id": "item",
+              "name": "镶钉皮甲",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            },
+            "offhand": null
           },
           "resources": {
             "action": "可用",
@@ -360,7 +636,8 @@
           "spells": {
             "summary": "无法术"
           },
-          "conditions": []
+          "conditions": [],
+          "initiative": -1
         },
         {
           "id": "goblin-4",
@@ -379,20 +656,56 @@
           },
           "defense": {
             "ac": "15",
-            "sources": "皮甲（+1）+ 短盾（+2）"
+            "sources": [
+              {
+                "name": "皮甲（",
+                "modifier": 0
+              },
+              {
+                "name": "1）",
+                "modifier": 0
+              },
+              {
+                "name": "短盾（",
+                "modifier": 0
+              },
+              {
+                "name": "2）",
+                "modifier": 0
+              }
+            ]
           },
           "abilities": {
-            "str": "8（修正值-1）",
-            "dex": "14（修正值+2）",
-            "con": "10（修正值+0）",
-            "int": "10（修正值+0）",
-            "wis": "8（修正值-1）",
-            "cha": "8（修正值-1）"
+            "str": "8",
+            "dex": "14",
+            "con": "10",
+            "int": "10",
+            "wis": "8",
+            "cha": "8"
           },
           "equipment": {
-            "mainWeapon": "弯刀（1d6+2）",
-            "armor": "皮甲",
-            "offhand": "短盾"
+            "mainWeapon": {
+              "id": "item",
+              "name": "弯刀",
+              "tag": "weapon",
+              "damage": "1d6",
+              "modifier": 2,
+              "description": ""
+            },
+            "armor": {
+              "id": "item",
+              "name": "皮甲",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            },
+            "offhand": {
+              "id": "item",
+              "name": "短盾",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            }
           },
           "resources": {
             "action": "可用",
@@ -402,7 +715,8 @@
           "spells": {
             "summary": "无法术"
           },
-          "conditions": []
+          "conditions": [],
+          "initiative": -1
         },
         {
           "id": "goblin-5",
@@ -421,20 +735,56 @@
           },
           "defense": {
             "ac": "15",
-            "sources": "皮甲（+1）+ 短盾（+2）"
+            "sources": [
+              {
+                "name": "皮甲（",
+                "modifier": 0
+              },
+              {
+                "name": "1）",
+                "modifier": 0
+              },
+              {
+                "name": "短盾（",
+                "modifier": 0
+              },
+              {
+                "name": "2）",
+                "modifier": 0
+              }
+            ]
           },
           "abilities": {
-            "str": "8（修正值-1）",
-            "dex": "14（修正值+2）",
-            "con": "10（修正值+0）",
-            "int": "10（修正值+0）",
-            "wis": "8（修正值-1）",
-            "cha": "8（修正值-1）"
+            "str": "8",
+            "dex": "14",
+            "con": "10",
+            "int": "10",
+            "wis": "8",
+            "cha": "8"
           },
           "equipment": {
-            "mainWeapon": "弯刀（1d6+2）",
-            "armor": "皮甲",
-            "offhand": "短盾"
+            "mainWeapon": {
+              "id": "item",
+              "name": "弯刀",
+              "tag": "weapon",
+              "damage": "1d6",
+              "modifier": 2,
+              "description": ""
+            },
+            "armor": {
+              "id": "item",
+              "name": "皮甲",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            },
+            "offhand": {
+              "id": "item",
+              "name": "短盾",
+              "tag": "armor",
+              "modifier": 0,
+              "description": ""
+            }
           },
           "resources": {
             "action": "可用",
@@ -444,7 +794,8 @@
           "spells": {
             "summary": "无法术"
           },
-          "conditions": []
+          "conditions": [],
+          "initiative": -1
         }
       ]
     }

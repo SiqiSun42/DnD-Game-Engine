@@ -10,9 +10,9 @@ CHECK_TEST_NON_APPRAISAL_PROMPT_FILE = "游戏进程/非鉴定测试.md"
 BATTLE_TRIGGER_PROMPT_FILE = "游戏进程/战斗/1.触发战斗.md"
 BATTLE_COUNT_PROMPT_FILE = "游戏进程/战斗/2.参战人数.md"
 BATTLE_INITIATIVE_PROMPT_FILE = "游戏进程/战斗/3.先攻顺序.md"
-BATTLE_ROUND_0_PROMPT_FILE = "游戏进程/战斗/4.第0回合.md"
-BATTLE_ROUND_NORMAL_PROMPT_FILE = "游戏进程/战斗/5.战斗回合.md"
-BATTLE_END_PROMPT_FILE = "游戏进程/战斗/6.战斗结束.md"
+BATTLE_PLAYER_TURN_PROMPT_FILE = "游戏进程/战斗/4.玩家回合.md"
+BATTLE_NPC_TURN_PROMPT_FILE = "游戏进程/战斗/5.NPC回合.md"
+BATTLE_UPDATE_PROMPT_FILE = "游戏进程/战斗/6.战斗更新.md"
 BATTLE_NO_TRIGGER_PROMPT_FILE = "游戏进程/战斗/7.未触发战斗.md"
 GAME_PROMPT_FILE_KEY = "promptFile"
 
@@ -86,26 +86,24 @@ def load_initiative_order_prompt() -> str:
     )
 
 
-def load_battle_round_0_prompt() -> str:
+def load_battle_player_turn_prompt() -> str:
     return _load_battle_prompt(
-        BATTLE_ROUND_0_PROMPT_FILE,
-        "生成第0回合：玩家顺位之前的 NPC 行动，末尾提示玩家要做什么。",
+        BATTLE_PLAYER_TURN_PROMPT_FILE,
+        "处理玩家角色本轮行动",
     )
 
 
-def load_battle_round_normal_prompt() -> str:
+def load_battle_npc_turn_prompt() -> str:
     return _load_battle_prompt(
-        BATTLE_ROUND_NORMAL_PROMPT_FILE,
-        "处理玩家回合到下一个玩家顺位前的所有战斗行动，末尾提示玩家要做什么。",
+        BATTLE_NPC_TURN_PROMPT_FILE,
+        "处理当前 NPC 角色本轮行动",
     )
 
-
-def load_battle_end_prompt() -> str:
+def load_battle_update_prompt() -> str:
     return _load_battle_prompt(
-        BATTLE_END_PROMPT_FILE,
-        "判断战斗是否结束。只输出 {True} 或 {False}。",
+        BATTLE_UPDATE_PROMPT_FILE,
+        "根据DM输出生成战斗状态更新JSON。返回修改指令，使用response_format='json_object'。",
     )
-
 
 def load_no_trigger_prompt() -> str:
     return _load_battle_prompt(
@@ -172,12 +170,14 @@ def append_quest_sync_reminder(prompt: str, game_context: dict | None) -> str:
 def append_combat_state_reminder(prompt: str, game_context: dict | None) -> str:
     if not game_context or not game_context.get("inCombat"):
         return prompt
+    status = game_context.get("status") or {}
     notice = (
         "## 战斗状态提醒\n\n"
         f"当前 `inCombat` 为 **true**，`participants` = {game_context.get('participants', -1)}，"
-        f"`combatRound` = {game_context.get('status', {}).get('combatRound', 1)}。\n"
-        "- 使用系统提供的战斗骰数据，禁止自行随机\n"
-        "- 每轮骰子均为新生成，主动作使用本次第一组\n"
+        f"`combatRound` = {status.get('combatRound', 1)}，"
+        f"`combatTurnIndex` = {status.get('combatTurnIndex', 0)}。\n"
+        "- 本场按先攻顺序逐角色行动，每次 API 只处理一个角色\n"
+        "- 使用系统为本角色新生成的骰子，禁止自行随机\n"
         "- 战斗结束后必须在 `[STATUS_SYNC]` 中将 `inCombat` 设为 false、`participants` 设为 -1"
     )
     return f"{prompt.rstrip()}\n\n{notice}"

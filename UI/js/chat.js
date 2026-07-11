@@ -150,10 +150,7 @@ function initChat(root, options = {}) {
         btn.disabled = busy;
       });
       input.placeholder = busy ? busyPlaceholder : idlePlaceholder;
-      if (busy) {
-        showThinkingIndicator(messagesEl, 'DM');
-        scrollToBottom(scrollEl);
-      } else {
+      if (!busy) {
         hideThinkingIndicator(messagesEl);
       }
     },

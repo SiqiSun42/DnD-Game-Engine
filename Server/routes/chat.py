@@ -16,6 +16,7 @@ class ChatRequest(BaseModel):
     messages: list[ChatMessage] = Field(default_factory=list)
     saveName: str | None = None
     gameContext: dict | None = None
+    combatContinue: bool = False
 
 
 class PipelineMessage(BaseModel):
@@ -34,10 +35,14 @@ class ChatResponse(BaseModel):
     statusSync: dict | None = None
     pipelineMessages: list[PipelineMessage] | None = None
     battleState: str | None = None
+    combatAutoContinue: bool = False
 
 
 async def process_chat_request(body: ChatRequest) -> ChatResponse:
     handler = get_handler(body.channel)
     payload = [message.model_dump(exclude_none=True) for message in body.messages]
-    result = await handler(payload, body.saveName, body.gameContext)
+    context = dict(body.gameContext or {})
+    if body.combatContinue:
+        context["combatContinue"] = True
+    result = await handler(payload, body.saveName, context)
     return ChatResponse(**result)

@@ -1,29 +1,26 @@
 import json
 import re
 
-from config import DEEPSEEK_USER_PROMPT_PATCH
+from config import DEEPSEEK_COMBAT_MODEL, DEEPSEEK_USER_PROMPT_PATCH
 from handlers.consult import extract_last_user_message
 from handlers.passthrough import to_llm_messages
 from rag.policies import CHANNEL_COMBAT_TEST
 from rag.service import retrieve_context
 from services.deepseek import ChatCompletionResult, deepseek_client
-from services.dice_combat import format_combat_dice_block
+from services.dice_initiative import format_initiative_block
+from services.dice_single import format_single_dice_block
 from services.prompts import (
     build_game_system_prompt,
     load_battle_count_prompt,
-    load_battle_end_prompt,
-    load_battle_round_0_prompt,
-    load_battle_round_normal_prompt,
+    load_battle_npc_turn_prompt,
+    load_battle_player_turn_prompt,
     load_battle_trigger_prompt,
     load_initiative_order_prompt,
     load_no_trigger_prompt,
     load_user_prompt_patch,
 )
 
-# 临时调试阶段：trigger → count → initiative → round0 → full
-# full = 全流程（战前 + 战斗回合 + 自动战斗结束判定）；未触发战斗走触发分支的 no_trigger
 COMBAT_DEBUG_STAGE = "full"
-
 
 TRIGGER_OUTPUT_REMINDER = (
     "【系统】请根据以上对话判断：玩家最新行动是否会触发战斗。"
@@ -33,17 +30,9 @@ COUNT_OUTPUT_REMINDER = (
     "【系统】请确定本场战斗的参战人员。"
     "只输出 [STATUS_SYNC] 更新所有相关角色的 fighting 字段，禁止任何其它文字。"
 )
-END_FOLLOWUP_REMINDER = (
-    "【系统】根据刚才的回合结果判断：若战斗已结束，描写结局并在末尾输出 "
-    "[STATUS_SYNC]（inCombat: false, participants: -1, combatRound: -1, "
-    "所有参战角色 initiative: -1, combatOrder: -1, fighting: false）。"
-    "若战斗尚未结束，只输出 {Continue}，不要输出其它内容。"
-    "友方全灭须所有参战队友 HP 均≤0；仅玩家一人阵亡不算友方全灭。"
-)
 
 BOOL_TRUE = re.compile(r"\{True\b", re.IGNORECASE)
 BOOL_FALSE = re.compile(r"\{False\b", re.IGNORECASE)
-CONTINUE_TOKEN = re.compile(r"\{Continue\b", re.IGNORECASE)
 INT_PATTERN = re.compile(r"\b(\d+)\b")
 STATUS_SYNC_PATTERN = re.compile(
     r"\[STATUS_SYNC\]\s*([\s\S]*?)\s*\[/STATUS_SYNC\]",
@@ -58,27 +47,11 @@ QUEST_SYNC_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-COMBAT_THINKING_REMINDER = (
-    "【系统·思考模式】API 会将推理与正文分开：reasoning=思考过程，content=玩家可见正文。"
-    "思考里计划要写的内容，必须完整抄进正文。"
-    "[STATUS_SYNC] 若在思考里计划但未写入正文，面板不会更新；"
-    "系统会从正文与思考中提取同步块，但思考里仅有「打算写」而不含完整 JSON 块则无效。"
-)
-ROUND_START_LEADING_PATTERN = re.compile(r"^\s*——第\d+回合开始——\s*")
-ROUND_0_OUTPUT_REMINDER = (
-    "【系统】第0回合叙述完成后，必须在回复正文最末尾输出 [STATUS_SYNC]，"
-    "将所有 HP/conditions 变化写入面板（必须含 id 与 hitPoints.current）。"
-    "面板只认 [STATUS_SYNC]；叙述里的「凯文 HP：8 → 4」等文字仅供玩家阅读，不会写入面板。"
-    "必须写 literally `[STATUS_SYNC]` 与 `[/STATUS_SYNC]`，禁止用 markdown 标题（如 # STATUS_SYNC）或纯文本 STATUS_SYNC。"
-    "禁止把 [STATUS_SYNC] 只写在思考过程中。"
-    "思考过程仅供推理；玩家可见的完整叙述必须写在回复正文，正文不得为空。"
-)
-ROUND_NORMAL_OUTPUT_REMINDER = (
-    "【系统】战斗回合叙述完成后，必须在回复正文最末尾输出 [STATUS_SYNC]，"
-    "将所有 HP/conditions 变化写入面板（必须含 id 与 hitPoints.current）。"
-    "面板只认 [STATUS_SYNC]；叙述里的 HP 箭头仅供玩家阅读，不会写入面板。"
-    "必须写 literally `[STATUS_SYNC]` 与 `[/STATUS_SYNC]`，禁止用 markdown 标题（如 # STATUS_SYNC）或纯文本 STATUS_SYNC。"
-    "禁止把 [STATUS_SYNC] 只写在思考过程中。"
+TURN_SYNC_REMINDER = (
+    "【系统】本角色行动叙述完成后，必须在回复正文最末尾输出 [STATUS_SYNC]，"
+    "写入本回合该角色造成的 HP/conditions 变化（必须含 id 与 hitPoints.current）。"
+    "若玩家逃跑/投降，或本场战斗应结束，须在 [STATUS_SYNC] 中设 inCombat: false。"
+    "必须写 literally `[STATUS_SYNC]` 与 `[/STATUS_SYNC]`。"
     "思考过程仅供推理；玩家可见的完整叙述必须写在回复正文，正文不得为空。"
 )
 COMBAT_DOWN_REMINDER = (
@@ -87,56 +60,20 @@ COMBAT_DOWN_REMINDER = (
     "使用治疗道具或法术回血后，HP>0 才可行动。"
     "玩家 HP≤0 时，其输入视为语言指挥，不是「尝试行动」，不要提示「第二次尝试」。"
 )
-COMBAT_DICE_FRESH_REMINDER = (
-    "【骰子·本轮新生成】以下骰子由系统在本轮玩家输入后重新掷出，"
-    "与对话历史中的旧骰子完全无关。"
-    "主动作、攻击检定、NPC 自动化一律使用本次「第一组」；"
-    "「第二组」仅在本轮确有附赠动作/附加动作时才使用，测试阶段通常不需要。"
-    "禁止因历史对话中已出现过「第一组」而改用「第二组」。"
-)
-COMBAT_ROUND_SCOPE_REMINDER = (
-    "【系统·本轮范围】只生成本次战斗回合的叙述与检定。"
-    "对话历史（含第0回合、先攻、过往战斗回合、历史中「轮到你了」）仅供参考背景，"
-    "可能与当前规则不一致，**不要**据此推断本次行动顺序，**不要**纠错或复盘历史。"
-    "第0回合按先攻在玩家前先动NPC，那是另一阶段；与本战斗回合无关。"
-    "本战斗回合固定：玩家 combatOrder=1 先行动（【第一～三步】）→ NPC combatOrder 2→N（【第四步】）→ 提示下一轮。"
-    "玩家本条输入 = 本轮玩家行动，不是「等所有NPC动完后的补充」；本轮由玩家第一个生成。"
-    "禁止输出「其实玩家应该在NPC之后」类自我修正，直接按本 prompt 执行。"
-)
-COMBAT_ROUND_FLOW_REMINDER = (
-    "【系统·本轮生成顺序】本条回复必须按下列顺序书写，与对话历史先后无关："
-    "①【第一～三步】玩家（combatOrder=1）根据玩家最新输入行动；"
-    "②【第四步】按队列自动化 NPC（combatOrder 2→N）；"
-    "③【第五～六步】状态同步与提示下一轮。"
-    "历史中若先出现NPC、后出现「轮到你了」，那是第0回合或旧回合，不表示本次玩家排在NPC后面。"
-)
-COMBAT_NPC_QUEUE_REMINDER = (
-    "【系统·NPC队列硬性规则】队列中每一位可行动的 NPC 都必须依次完整执行（检定+结果），"
-    "不得跳过，不得用剧情代替。"
-    "禁止：队列外角色介入、威吓挡刀、援护、把敌人吓退、突发事件打断等，"
-    "用以免去队列内某位敌人的正式行动回合。"
-    "队友 NPC 只能在轮到其队列顺位时行动，不能插队干预其他顺位。"
-    "仅当该 NPC 本回复内 HP≤0 或已有石化/昏迷/麻痹/束缚等禁制状态时，"
-    "才可写「无法行动」并进入下一位。"
-    "输出格式：每位 NPC 行动前必须先写标题行"
-    "【NPC行动 i/N | id=角色id | name=角色名】，再写检定与结果。"
-    "缺少标题行时系统只打警告，不会补写。"
-)
-NPC_ACTION_HEADER_PATTERN = re.compile(
-    r"【NPC行动\s+(?P<index>\d+)/(?P<total>\d+)\s*\|\s*id=(?P<id>[^\s|｜]+)",
-)
-FLEE_INTENT_PATTERN = re.compile(
-    r"(逃跑|逃走|逃离|逃脱|撤退|溜走|开溜|撤离|撒退|投降|认输|缴械)",
-    re.IGNORECASE,
-)
-COMBAT_FLEE_ROUND_REMINDER = (
-    "【系统·逃跑/投降】玩家已明确表示逃脱或投降。"
-    "本战斗回合只输出简短确认（可极短），禁止描写战斗结局、禁止执行【第四步】NPC 队列、"
-    "禁止输出 [STATUS_SYNC]。结局与状态重置由紧随其后的战斗结束判定阶段处理。"
+COMBAT_ACTOR_ONLY_REMINDER = (
+    "【系统·行动者锁定】本场按先攻队列由 Python 逐人调度，每人每轮仅一次主动行动。"
+    "本次仅供【当前行动角色·系统指定】中的角色生成主动行动与检定。"
+    "禁止描写其他任何角色在本回合的主动行动，含即时反击、借机攻击、反应动作、错峰插队。"
+    "被攻击方不得在同一回应里「立刻还手」；其行动须等轮到该角色队列位时另开一轮生成。"
+    "其他角色仅可作为目标或被影响方出现。"
 )
 
+ACTOR_TURN_TEMPLATE = "【{name}·回合】"
 
-COMBAT_DEBUG_ORDER = ("trigger", "count", "initiative", "round0", "full")
+ROUND_START_TEMPLATE = "——第{round}回合开始——"
+ROUND_END_TEMPLATE = "——第{round}回合结束——"
+
+COMBAT_DEBUG_ORDER = ("trigger", "count", "initiative", "full")
 
 
 def _debug_stage_reached(stage: str) -> bool:
@@ -169,6 +106,52 @@ def _reset_fighting_sync(context: dict) -> dict:
             patch["enemy"].append({"id": encounter["id"], "members": members_patch})
 
     return patch
+
+
+def _reset_initiative_sync(context: dict) -> dict:
+    status = context.get("status") or {}
+    patch: dict = {"team": [], "enemy": []}
+
+    for char in status.get("team") or []:
+        if not isinstance(char, dict) or not char.get("id"):
+            continue
+        try:
+            initiative = int(char.get("initiative", -1))
+        except (TypeError, ValueError):
+            initiative = -1
+        if initiative >= 1 or char.get("fighting") is True:
+            patch["team"].append({"id": char["id"], "initiative": -1})
+
+    for encounter in status.get("enemy") or []:
+        if not isinstance(encounter, dict) or not encounter.get("id"):
+            continue
+        members_patch = []
+        for member in encounter.get("members") or []:
+            if not isinstance(member, dict) or not member.get("id"):
+                continue
+            try:
+                initiative = int(member.get("initiative", -1))
+            except (TypeError, ValueError):
+                initiative = -1
+            if initiative >= 1 or member.get("fighting") is True:
+                members_patch.append({"id": member["id"], "initiative": -1})
+        if members_patch:
+            patch["enemy"].append({"id": encounter["id"], "members": members_patch})
+
+    return patch
+
+
+def _build_combat_exit_sync(context: dict) -> dict:
+    merged = _merge_status_sync(
+        {
+            "inCombat": False,
+            "participants": -1,
+            "combatRound": -1,
+            "combatTurnIndex": -1,
+        },
+        _reset_initiative_sync(context),
+    )
+    return _merge_status_sync(merged, _reset_fighting_sync(context))
 
 
 def _resolve_character_name(
@@ -244,7 +227,7 @@ def _collect_fighting_combatants(status_sync: dict | None, context: dict) -> lis
 def _format_fighters_block(fighters: list[dict]) -> str:
     if not fighters:
         return "参战角色（fighting: true）：无"
-    lines = ["参战角色（按下列顺序编号，与 d20 第一组数值一一对应）："]
+    lines = ["参战角色（按下列顺序编号，与 d20 数值一一对应）："]
     for index, fighter in enumerate(fighters, start=1):
         if fighter.get("side") == "team":
             lines.append(
@@ -271,18 +254,6 @@ def _parse_bool_token(text: str) -> bool | None:
     if BOOL_FALSE.search(cleaned):
         return False
     return None
-
-
-def _is_continue_token(text: str) -> bool:
-    return bool(CONTINUE_TOKEN.search((text or "").strip()))
-
-
-def _detect_flee_intent(text: str) -> bool:
-    return bool(FLEE_INTENT_PATTERN.search((text or "").strip()))
-
-
-def _is_combat_end_sync(sync: dict | None) -> bool:
-    return bool(sync) and sync.get("inCombat") is False
 
 
 def _parse_positive_int(text: str, default: int) -> int:
@@ -441,8 +412,7 @@ def _extract_status_sync_all(text: str) -> dict | None:
             found = True
     if found:
         return merged
-    loose = _extract_status_sync_loose(text)
-    return loose
+    return _extract_status_sync_loose(text)
 
 
 def _llm_result_text_layers(result: ChatCompletionResult) -> tuple[str, str]:
@@ -466,45 +436,20 @@ def _get_combat_round(context: dict) -> int:
     return value if value >= 1 else 1
 
 
-def _format_combat_round_marker_block(context: dict, npc_queue: list[dict]) -> str:
-    combat_round = _get_combat_round(context)
+def _get_combat_turn_index(context: dict) -> int:
     status = context.get("status") or {}
-    allowed: list[str] = []
+    try:
+        value = int(status.get("combatTurnIndex", 0))
+    except (TypeError, ValueError):
+        value = 0
+    return max(0, value)
 
-    player = _find_player_character(status.get("team") or [])
-    if player:
-        try:
-            if int(player.get("initiative", -1)) == 1:
-                allowed.append(
-                    f"玩家 name={player.get('name')} id={player.get('id')} initiative=1 "
-                    f"→ 仅【第三步】该角色行动叙述紧前"
-                )
-        except (TypeError, ValueError):
-            pass
 
-    for entry in npc_queue:
-        try:
-            if int(entry.get("initiative", -1)) == 1:
-                allowed.append(
-                    f"NPC name={entry.get('name')} id={entry.get('id')} initiative=1 "
-                    f"→ 仅【第四步】该角色行动叙述紧前"
-                )
-        except (TypeError, ValueError):
-            continue
-
-    lines = [
-        f"【回合标记·系统指定】本场为第 {combat_round} 战斗回合，N={combat_round}。",
-        "禁止在回复开头输出 ——第N回合开始——。",
-        "玩家 initiative≠1 时，禁止在【第三步】之前输出回合开始标记。",
-        f"同一回复内最多输出一次 ——第{combat_round}回合开始——。",
-        "回合开始标记为可选叙述装饰，不强制每次必须输出；若输出则遵守下列位置限制。",
-    ]
-    if not allowed:
-        lines.append("本场无 initiative=1 的角色，禁止输出回合开始标记。")
-    else:
-        lines.append("仅以下角色行动叙述紧前可输出：")
-        lines.extend(f"- {item}" for item in allowed)
-    return "\n".join(lines)
+def _set_combat_position(context: dict, turn_index: int, combat_round: int) -> None:
+    status = dict(context.get("status") or {})
+    status["combatTurnIndex"] = turn_index
+    status["combatRound"] = combat_round
+    context["status"] = status
 
 
 def _parse_hp_current(char: dict) -> int:
@@ -543,53 +488,6 @@ def _is_enemy_wipe(status: dict) -> bool:
     return all(_parse_hp_current(char) <= 0 for char in fighters)
 
 
-def _build_combat_end_fact_block(context: dict, last_user: str = "") -> str:
-    status = context.get("status") or {}
-    team_lines = []
-    for char in _iter_fighting_team_members(status):
-        name = char.get("name") or char.get("id")
-        hp = _parse_hp_current(char)
-        team_lines.append(f"- {name}（id={char.get('id')}）HP={hp}")
-
-    enemy_lines = []
-    for member in _iter_fighting_enemy_members(status):
-        name = member.get("name") or member.get("id")
-        hp = _parse_hp_current(member)
-        enemy_lines.append(f"- {name}（id={member.get('id')}）HP={hp}")
-
-    team_wipe = _is_team_wipe(status)
-    enemy_wipe = _is_enemy_wipe(status)
-    flee_intent = _detect_flee_intent(last_user)
-    lines = [
-        "【战斗结束判定·系统面板数据】（以本节为准，勿凭叙述臆断）",
-        "友方参战者：",
-        *(team_lines or ["- （无）"]),
-        f"友方全灭：{'是' if team_wipe else '否'}",
-        "敌方参战者：",
-        *(enemy_lines or ["- （无）"]),
-        f"敌方全灭：{'是' if enemy_wipe else '否'}",
-        f"玩家逃脱/投降：{'是' if flee_intent else '否'}",
-    ]
-    if team_wipe or enemy_wipe or flee_intent:
-        reasons = []
-        if team_wipe:
-            reasons.append("友方全灭")
-        if enemy_wipe:
-            reasons.append("敌方全灭")
-        if flee_intent:
-            reasons.append("玩家逃脱/投降")
-        lines.append(
-            f"结论：战斗应结束（{'、'.join(reasons)}）。"
-            "描写结局并在末尾输出 [STATUS_SYNC] 重置战斗状态。"
-        )
-    else:
-        lines.append(
-            "结论：战斗尚未结束。仅玩家一人 HP≤0 不构成友方全灭（队友仍存活即继续）。"
-            "必须只输出 {Continue}，禁止描写战斗结局。"
-        )
-    return "\n".join(lines)
-
-
 def _find_player_character(team: list) -> dict | None:
     for char in team:
         if char.get("tier") == "player":
@@ -598,30 +496,6 @@ def _find_player_character(team: list) -> dict | None:
         if char.get("id") == "pc":
             return char
     return team[0] if team else None
-
-
-def _player_initiative_from_sync(status_sync: dict | None, context: dict) -> int:
-    teams_to_check: list[list] = []
-    if status_sync and isinstance(status_sync.get("team"), list):
-        teams_to_check.append(status_sync["team"])
-    status = context.get("status") or {}
-    if isinstance(status.get("team"), list):
-        teams_to_check.append(status["team"])
-
-    for team in teams_to_check:
-        player = _find_player_character(team)
-        if not player:
-            continue
-        initiative = player.get("initiative")
-        if initiative is None:
-            continue
-        try:
-            value = int(initiative)
-        except (TypeError, ValueError):
-            continue
-        if value >= 1:
-            return value
-    return 1
 
 
 def _strip_display_sync_blocks(text: str) -> str:
@@ -765,7 +639,7 @@ def _merge_status_sync(base: dict, patch: dict | None) -> dict:
         return base
     merged = {**base}
     for key, value in patch.items():
-        if key in ("inCombat", "participants"):
+        if key in ("inCombat", "participants", "combatRound", "combatTurnIndex"):
             merged[key] = value
             continue
         if key == "team" and isinstance(value, list):
@@ -790,49 +664,6 @@ def _apply_status_sync_to_context(context: dict, status_sync: dict | None) -> No
         context["participants"] = status_sync["participants"]
 
 
-def _summarize_initiative_from_context(context: dict) -> list[dict]:
-    status = context.get("status") or {}
-    entries: list[dict] = []
-
-    for char in status.get("team") or []:
-        if not isinstance(char, dict):
-            continue
-        initiative = char.get("initiative")
-        try:
-            value = int(initiative)
-        except (TypeError, ValueError):
-            continue
-        if value >= 1:
-            entries.append({
-                "id": char.get("id"),
-                "name": char.get("name"),
-                "initiative": value,
-                "side": "team",
-            })
-
-    for encounter in status.get("enemy") or []:
-        if not isinstance(encounter, dict):
-            continue
-        for member in encounter.get("members") or []:
-            if not isinstance(member, dict):
-                continue
-            initiative = member.get("initiative")
-            try:
-                value = int(initiative)
-            except (TypeError, ValueError):
-                continue
-            if value >= 1:
-                entries.append({
-                    "id": member.get("id"),
-                    "name": member.get("name"),
-                    "initiative": value,
-                    "side": "enemy",
-                })
-
-    entries.sort(key=lambda item: item["initiative"])
-    return entries
-
-
 def _is_player_character(context: dict, char_id: str | None, side: str) -> bool:
     if side != "team" or not char_id:
         return False
@@ -841,13 +672,6 @@ def _is_player_character(context: dict, char_id: str | None, side: str) -> bool:
             continue
         return char.get("id") == "pc" or char.get("tier") == "player"
     return char_id == "pc"
-
-
-def _find_player_initiative_index(ordered: list[dict], context: dict) -> int | None:
-    for index, entry in enumerate(ordered):
-        if _is_player_character(context, entry.get("id"), entry.get("side", "")):
-            return index
-    return None
 
 
 def _enrich_enemy_encounter_ids(entries: list[dict], context: dict) -> None:
@@ -864,25 +688,23 @@ def _enrich_enemy_encounter_ids(entries: list[dict], context: dict) -> None:
                     break
 
 
-def _summarize_combat_order_from_context(context: dict) -> list[dict]:
+def _get_initiative_turn_order(context: dict) -> list[dict]:
     status = context.get("status") or {}
     entries: list[dict] = []
 
     for char in status.get("team") or []:
-        if not isinstance(char, dict):
+        if not isinstance(char, dict) or char.get("fighting") is not True:
             continue
         try:
-            combat_order = int(char.get("combatOrder"))
             initiative = int(char.get("initiative"))
         except (TypeError, ValueError):
             continue
-        if combat_order < 1:
+        if initiative < 1:
             continue
         entries.append({
             "id": char.get("id"),
             "name": char.get("name"),
             "initiative": initiative,
-            "combatOrder": combat_order,
             "side": "team",
         })
 
@@ -890,305 +712,94 @@ def _summarize_combat_order_from_context(context: dict) -> list[dict]:
         if not isinstance(encounter, dict):
             continue
         for member in encounter.get("members") or []:
-            if not isinstance(member, dict):
+            if not isinstance(member, dict) or member.get("fighting") is not True:
                 continue
             try:
-                combat_order = int(member.get("combatOrder"))
                 initiative = int(member.get("initiative"))
             except (TypeError, ValueError):
                 continue
-            if combat_order < 1:
+            if initiative < 1:
                 continue
             entries.append({
                 "id": member.get("id"),
                 "name": member.get("name"),
                 "initiative": initiative,
-                "combatOrder": combat_order,
                 "side": "enemy",
-                "encounterId": encounter.get("id"),
             })
 
-    entries.sort(key=lambda item: item["combatOrder"])
+    entries.sort(key=lambda item: item["initiative"])
+    _enrich_enemy_encounter_ids(entries, context)
     return entries
 
 
-def _build_combat_order_sync(context: dict) -> dict | None:
-    ordered = _summarize_initiative_from_context(context)
-    if not ordered:
-        return None
-
-    _enrich_enemy_encounter_ids(ordered, context)
-    player_index = _find_player_initiative_index(ordered, context)
-    if player_index is None:
-        return None
-
-    sequence = [ordered[player_index]] + ordered[player_index + 1:] + ordered[:player_index]
-    team_patches: list[dict] = []
-    enemy_patches: dict[str, list[dict]] = {}
-
-    for combat_pos, entry in enumerate(sequence, start=1):
-        patch = {"id": entry["id"], "combatOrder": combat_pos}
-        if entry.get("side") == "team":
-            team_patches.append(patch)
-            continue
-        encounter_id = entry.get("encounterId")
-        if encounter_id:
-            enemy_patches.setdefault(encounter_id, []).append(patch)
-
-    result: dict = {}
-    if team_patches:
-        result["team"] = team_patches
-    if enemy_patches:
-        result["enemy"] = [
-            {"id": encounter_id, "members": members}
-            for encounter_id, members in enemy_patches.items()
-        ]
-    return result or None
-
-
-def _reset_combat_order_sync(context: dict) -> dict:
-    status = context.get("status") or {}
-    patch: dict = {"team": [], "enemy": []}
-
-    for char in status.get("team") or []:
-        if not isinstance(char, dict) or not char.get("id"):
-            continue
-        patch["team"].append({"id": char["id"], "combatOrder": -1})
-
-    for encounter in status.get("enemy") or []:
-        if not isinstance(encounter, dict) or not encounter.get("id"):
-            continue
-        members_patch = []
-        for member in encounter.get("members") or []:
-            if not isinstance(member, dict) or not member.get("id"):
-                continue
-            members_patch.append({"id": member["id"], "combatOrder": -1})
-        if members_patch:
-            patch["enemy"].append({"id": encounter["id"], "members": members_patch})
-
-    return patch
-
-
-def _build_npc_automation_queue(context: dict, phase: str) -> list[dict]:
-    if phase == "after_player":
-        ordered = _summarize_combat_order_from_context(context)
-        return [
-            entry for entry in ordered
-            if entry.get("combatOrder", -1) >= 2
-            and not _is_player_character(context, entry.get("id"), entry.get("side", ""))
-        ]
-
-    ordered = _summarize_initiative_from_context(context)
-    if not ordered:
-        return []
-
-    _enrich_enemy_encounter_ids(ordered, context)
-    player_index = _find_player_initiative_index(ordered, context)
-    if player_index is None:
-        return [
-            entry for entry in ordered
-            if not _is_player_character(context, entry.get("id"), entry.get("side", ""))
-        ]
-
-    if phase == "round0":
-        segment = ordered[:player_index]
-    else:
-        return []
-
-    return [
-        entry for entry in segment
-        if not _is_player_character(context, entry.get("id"), entry.get("side", ""))
-    ]
-
-
-def _format_combat_order_reference_block(context: dict) -> str:
-    ordered = _summarize_combat_order_from_context(context)
-    if not ordered:
-        return "【战斗顺位】（combatOrder）未生成"
-
-    lines = [
-        "【战斗顺位】（combatOrder，玩家恒为 1；本场战斗回合按此顺序行动，"
-        "与面板 initiative 先攻显示、对话历史先后无关）",
-    ]
-    for entry in ordered:
+def _format_initiative_order_block(order: list[dict], context: dict) -> str:
+    if not order:
+        return "【先攻行动顺序】未生成"
+    lines = ["【先攻行动顺序】（本场按此顺序逐角色行动，由 Python 循环调度）"]
+    for index, entry in enumerate(order):
         role = "玩家" if _is_player_character(context, entry.get("id"), entry.get("side", "")) else "NPC"
-        if entry.get("side") == "team":
-            lines.append(
-                f"- combatOrder={entry.get('combatOrder')} | initiative={entry.get('initiative')} "
-                f"| {role} | team | id={entry.get('id')} | name={entry.get('name', '')}"
-            )
-            continue
         lines.append(
-            f"- combatOrder={entry.get('combatOrder')} | initiative={entry.get('initiative')} "
-            f"| {role} | enemy | id={entry.get('id')} | name={entry.get('name', '')}"
+            f"- 队列 {index + 1}/{len(order)} | initiative={entry.get('initiative')} "
+            f"| {role} | side={entry.get('side')} | id={entry.get('id')} | name={entry.get('name', '')}"
         )
     return "\n".join(lines)
 
 
-def _format_combat_round_execution_block(context: dict, npc_queue: list[dict]) -> str:
-    ordered = _summarize_combat_order_from_context(context)
-    player_entry = next(
-        (
-            entry
-            for entry in ordered
-            if _is_player_character(context, entry.get("id"), entry.get("side", ""))
-        ),
-        None,
-    )
-    player_name = player_entry.get("name", "") if player_entry else ""
-    player_label = f"玩家 {player_name}".strip()
-
-    lines = [
-        "【本轮执行顺序】（本条回复书写顺序；与对话历史、第0回合先后无关）",
-        f"1. 【第一～三步】{player_label} combatOrder=1 —— 根据玩家最新输入**先**行动",
-    ]
-    for index, entry in enumerate(npc_queue, start=1):
-        lines.append(
-            f"{index + 1}. 【第四步·NPC {index}/{len(npc_queue)}】"
-            f" combatOrder={entry.get('combatOrder')} | id={entry.get('id')} "
-            f"| name={entry.get('name', '')}"
-        )
-    lines.append(f"{len(npc_queue) + 2}. 【第五～六步】[STATUS_SYNC] 与提示下一轮")
-    lines.append(
-        "历史中若 NPC 先于玩家、或出现「轮到你了」，那是第0回合/旧回合；"
-        "本次战斗回合玩家永远在回复正文最前生成行动，玩家输入不是排在 NPC 队尾之后。"
-    )
-    return "\n".join(lines)
-
-
-def _collect_llm_full_text(result: ChatCompletionResult) -> str:
-    content, reasoning = _llm_result_text_layers(result)
-    return f"{content}\n{reasoning}".strip()
-
-
-def _log_npc_queue_coverage(result: ChatCompletionResult, queue: list[dict], label: str) -> None:
-    if not queue:
-        return
-    full_text = _collect_llm_full_text(result)
-    found_ids = {
-        match.group("id").strip()
-        for match in NPC_ACTION_HEADER_PATTERN.finditer(full_text)
-    }
-    missing_headers = []
-    for entry in queue:
-        entry_id = entry.get("id")
-        if entry_id and entry_id not in found_ids:
-            missing_headers.append(entry.get("name") or entry_id)
-    if missing_headers:
-        print(
-            f"[combat-test] {label} queue header WARNING => "
-            f"缺少【NPC行动 i/N | id=... | name=...】标题: {missing_headers}"
-        )
-    else:
-        print(f"[combat-test] {label} queue headers => ok ({len(queue)}/{len(queue)})")
-
-
-def _format_npc_queue_block(queue: list[dict], *, phase: str) -> str:
-    if not queue:
-        return "【本次需自动化的 NPC 行动队列】：无"
-
-    if phase == "round0":
-        intro = (
-            "【本次需自动化的 NPC 行动队列】（第0回合：先攻第1位至玩家前一位，"
-            "必须全部执行完毕才可提示玩家）"
-        )
-    else:
-        intro = (
-            "【本次需自动化的 NPC 行动队列】（战斗回合：玩家 combatOrder=1 已在【第一～三步】先完成；"
-            "本队列 combatOrder 2→N 在玩家之后依次执行；"
-            "队列全部执行完毕后才可提示玩家）"
-        )
-        intro += (
-            "\n骰子：各角色使用 combatOrder 对应位置的骰子值（玩家 combatOrder=1 为每行第1个）；"
-            "initiative 不参与骰子。"
-            "\n回合标记：见系统【回合标记·系统指定】；initiative=1 时输出指定 N，同一回复只输出一次。"
-        )
-
-    total = len(queue)
-    intro += (
-        f"\n共 {total} 位 NPC，按下列顺序逐位执行。"
-        "每位行动前必须先写标题行：【NPC行动 i/N | id=角色id | name=角色名】，"
-        "再写检定与结果。禁止用剧情介入跳过队列内可行动 NPC。"
-    )
-
-    lines = [intro]
-    for index, entry in enumerate(queue, start=1):
-        order_key = "combatOrder" if phase == "after_player" else "initiative"
-        order_val = entry.get(order_key, entry.get("initiative"))
-        header = f"【NPC行动 {index}/{total} | id={entry.get('id')} | name={entry.get('name', '')}】"
-        if entry.get("side") == "team":
-            lines.append(
-                f"{index}. team | {order_key}={order_val} | initiative={entry.get('initiative')} "
-                f"| id={entry.get('id')} | name={entry.get('name', '')} | 必须输出 {header}"
-            )
-            continue
-        lines.append(
-            f"{index}. enemy | {order_key}={order_val} | initiative={entry.get('initiative')} "
-            f"| encounter={entry.get('encounterId', '')} "
-            f"| id={entry.get('id')} | name={entry.get('name', '')} | 必须输出 {header}"
-        )
-    return "\n".join(lines)
-
-
-def _format_combat_dice_block_by_combat_order(context: dict, count: int) -> str:
-    base = format_combat_dice_block(count)
-    ordered = _summarize_combat_order_from_context(context)
-    if not ordered:
-        return (
-            f"{base}\n\n"
-            "【骰子取用规则·战斗回合】按 combatOrder 取用（玩家 combatOrder=1 为每行第 1 个数值）；"
-            "initiative 仅用于回合开始标记。"
-        )
-
-    lines = [
-        COMBAT_DICE_FRESH_REMINDER,
-        "",
-        "【骰子取用规则·战斗回合】",
-        "每种骰子一行中，第 n 个数值对应 combatOrder=n 的角色（玩家恒为第 1 个）。",
-        "initiative 不参与骰子分配，仅用于「第N回合开始」标记。",
-        "",
-    ]
-    for entry in ordered:
-        role = "玩家" if _is_player_character(context, entry.get("id"), entry.get("side", "")) else "NPC"
-        pos = entry.get("combatOrder")
-        lines.append(
-            f"combatOrder={pos}（骰子第{pos}位）| {role} "
-            f"| id={entry.get('id')} | name={entry.get('name', '')}"
-        )
-    return f"{base}\n\n" + "\n".join(lines)
-
-
-def _strip_leading_round_start_markers(text: str) -> str:
-    cleaned = text or ""
-    while ROUND_START_LEADING_PATTERN.match(cleaned):
-        cleaned = ROUND_START_LEADING_PATTERN.sub("", cleaned, count=1)
-    return cleaned
-
-
-def _postprocess_combat_round_result(
-    result: ChatCompletionResult,
+def _format_turn_context_block(
+    entry: dict,
     context: dict,
-    npc_queue: list[dict],
-) -> ChatCompletionResult:
-    status = context.get("status") or {}
-    player = _find_player_character(status.get("team") or [])
-    player_init = -1
-    if player:
-        try:
-            player_init = int(player.get("initiative", -1))
-        except (TypeError, ValueError):
-            player_init = -1
-
-    content = _strip_leading_round_start_markers(result.content or "")
-    if player_init != 1 and content != (result.content or ""):
-        print(
-            "[combat-test] round marker sanitize => "
-            f"stripped leading marker (player initiative={player_init})"
-        )
-    return ChatCompletionResult(
-        content=content,
-        reasoning_content=result.reasoning_content,
+    combat_round: int,
+    turn_index: int,
+    total: int,
+    initiative_order: list[dict] | None = None,
+) -> str:
+    role = "玩家" if _is_player_character(context, entry.get("id"), entry.get("side", "")) else "NPC"
+    order = initiative_order or _get_initiative_turn_order(context)
+    order_block = _format_initiative_order_block(order, context)
+    return (
+        f"{order_block}\n\n"
+        "【当前行动角色·系统指定】\n"
+        f"- 第 {combat_round} 回合 | 先攻队列 {turn_index + 1}/{total} "
+        f"| initiative={entry.get('initiative')}\n"
+        f"- {role} | side={entry.get('side')} | id={entry.get('id')} | name={entry.get('name', '')}\n"
+        "- 本次只生成该角色本人的主动行动与检定；禁止代写其他角色行动或即时反击。"
     )
+
+
+def _merge_turn_status_sync(result: ChatCompletionResult, context: dict) -> dict | None:
+    return _normalize_status_sync(_extract_status_sync_from_result(result), context)
+
+
+def _post_turn_checks(context: dict, turn_sync: dict | None) -> dict:
+    patches: list[dict] = []
+    end_reason = None
+
+    if turn_sync:
+        _apply_status_sync_to_context(context, turn_sync)
+        patches.append(turn_sync)
+
+    status = context.get("status") or {}
+    if _is_team_wipe(status):
+        end_reason = "team_wipe"
+        context["inCombat"] = False
+        patches.append({"inCombat": False})
+    elif _is_enemy_wipe(status):
+        end_reason = "enemy_wipe"
+        context["inCombat"] = False
+        patches.append({"inCombat": False})
+
+    if not context.get("inCombat", False):
+        exit_sync = _build_combat_exit_sync(context)
+        print(f"[combat-test] combat ended => {end_reason or 'inCombat_false'}")
+        merged = {}
+        for patch in patches:
+            merged = _merge_status_sync(merged, patch)
+        return _merge_status_sync(merged, exit_sync)
+
+    merged = {}
+    for patch in patches:
+        merged = _merge_status_sync(merged, patch)
+    return merged
 
 
 def _resolve_display_content(result: ChatCompletionResult) -> ChatCompletionResult:
@@ -1221,6 +832,7 @@ def _build_handler_response(
     pipeline_messages: list[dict] | None = None,
     status_sync: dict | None = None,
     battle_state: str | None = None,
+    combat_auto_continue: bool = False,
 ) -> dict:
     cleaned = _resolve_display_content(result)
     response = deepseek_client.to_handler_response(cleaned)
@@ -1230,6 +842,8 @@ def _build_handler_response(
         response["statusSync"] = status_sync
     if battle_state:
         response["battleState"] = battle_state
+    if combat_auto_continue:
+        response["combatAutoContinue"] = True
     return response
 
 
@@ -1239,6 +853,7 @@ def _build_text_response(
     pipeline_messages: list[dict] | None = None,
     status_sync: dict | None = None,
     battle_state: str | None = None,
+    combat_auto_continue: bool = False,
 ) -> dict:
     response = deepseek_client.to_handler_response(
         ChatCompletionResult(content=text),
@@ -1249,7 +864,204 @@ def _build_text_response(
         response["statusSync"] = status_sync
     if battle_state:
         response["battleState"] = battle_state
+    if combat_auto_continue:
+        response["combatAutoContinue"] = True
     return response
+
+
+async def _execute_character_turn(
+    turn_messages: list[dict],
+    last_user: str,
+    context: dict,
+    entry: dict,
+    combat_round: int,
+    turn_index: int,
+    total_fighters: int,
+    *,
+    is_player: bool,
+) -> ChatCompletionResult:
+    dice_block = format_single_dice_block()
+    initiative_order = _get_initiative_turn_order(context)
+    turn_block = _format_turn_context_block(
+        entry,
+        context,
+        combat_round,
+        turn_index,
+        total_fighters,
+        initiative_order,
+    )
+    prompt_loader = load_battle_player_turn_prompt if is_player else load_battle_npc_turn_prompt
+    rag_context = await retrieve_context(
+        CHANNEL_COMBAT_TEST,
+        last_user if is_player else str(entry.get("name") or ""),
+        context,
+    )
+    system_prompt = build_game_system_prompt(
+        prompt_loader(),
+        rag_context,
+        context,
+        dice_results_block=dice_block,
+        channel="combat-test",
+        last_user=last_user if is_player else "",
+    )
+    system_prompt = (
+        f"{system_prompt.rstrip()}\n\n{turn_block}\n\n"
+        f"{COMBAT_ACTOR_ONLY_REMINDER}\n\n"
+        f"{COMBAT_DOWN_REMINDER}\n\n{TURN_SYNC_REMINDER}"
+    )
+
+    actor_name = entry.get("name") or entry.get("id") or "未知"
+    actor_id = entry.get("id") or ""
+    messages = list(turn_messages)
+    messages = _append_reminder(
+        messages,
+        f"【系统】只生成 {actor_name}（id={actor_id}）本回合主动行动，禁止其他角色主动行动或反击。",
+    )
+    if is_player:
+        messages = _append_reminder(
+            messages,
+            f"【系统】请根据玩家最新输入处理该角色本轮行动：{last_user}",
+        )
+
+    user_patch = load_user_prompt_patch() if DEEPSEEK_USER_PROMPT_PATCH and is_player else None
+    return await deepseek_client.chat(
+        messages,
+        system=system_prompt,
+        user_patch=user_patch,
+        thinking=False,
+        temperature=0.5,
+        model=DEEPSEEK_COMBAT_MODEL,
+        attach_user_patch=bool(user_patch),
+    )
+
+
+async def _execute_single_combat_step(
+    llm_messages: list[dict],
+    last_user: str,
+    context: dict,
+    participants: int,
+) -> dict:
+    initiative_order = _get_initiative_turn_order(context)
+    total_fighters = len(initiative_order)
+    if total_fighters < 1:
+        return _build_text_response(
+            "[战斗错误] 先攻行动顺序为空，无法继续战斗。",
+            battle_state="error",
+        )
+
+    turn_messages = list(llm_messages)
+    turn_index = _get_combat_turn_index(context)
+    if turn_index >= total_fighters:
+        turn_index = 0
+    combat_round = _get_combat_round(context)
+    combat_continue = bool(context.get("combatContinue"))
+    consume_player_input = not combat_continue
+
+    print(
+        f"[combat-test] step => round={combat_round} turn_index={turn_index} "
+        f"continue={combat_continue} consume_player={consume_player_input} "
+        f"actor={initiative_order[turn_index].get('id')}"
+    )
+    print(
+        "[combat-test] order => "
+        f"{[{'i': i, 'id': e.get('id'), 'name': e.get('name'), 'init': e.get('initiative')} for i, e in enumerate(initiative_order)]}"
+    )
+
+    prefix_parts: list[str] = []
+    if turn_index == 0:
+        prefix_parts.append(ROUND_START_TEMPLATE.format(round=combat_round))
+        print(f"[combat-test] round {combat_round} start")
+
+    entry = initiative_order[turn_index]
+    is_player = _is_player_character(context, entry.get("id"), entry.get("side", ""))
+
+    if is_player and not consume_player_input:
+        player_name = entry.get("name") or "玩家"
+        prompt = f"轮到{player_name}了。你要做什么？"
+        text = "\n\n".join([*prefix_parts, prompt]) if prefix_parts else prompt
+        status_sync = {
+            "inCombat": True,
+            "participants": participants,
+            "combatRound": combat_round,
+            "combatTurnIndex": turn_index,
+        }
+        _set_combat_position(context, turn_index, combat_round)
+        return _build_text_response(
+            text,
+            status_sync=status_sync,
+            battle_state="player_turn",
+        )
+
+    last_result = await _execute_character_turn(
+        turn_messages,
+        last_user,
+        context,
+        entry,
+        combat_round,
+        turn_index,
+        total_fighters,
+        is_player=is_player,
+    )
+    turn_messages.append({"role": "assistant", "content": last_result.content or ""})
+
+    turn_sync = _merge_turn_status_sync(last_result, context)
+    if not turn_sync:
+        print(f"[combat-test] turn WARNING: 未找到 [STATUS_SYNC] id={entry.get('id')}")
+
+    status_sync = _post_turn_checks(context, turn_sync)
+
+    display = _resolve_display_content(last_result)
+    actor_label = ACTOR_TURN_TEMPLATE.format(name=entry.get("name") or entry.get("id") or "未知")
+    body_parts = [*prefix_parts, actor_label, display.content]
+    body = "\n\n".join(part for part in body_parts if part and str(part).strip())
+
+    if not context.get("inCombat", False):
+        print(f"[combat-test] step exit => combat ended after id={entry.get('id')}")
+        return _build_handler_response(
+            ChatCompletionResult(content=body, reasoning_content=display.reasoning_content),
+            status_sync=status_sync,
+            battle_state="ended",
+        )
+
+    turn_index += 1
+    suffix_parts: list[str] = []
+    if turn_index >= total_fighters:
+        suffix_parts.append(ROUND_END_TEMPLATE.format(round=combat_round))
+        print(f"[combat-test] round {combat_round} end")
+        combat_round += 1
+        turn_index = 0
+
+    _set_combat_position(context, turn_index, combat_round)
+    status_sync = _merge_status_sync(status_sync, {
+        "inCombat": True,
+        "participants": participants,
+        "combatRound": combat_round,
+        "combatTurnIndex": turn_index,
+    })
+
+    next_entry = initiative_order[turn_index]
+    next_is_player = _is_player_character(
+        context,
+        next_entry.get("id"),
+        next_entry.get("side", ""),
+    )
+    combat_auto_continue = not next_is_player
+    battle_state = "ongoing"
+
+    if next_is_player:
+        next_name = next_entry.get("name") or "玩家"
+        suffix_parts.append(f"轮到{next_name}了。你要做什么？")
+        battle_state = "player_turn"
+
+    if suffix_parts:
+        body = f"{body}\n\n" + "\n\n".join(suffix_parts)
+
+    return _build_handler_response(
+        ChatCompletionResult(content=body, reasoning_content=display.reasoning_content),
+        status_sync=status_sync,
+        battle_state=battle_state,
+        combat_auto_continue=combat_auto_continue,
+    )
 
 
 async def handle_combat_test(
@@ -1271,7 +1083,12 @@ async def handle_combat_test(
         )
 
     participants = context.get("participants", -1)
-    return await _handle_in_combat(llm_messages, last_user, context, participants)
+    return await _execute_single_combat_step(
+        llm_messages,
+        last_user,
+        context,
+        participants,
+    )
 
 
 async def _handle_non_combat(
@@ -1339,8 +1156,6 @@ async def _handle_battle_prep(
     last_user: str,
     context: dict,
 ) -> dict:
-    pipeline: list[dict] = []
-
     count_result = await deepseek_client.chat(
         _append_reminder(llm_messages, COUNT_OUTPUT_REMINDER),
         system=build_game_system_prompt(
@@ -1378,7 +1193,7 @@ async def _handle_battle_prep(
         )
 
     fighters_block = _format_fighters_block(fighters)
-    dice_results_block = format_combat_dice_block(participants)
+    dice_results_block = format_initiative_block(participants)
     print(f"[combat-test] initiative input =>\n{fighters_block}\n{dice_results_block}")
 
     initiative_messages = [
@@ -1388,7 +1203,7 @@ async def _handle_battle_prep(
             "content": (
                 f"{fighters_block}\n\n"
                 f"{dice_results_block}\n\n"
-                "请根据以上参战角色列表（顺序已与 d20 第一组对齐）与骰子结果生成先攻顺序，"
+                "请根据以上参战角色列表（顺序已与 d20 数值一一对应）与骰子结果生成先攻顺序，"
                 "并在末尾输出 [STATUS_SYNC] 更新所有参战角色的 initiative。"
             ),
         },
@@ -1405,285 +1220,39 @@ async def _handle_battle_prep(
         thinking=True,
         attach_user_patch=False,
     )
-    pipeline.append(_dm_segment_from_result(initiative_result))
 
     initiative_sync = _normalize_status_sync(
         _extract_status_sync(initiative_result.content),
         context,
     )
-    player_position = _player_initiative_from_sync(initiative_sync, context)
     status_sync = _merge_status_sync(
         status_sync,
-        {"inCombat": True, "participants": participants, "combatRound": 1},
+        {
+            "inCombat": True,
+            "participants": participants,
+            "combatRound": 1,
+            "combatTurnIndex": 0,
+        },
     )
     status_sync = _merge_status_sync(status_sync, initiative_sync)
     _apply_status_sync_to_context(context, status_sync)
-    combat_order_sync = _normalize_status_sync(_build_combat_order_sync(context), context)
-    if combat_order_sync:
-        status_sync = _merge_status_sync(status_sync, combat_order_sync)
-        _apply_status_sync_to_context(context, status_sync)
 
+    initiative_order = _get_initiative_turn_order(context)
     print(
-        f"[combat-test] initiative => player_position={player_position} "
-        f"combat_order={_summarize_combat_order_from_context(context)}"
+        f"[combat-test] initiative => order="
+        f"{[{'id': e.get('id'), 'initiative': e.get('initiative')} for e in initiative_order]}"
     )
 
-    if not _debug_stage_reached("round0"):
+    if not _debug_stage_reached("full"):
         return _build_handler_response(
             initiative_result,
-            pipeline_messages=pipeline,
             status_sync=status_sync,
             battle_state="debug_initiative",
         )
 
-    if player_position == 1:
-        final_text = "你是第一顺位。你要做什么？"
-        pipeline.append(_dm_segment(final_text))
-        return _build_text_response(
-            final_text,
-            pipeline_messages=pipeline,
-            status_sync=status_sync,
-            battle_state="player_turn",
-        )
-
-    _apply_status_sync_to_context(context, status_sync)
-    round0_queue = _build_npc_automation_queue(context, "round0")
-    round0_queue_block = _format_npc_queue_block(round0_queue, phase="round0")
-    print(
-        "[combat-test] round0 input => initiative order "
-        f"{_summarize_initiative_from_context(context)} queue={round0_queue}"
-    )
-
-    rag_context = await retrieve_context(CHANNEL_COMBAT_TEST, last_user, context)
-    round_0_prompt = load_battle_round_0_prompt()
-    system_prompt = build_game_system_prompt(
-        round_0_prompt,
-        rag_context,
-        context,
-        dice_results_block=dice_results_block,
-        channel="combat-test",
-        last_user=last_user,
-    )
-    system_prompt = (
-        f"{system_prompt.rstrip()}\n\n{round0_queue_block}\n\n"
-        f"{COMBAT_DOWN_REMINDER}\n\n{COMBAT_NPC_QUEUE_REMINDER}\n\n{COMBAT_THINKING_REMINDER}\n\n"
-        f"{ROUND_0_OUTPUT_REMINDER}"
-    )
-    round_0_messages = [
-        *llm_messages,
-        {"role": "assistant", "content": initiative_result.content},
-    ]
-    user_patch = load_user_prompt_patch() if DEEPSEEK_USER_PROMPT_PATCH else None
-    round_0_result = await deepseek_client.chat(
-        round_0_messages,
-        system=system_prompt,
-        user_patch=user_patch,
-        thinking=True,
-    )
-    _log_npc_queue_coverage(round_0_result, round0_queue, "round0")
-    pipeline.append(_dm_segment_from_result(round_0_result))
-
-    round_0_sync = _merge_round_status_sync(round_0_result, context)
-
-    content_text, reasoning_text = _llm_result_text_layers(round_0_result)
-    print(
-        "[combat-test] round0 sync => "
-        f"extracted={bool(round_0_sync)} "
-        f"content_has_block={bool(_extract_status_sync_all(content_text))} "
-        f"reasoning_has_block={bool(_extract_status_sync_all(reasoning_text))} "
-        f"merged={round_0_sync!r}"
-    )
-    if not round_0_sync:
-        print("[combat-test] round0 WARNING: 未找到 [STATUS_SYNC]，面板不会更新")
-
-    status_sync = _merge_status_sync(status_sync, round_0_sync)
-
     return _build_handler_response(
-        round_0_result,
-        pipeline_messages=pipeline,
+        initiative_result,
         status_sync=status_sync,
-        battle_state="round_0",
-    )
-
-
-def _merge_round_status_sync(round_source: str | ChatCompletionResult, context: dict) -> dict | None:
-    if isinstance(round_source, ChatCompletionResult):
-        return _normalize_status_sync(
-            _extract_status_sync_from_result(round_source),
-            context,
-        )
-    return _normalize_status_sync(
-        _extract_status_sync(round_source),
-        context,
-    )
-
-
-async def _handle_in_combat(
-    llm_messages: list[dict],
-    last_user: str,
-    context: dict,
-    participants: int,
-) -> dict:
-    if participants < 1:
-        participants = _parse_positive_int(str(participants), 4)
-        context["participants"] = participants
-
-    combat_round = _get_combat_round(context)
-    flee_intent = _detect_flee_intent(last_user)
-    npc_queue = _build_npc_automation_queue(context, "after_player")
-    round_marker_block = _format_combat_round_marker_block(context, npc_queue)
-    execution_block = _format_combat_round_execution_block(context, npc_queue)
-    dice_results_block = _format_combat_dice_block_by_combat_order(context, participants)
-    npc_queue_block = _format_npc_queue_block(npc_queue, phase="after_player")
-    combat_order_block = _format_combat_order_reference_block(context)
-    print(
-        f"[combat-test] combat round={combat_round} flee_intent={flee_intent} "
-        f"npc queue => {npc_queue}"
-    )
-
-    rag_context = await retrieve_context(CHANNEL_COMBAT_TEST, last_user, context)
-    system_prompt = build_game_system_prompt(
-        load_battle_round_normal_prompt(),
-        rag_context,
-        context,
-        dice_results_block=dice_results_block,
-        channel="combat-test",
-        last_user=last_user,
-    )
-    system_prompt = (
-        f"{system_prompt.rstrip()}\n\n{execution_block}\n\n{round_marker_block}\n\n"
-        f"{combat_order_block}\n\n{npc_queue_block}\n\n{COMBAT_DOWN_REMINDER}\n\n"
-        f"{COMBAT_NPC_QUEUE_REMINDER}\n\n{COMBAT_THINKING_REMINDER}\n\n"
-        f"{COMBAT_ROUND_SCOPE_REMINDER}\n\n{COMBAT_ROUND_FLOW_REMINDER}\n\n"
-        f"{ROUND_NORMAL_OUTPUT_REMINDER}"
-    )
-    if flee_intent:
-        system_prompt = f"{system_prompt.rstrip()}\n\n{COMBAT_FLEE_ROUND_REMINDER}"
-    user_patch = load_user_prompt_patch() if DEEPSEEK_USER_PROMPT_PATCH else None
-    round_messages = _append_reminder(
-        llm_messages,
-        f"{COMBAT_ROUND_SCOPE_REMINDER}\n\n{COMBAT_ROUND_FLOW_REMINDER}",
-    )
-    if flee_intent:
-        round_messages = _append_reminder(round_messages, COMBAT_FLEE_ROUND_REMINDER)
-    round_result = await deepseek_client.chat(
-        round_messages,
-        system=system_prompt,
-        user_patch=user_patch,
-        thinking=True,
-    )
-    if flee_intent:
-        print("[combat-test] combat-round flee => skip NPC queue header check")
-    else:
-        _log_npc_queue_coverage(round_result, npc_queue, "combat-round")
-
-    round_sync = _merge_round_status_sync(round_result, context)
-    round_result = _postprocess_combat_round_result(round_result, context, npc_queue)
-    content_text, reasoning_text = _llm_result_text_layers(round_result)
-    strict = bool(STATUS_SYNC_PATTERN.search(content_text) or STATUS_SYNC_PATTERN.search(reasoning_text))
-    loose = bool(_extract_status_sync_loose_payload(content_text) or _extract_status_sync_loose_payload(reasoning_text))
-    if flee_intent:
-        print("[combat-test] combat-round flee => STATUS_SYNC not expected in round phase")
-    elif not round_sync:
-        print("[combat-test] combat-round WARNING: 未找到 [STATUS_SYNC]，面板不会更新")
-    elif not strict and loose:
-        print("[combat-test] combat-round sync => loose extract (missing [STATUS_SYNC] opener)")
-    _apply_status_sync_to_context(context, round_sync)
-
-    end_fact_block = _build_combat_end_fact_block(context, last_user)
-    print(f"[combat-test] combat end check => {end_fact_block.splitlines()[-1]}")
-    end_messages = [
-        *llm_messages,
-        {"role": "assistant", "content": round_result.content},
-        {"role": "user", "content": END_FOLLOWUP_REMINDER},
-    ]
-    end_result = await deepseek_client.chat(
-        end_messages,
-        system=build_game_system_prompt(
-            load_battle_end_prompt(),
-            end_fact_block,
-            context,
-            channel="combat-test",
-            last_user=last_user,
-        ),
-        thinking=True,
-        attach_user_patch=False,
-    )
-
-    status = context.get("status") or {}
-    team_wipe = _is_team_wipe(status)
-    enemy_wipe = _is_enemy_wipe(status)
-    end_sync_preview = _normalize_status_sync(
-        _extract_status_sync_from_result(end_result),
-        context,
-    )
-    model_end = _is_combat_end_sync(end_sync_preview)
-    should_continue = not team_wipe and not enemy_wipe and not flee_intent and not model_end
-    force_end = flee_intent and _is_continue_token(end_result.content)
-
-    if force_end:
-        print("[combat-test] flee override: 玩家已逃跑但结束判定输出 {Continue}，强制结束")
-        end_result = ChatCompletionResult(
-            content="你抓住机会，成功脱离了战斗。",
-            reasoning_content=end_result.reasoning_content,
-        )
-
-    if should_continue and not _is_continue_token(end_result.content):
-        print("[combat-test] end override: 友方/敌方均未全灭但模型未输出 {Continue}，强制继续")
-        end_result = ChatCompletionResult(content="{Continue}")
-
-    if not force_end and _is_continue_token(end_result.content):
-        print(f"[combat-test] combat end => continue (next round={combat_round + 1})")
-        status_sync = _merge_status_sync(
-            {"inCombat": True, "participants": participants, "combatRound": combat_round + 1},
-            round_sync,
-        )
-        return _build_handler_response(
-            round_result,
-            pipeline_messages=[_dm_segment_from_result(round_result)],
-            status_sync=status_sync,
-            battle_state="ongoing",
-        )
-
-    end_reasons = []
-    if flee_intent:
-        end_reasons.append("flee")
-    if team_wipe:
-        end_reasons.append("team_wipe")
-    if enemy_wipe:
-        end_reasons.append("enemy_wipe")
-    if model_end:
-        end_reasons.append("model_end_sync")
-    print(f"[combat-test] combat end => ended ({', '.join(end_reasons) or 'unknown'})")
-
-    pipeline = [
-        _dm_segment_from_result(round_result),
-        _dm_segment_from_result(end_result),
-    ]
-    end_sync = end_sync_preview or {
-        "inCombat": False,
-        "participants": -1,
-        "combatRound": -1,
-    }
-    end_sync = _normalize_status_sync(end_sync, context)
-    if not _extract_status_sync_from_result(end_result):
-        print("[combat-test] combat end WARNING: 未找到 [STATUS_SYNC]，使用 Python 默认重置")
-    end_sync = _merge_status_sync(end_sync, _reset_fighting_sync(context))
-    end_sync = _merge_status_sync(end_sync, _reset_combat_order_sync(context))
-    status_sync = _merge_status_sync(
-        end_sync,
-        round_sync,
-    )
-    if status_sync.get("inCombat") is not False:
-        status_sync["inCombat"] = False
-        status_sync["participants"] = -1
-        status_sync["combatRound"] = -1
-
-    print(f"[combat-test] combat end sync => inCombat={status_sync.get('inCombat')}")
-
-    return _build_handler_response(
-        end_result,
-        pipeline_messages=pipeline,
-        status_sync=status_sync,
-        battle_state="ended",
+        battle_state="initiative",
+        combat_auto_continue=True,
     )

@@ -19,6 +19,10 @@ function displayDmReply({
     }
   }
 
+  if (reply.suppressDisplay) {
+    return enteredCombat;
+  }
+
   const renderSegment = (segmentText, segmentReasoning, showJudge) => {
     let segmentDisplayText = segmentText;
 
@@ -83,12 +87,16 @@ async function requestChat({
   channel,
   saveName,
   combatContinue = false,
+  combatStateUpdate = false,
+  combatActorId = null,
 }) {
   const request = {
     channel,
     messages: buildApiMessages(getChatMessages()),
     saveName,
     combatContinue,
+    combatStateUpdate,
+    combatActorId,
   };
 
   const usesGamePipeline = channel === CHAT_CHANNELS.GAME
@@ -147,20 +155,24 @@ async function handleChatSend({ text, playerLabel, chat, channel, saveName, mode
       reply,
       chat,
       usesGamePipeline,
-      isLastInChain: !reply.combatAutoContinue,
+      isLastInChain: !reply.combatAutoContinue && !reply.combatStateUpdate,
     });
 
     if (resolvedChannel === CHAT_CHANNELS.COMBAT_TEST) {
       let continueCount = 0;
-      while (reply.combatAutoContinue && continueCount < MAX_COMBAT_AUTO_CONTINUE) {
+      while ((reply.combatAutoContinue || reply.combatStateUpdate)
+        && continueCount < MAX_COMBAT_AUTO_CONTINUE) {
         continueCount += 1;
-        if (typeof chat.showThinking === 'function') {
+        const isStateUpdate = !!reply.combatStateUpdate;
+        if (!isStateUpdate && typeof chat.showThinking === 'function') {
           chat.showThinking('DM');
         }
         reply = await requestChat({
           channel: resolvedChannel,
           saveName: resolvedSaveName,
-          combatContinue: true,
+          combatContinue: !isStateUpdate,
+          combatStateUpdate: isStateUpdate,
+          combatActorId: isStateUpdate ? reply.combatActorId : null,
         });
         if (typeof chat.hideThinking === 'function') {
           chat.hideThinking();
@@ -169,7 +181,7 @@ async function handleChatSend({ text, playerLabel, chat, channel, saveName, mode
           reply,
           chat,
           usesGamePipeline,
-          isLastInChain: !reply.combatAutoContinue,
+          isLastInChain: !reply.combatAutoContinue && !reply.combatStateUpdate,
         });
         enteredCombat = enteredCombat || stepEnteredCombat;
       }

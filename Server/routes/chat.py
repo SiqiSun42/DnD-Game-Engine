@@ -17,6 +17,8 @@ class ChatRequest(BaseModel):
     saveName: str | None = None
     gameContext: dict | None = None
     combatContinue: bool = False
+    combatStateUpdate: bool = False
+    combatActorId: str | None = None
 
 
 class PipelineMessage(BaseModel):
@@ -36,6 +38,9 @@ class ChatResponse(BaseModel):
     pipelineMessages: list[PipelineMessage] | None = None
     battleState: str | None = None
     combatAutoContinue: bool = False
+    combatStateUpdate: bool = False
+    combatActorId: str | None = None
+    suppressDisplay: bool = False
 
 
 async def process_chat_request(body: ChatRequest) -> ChatResponse:
@@ -44,5 +49,9 @@ async def process_chat_request(body: ChatRequest) -> ChatResponse:
     context = dict(body.gameContext or {})
     if body.combatContinue:
         context["combatContinue"] = True
+    if body.combatStateUpdate:
+        context["combatStateUpdate"] = True
+    if body.combatActorId:
+        context["combatActorId"] = body.combatActorId
     result = await handler(payload, body.saveName, context)
     return ChatResponse(**result)

@@ -101,6 +101,8 @@ class DeepSeekClient:
         thinking: bool | None = None,
         attach_user_patch: bool | None = None,
         model: str | None = None,
+        response_format: dict | None = None,
+        max_tokens: int | None = None,
     ) -> ChatCompletionResult:
         self._ensure_configured()
 
@@ -123,6 +125,10 @@ class DeepSeekClient:
             payload["thinking"] = {"type": "enabled"}
         else:
             payload["temperature"] = temperature
+        if response_format:
+            payload["response_format"] = response_format
+        if max_tokens is not None:
+            payload["max_tokens"] = max_tokens
 
         url = f"{self._base_url}/chat/completions"
         headers = {

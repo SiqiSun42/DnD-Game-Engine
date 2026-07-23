@@ -12,7 +12,7 @@ BATTLE_COUNT_PROMPT_FILE = "游戏进程/战斗/2.参战人数.md"
 BATTLE_INITIATIVE_PROMPT_FILE = "游戏进程/战斗/3.先攻顺序.md"
 BATTLE_PLAYER_TURN_PROMPT_FILE = "游戏进程/战斗/4.玩家回合.md"
 BATTLE_NPC_TURN_PROMPT_FILE = "游戏进程/战斗/5.NPC回合.md"
-BATTLE_UPDATE_PROMPT_FILE = "游戏进程/战斗/6.战斗更新.md"
+BATTLE_UPDATE_PROMPT_FILE = "游戏进程/战斗/6.状态更新.md"
 BATTLE_NO_TRIGGER_PROMPT_FILE = "游戏进程/战斗/7.未触发战斗.md"
 GAME_PROMPT_FILE_KEY = "promptFile"
 
@@ -224,4 +224,3 @@ def build_game_system_prompt(
     if dice_results_block and dice_results_block.strip():
         prompt = f"{prompt.rstrip()}\n\n{dice_results_block.strip()}"
     return prompt
-

@@ -1,5 +1,6 @@
 import json
 import re
+from copy import deepcopy
 
 from config import DEEPSEEK_COMBAT_MODEL, DEEPSEEK_USER_PROMPT_PATCH
 from handlers.consult import extract_last_user_message
@@ -15,6 +16,7 @@ from services.prompts import (
     load_battle_npc_turn_prompt,
     load_battle_player_turn_prompt,
     load_battle_trigger_prompt,
+    load_battle_update_prompt,
     load_initiative_order_prompt,
     load_no_trigger_prompt,
     load_user_prompt_patch,
@@ -24,7 +26,7 @@ COMBAT_DEBUG_STAGE = "full"
 
 TRIGGER_OUTPUT_REMINDER = (
     "【系统】请根据以上对话判断：玩家最新行动是否会触发战斗。"
-    "只输出 {True} 或 {False}，禁止任何其它文字。"
+    "只输出合法 JSON，不要解释。格式必须为：{\"triggered\": true} 或 {\"triggered\": false}。"
 )
 COUNT_OUTPUT_REMINDER = (
     "【系统】请确定本场战斗的参战人员。"
@@ -47,13 +49,6 @@ QUEST_SYNC_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
-TURN_SYNC_REMINDER = (
-    "【系统】本角色行动叙述完成后，必须在回复正文最末尾输出 [STATUS_SYNC]，"
-    "写入本回合该角色造成的 HP/conditions 变化（必须含 id 与 hitPoints.current）。"
-    "若玩家逃跑/投降，或本场战斗应结束，须在 [STATUS_SYNC] 中设 inCombat: false。"
-    "必须写 literally `[STATUS_SYNC]` 与 `[/STATUS_SYNC]`。"
-    "思考过程仅供推理；玩家可见的完整叙述必须写在回复正文，正文不得为空。"
-)
 COMBAT_DOWN_REMINDER = (
     "【系统·倒地规则·调试】HP≤0 视为倒地，禁止死亡豁免检定。"
     "倒地角色可说话指挥队友，但不能攻击/移动/施法；"
@@ -74,6 +69,11 @@ ROUND_START_TEMPLATE = "——第{round}回合开始——"
 ROUND_END_TEMPLATE = "——第{round}回合结束——"
 
 COMBAT_DEBUG_ORDER = ("trigger", "count", "initiative", "full")
+
+JSON_RESPONSE_FORMAT = {"type": "json_object"}
+COMBAT_STATE_UPDATE_MAX_TOKENS = 2048
+COMBAT_STATE_PATH = re.compile(r"(?:[A-Za-z_][A-Za-z0-9_]*|\[\d+\])")
+COMBAT_STATE_ROOT_KEYS = {"inCombat", "participants", "combatRound", "combatTurnIndex", "team", "enemy"}
 
 
 def _debug_stage_reached(stage: str) -> bool:
@@ -254,6 +254,17 @@ def _parse_bool_token(text: str) -> bool | None:
     if BOOL_FALSE.search(cleaned):
         return False
     return None
+
+
+def _parse_trigger_json(text: str) -> bool | None:
+    try:
+        payload = json.loads((text or "").strip())
+    except json.JSONDecodeError:
+        return _parse_bool_token(text)
+    if not isinstance(payload, dict) or set(payload) != {"triggered"}:
+        return None
+    value = payload.get("triggered")
+    return value if isinstance(value, bool) else None
 
 
 def _parse_positive_int(text: str, default: int) -> int:
@@ -770,6 +781,151 @@ def _merge_turn_status_sync(result: ChatCompletionResult, context: dict) -> dict
     return _normalize_status_sync(_extract_status_sync_from_result(result), context)
 
 
+def _parse_combat_state_path(path: object) -> list[str | int] | None:
+    if not isinstance(path, str) or not path.strip():
+        return None
+    tokens: list[str | int] = []
+    cursor = 0
+    for match in COMBAT_STATE_PATH.finditer(path):
+        if match.start() != cursor:
+            return None
+        token = match.group(0)
+        tokens.append(int(token[1:-1]) if token.startswith("[") else token)
+        cursor = match.end()
+        if cursor < len(path) and path[cursor] == ".":
+            cursor += 1
+    if cursor != len(path) or not tokens or tokens[0] not in COMBAT_STATE_ROOT_KEYS:
+        return None
+    return tokens
+
+
+def _resolve_combat_state_parent(state: dict, tokens: list[str | int]) -> tuple[dict | list, str | int] | None:
+    if len(tokens) < 1:
+        return None
+    current: dict | list = state
+    for token in tokens[:-1]:
+        if isinstance(current, dict):
+            if not isinstance(token, str) or token not in current:
+                return None
+            current = current[token]
+        elif isinstance(current, list):
+            if not isinstance(token, int) or token < 0 or token >= len(current):
+                return None
+            current = current[token]
+        else:
+            return None
+        if not isinstance(current, (dict, list)):
+            return None
+    return current, tokens[-1]
+
+
+def _apply_combat_state_modifications(context: dict, payload: object) -> dict | None:
+    """Apply the JSON-mode updater's whitelisted status paths to a status snapshot."""
+    if not isinstance(payload, dict):
+        return None
+    modifications = payload.get("modifications")
+    if not isinstance(modifications, list):
+        return None
+
+    updated = deepcopy(context.get("status") or {})
+    changed = False
+    for modification in modifications:
+        if not isinstance(modification, dict):
+            continue
+        tokens = _parse_combat_state_path(modification.get("path"))
+        if not tokens:
+            print(f"[combat-test] state update ignored invalid path={modification.get('path')!r}")
+            continue
+        resolved = _resolve_combat_state_parent(updated, tokens)
+        if not resolved:
+            print(f"[combat-test] state update ignored unresolved path={modification.get('path')!r}")
+            continue
+        parent, leaf = resolved
+        if isinstance(parent, dict):
+            if not isinstance(leaf, str) or leaf not in parent:
+                continue
+            current = parent[leaf]
+        else:
+            if not isinstance(leaf, int) or leaf < 0 or leaf >= len(parent):
+                continue
+            current = parent[leaf]
+
+        if "change" in modification:
+            try:
+                value = int(current) + int(modification["change"])
+            except (TypeError, ValueError):
+                continue
+            value = str(value) if isinstance(current, str) else value
+        elif modification.get("action") in {"add", "remove"}:
+            if not isinstance(current, list) or "value" not in modification:
+                continue
+            value = list(current)
+            if modification["action"] == "add" and modification["value"] not in value:
+                value.append(modification["value"])
+            if modification["action"] == "remove":
+                value = [item for item in value if item != modification["value"]]
+        elif "value" in modification:
+            value = modification["value"]
+        else:
+            continue
+
+        if isinstance(parent, dict):
+            parent[leaf] = value
+        else:
+            parent[leaf] = value
+        changed = True
+
+    return updated if changed else {}
+
+
+async def _generate_combat_state_sync(
+    context: dict,
+    narrative: str,
+    *,
+    actor: dict,
+) -> dict | None:
+    """Convert one completed combat narration into a reliable status patch via JSON mode."""
+    system_prompt = build_game_system_prompt(
+        load_battle_update_prompt(),
+        "",
+        context,
+        channel="combat-test",
+        panels=["status", "inventory"],
+    )
+    actor_name = actor.get("name") or actor.get("id") or "未知角色"
+    messages = [{
+        "role": "user",
+        "content": (
+            "请根据以下刚完成的战斗回合生成 JSON 状态修改。"
+            "只输出 JSON 对象，不要解释。\n\n"
+            f"当前行动者：{actor_name}（id={actor.get('id', '')}）\n"
+            f"DM 回合输出：\n{narrative.strip()}"
+        ),
+    }]
+
+    for attempt in range(1, 3):
+        result = await deepseek_client.chat(
+            messages,
+            system=system_prompt,
+            thinking=False,
+            temperature=0,
+            model=DEEPSEEK_COMBAT_MODEL,
+            attach_user_patch=False,
+            response_format=JSON_RESPONSE_FORMAT,
+            max_tokens=COMBAT_STATE_UPDATE_MAX_TOKENS,
+        )
+        try:
+            payload = json.loads(result.content)
+        except (TypeError, json.JSONDecodeError):
+            payload = None
+        status_sync = _apply_combat_state_modifications(context, payload)
+        if status_sync is not None:
+            return status_sync
+        print(f"[combat-test] state update attempt {attempt}/2 failed: invalid or empty JSON")
+        messages[0]["content"] += "\n\n上一次输出无效。必须返回包含 modifications 数组的合法 JSON 对象。"
+    return None
+
+
 def _post_turn_checks(context: dict, turn_sync: dict | None) -> dict:
     patches: list[dict] = []
     end_reason = None
@@ -833,6 +989,9 @@ def _build_handler_response(
     status_sync: dict | None = None,
     battle_state: str | None = None,
     combat_auto_continue: bool = False,
+    combat_state_update: bool = False,
+    combat_actor_id: str | None = None,
+    suppress_display: bool = False,
 ) -> dict:
     cleaned = _resolve_display_content(result)
     response = deepseek_client.to_handler_response(cleaned)
@@ -844,6 +1003,12 @@ def _build_handler_response(
         response["battleState"] = battle_state
     if combat_auto_continue:
         response["combatAutoContinue"] = True
+    if combat_state_update:
+        response["combatStateUpdate"] = True
+    if combat_actor_id:
+        response["combatActorId"] = combat_actor_id
+    if suppress_display:
+        response["suppressDisplay"] = True
     return response
 
 
@@ -854,6 +1019,9 @@ def _build_text_response(
     status_sync: dict | None = None,
     battle_state: str | None = None,
     combat_auto_continue: bool = False,
+    combat_state_update: bool = False,
+    combat_actor_id: str | None = None,
+    suppress_display: bool = False,
 ) -> dict:
     response = deepseek_client.to_handler_response(
         ChatCompletionResult(content=text),
@@ -866,6 +1034,12 @@ def _build_text_response(
         response["battleState"] = battle_state
     if combat_auto_continue:
         response["combatAutoContinue"] = True
+    if combat_state_update:
+        response["combatStateUpdate"] = True
+    if combat_actor_id:
+        response["combatActorId"] = combat_actor_id
+    if suppress_display:
+        response["suppressDisplay"] = True
     return response
 
 
@@ -907,7 +1081,7 @@ async def _execute_character_turn(
     system_prompt = (
         f"{system_prompt.rstrip()}\n\n{turn_block}\n\n"
         f"{COMBAT_ACTOR_ONLY_REMINDER}\n\n"
-        f"{COMBAT_DOWN_REMINDER}\n\n{TURN_SYNC_REMINDER}"
+        f"{COMBAT_DOWN_REMINDER}"
     )
 
     actor_name = entry.get("name") or entry.get("id") or "未知"
@@ -928,7 +1102,7 @@ async def _execute_character_turn(
         messages,
         system=system_prompt,
         user_patch=user_patch,
-        thinking=False,
+        thinking=True,
         temperature=0.5,
         model=DEEPSEEK_COMBAT_MODEL,
         attach_user_patch=bool(user_patch),
@@ -978,7 +1152,11 @@ async def _execute_single_combat_step(
     if is_player and not consume_player_input:
         player_name = entry.get("name") or "玩家"
         prompt = f"轮到{player_name}了。你要做什么？"
-        text = "\n\n".join([*prefix_parts, prompt]) if prefix_parts else prompt
+        pipeline_messages = [
+            _dm_segment(part)
+            for part in [*prefix_parts, prompt]
+            if part and part.strip()
+        ]
         status_sync = {
             "inCombat": True,
             "participants": participants,
@@ -987,7 +1165,8 @@ async def _execute_single_combat_step(
         }
         _set_combat_position(context, turn_index, combat_round)
         return _build_text_response(
-            text,
+            prompt,
+            pipeline_messages=pipeline_messages,
             status_sync=status_sync,
             battle_state="player_turn",
         )
@@ -1004,29 +1183,80 @@ async def _execute_single_combat_step(
     )
     turn_messages.append({"role": "assistant", "content": last_result.content or ""})
 
-    turn_sync = _merge_turn_status_sync(last_result, context)
-    if not turn_sync:
-        print(f"[combat-test] turn WARNING: 未找到 [STATUS_SYNC] id={entry.get('id')}")
-
-    status_sync = _post_turn_checks(context, turn_sync)
-
     display = _resolve_display_content(last_result)
     actor_label = ACTOR_TURN_TEMPLATE.format(name=entry.get("name") or entry.get("id") or "未知")
-    body_parts = [*prefix_parts, actor_label, display.content]
-    body = "\n\n".join(part for part in body_parts if part and str(part).strip())
+    turn_text = "\n\n".join(part for part in [actor_label, display.content] if part and str(part).strip())
+    pipeline_messages = [
+        *[_dm_segment(part) for part in prefix_parts if part and part.strip()],
+        _dm_segment(turn_text, reasoning=display.reasoning_content),
+    ]
 
+    return _build_handler_response(
+        ChatCompletionResult(content=turn_text, reasoning_content=display.reasoning_content),
+        pipeline_messages=pipeline_messages,
+        battle_state="state_update_pending",
+        combat_state_update=True,
+        combat_actor_id=str(entry.get("id") or ""),
+    )
+
+
+def _latest_combat_narrative(messages: list[dict]) -> str:
+    for message in reversed(messages):
+        if message.get("role") not in {"dm", "assistant"}:
+            continue
+        content = str(message.get("content") or message.get("text") or "").strip()
+        if content:
+            return content
+    return ""
+
+
+async def _handle_combat_state_update(messages: list[dict], context: dict) -> dict:
+    initiative_order = _get_initiative_turn_order(context)
+    turn_index = _get_combat_turn_index(context)
+    if not initiative_order or turn_index >= len(initiative_order):
+        return _build_text_response(
+            "[系统提示：找不到待更新的战斗回合，已暂停战斗。]",
+            battle_state="state_sync_error",
+        )
+
+    entry = initiative_order[turn_index]
+    expected_actor_id = str(context.get("combatActorId") or "")
+    if expected_actor_id and entry.get("id") != expected_actor_id:
+        return _build_text_response(
+            "[系统提示：战斗回合与状态更新不匹配，已暂停战斗。]",
+            battle_state="state_sync_error",
+        )
+
+    narrative = _latest_combat_narrative(messages)
+    if not narrative:
+        return _build_text_response(
+            "[系统提示：未找到本回合叙事，无法更新面板。]",
+            battle_state="state_sync_error",
+        )
+
+    turn_sync = await _generate_combat_state_sync(context, narrative, actor=entry)
+    if turn_sync is None:
+        print(f"[combat-test] turn ERROR: 状态更新失败，停止推进 id={entry.get('id')}")
+        return _build_text_response(
+            "[系统提示：本回合的状态更新未能生成，战斗已暂停以避免错误继续。]",
+            battle_state="state_sync_error",
+        )
+
+    status_sync = _post_turn_checks(context, turn_sync)
     if not context.get("inCombat", False):
         print(f"[combat-test] step exit => combat ended after id={entry.get('id')}")
-        return _build_handler_response(
-            ChatCompletionResult(content=body, reasoning_content=display.reasoning_content),
+        return _build_text_response(
+            "——战斗结束——",
             status_sync=status_sync,
             battle_state="ended",
         )
 
+    participants = context.get("participants", -1)
+    combat_round = _get_combat_round(context)
     turn_index += 1
-    suffix_parts: list[str] = []
-    if turn_index >= total_fighters:
-        suffix_parts.append(ROUND_END_TEMPLATE.format(round=combat_round))
+    notices: list[str] = []
+    if turn_index >= len(initiative_order):
+        notices.append(ROUND_END_TEMPLATE.format(round=combat_round))
         print(f"[combat-test] round {combat_round} end")
         combat_round += 1
         turn_index = 0
@@ -1040,27 +1270,18 @@ async def _execute_single_combat_step(
     })
 
     next_entry = initiative_order[turn_index]
-    next_is_player = _is_player_character(
-        context,
-        next_entry.get("id"),
-        next_entry.get("side", ""),
-    )
-    combat_auto_continue = not next_is_player
-    battle_state = "ongoing"
-
+    next_is_player = _is_player_character(context, next_entry.get("id"), next_entry.get("side", ""))
     if next_is_player:
-        next_name = next_entry.get("name") or "玩家"
-        suffix_parts.append(f"轮到{next_name}了。你要做什么？")
-        battle_state = "player_turn"
+        notices.append(f"轮到{next_entry.get('name') or '玩家'}了。你要做什么？")
 
-    if suffix_parts:
-        body = f"{body}\n\n" + "\n\n".join(suffix_parts)
-
-    return _build_handler_response(
-        ChatCompletionResult(content=body, reasoning_content=display.reasoning_content),
+    pipeline_messages = [_dm_segment(notice) for notice in notices]
+    return _build_text_response(
+        "\n\n".join(notices),
+        pipeline_messages=pipeline_messages,
         status_sync=status_sync,
-        battle_state=battle_state,
-        combat_auto_continue=combat_auto_continue,
+        battle_state="player_turn" if next_is_player else "ongoing",
+        combat_auto_continue=not next_is_player,
+        suppress_display=not notices,
     )
 
 
@@ -1075,6 +1296,9 @@ async def handle_combat_test(
 
     if not bool(context.get("inCombat")):
         return await _handle_non_combat(llm_messages, last_user, context)
+
+    if context.get("combatStateUpdate"):
+        return await _handle_combat_state_update(messages, context)
 
     if not _debug_stage_reached("full"):
         return _build_text_response(
@@ -1108,9 +1332,11 @@ async def _handle_non_combat(
         thinking=False,
         temperature=0,
         attach_user_patch=False,
+        response_format=JSON_RESPONSE_FORMAT,
+        max_tokens=128,
     )
 
-    triggered = _parse_bool_token(trigger_result.content)
+    triggered = _parse_trigger_json(trigger_result.content)
     if triggered is True:
         debug_label = "{True}"
     elif triggered is False:

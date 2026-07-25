@@ -7,8 +7,8 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com").rstrip("/")
-DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-chat")
-DEEPSEEK_COMBAT_MODEL = os.getenv("DEEPSEEK_COMBAT_MODEL", "deepseek-chat")
+DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-v4-pro")
+DEEPSEEK_COMBAT_MODEL = os.getenv("DEEPSEEK_COMBAT_MODEL", "deepseek-v4-pro")
 def _env_flag(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).lower() in {"1", "true", "yes", "on"}
 

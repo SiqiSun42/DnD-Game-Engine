@@ -1,0 +1,30 @@
+{
+    "backpacks": [
+      {
+        "character_id": "",
+        "identity": "",
+        "inventory": [
+          {
+            "item_id": "",
+            "name": "",
+            "quantity": -1,
+            "is_equipped": false,
+            "equipped_slot": ""
+          }
+        ]
+      }
+    ],
+    "stocks": [
+      {
+        "location_id": "",
+        "type": "",
+        "inventory": [
+          {
+            "item_id": "",
+            "name": "",
+            "quantity": -1
+          }
+        ]
+      }
+    ]
+  }

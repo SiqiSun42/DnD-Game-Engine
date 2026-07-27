@@ -1,0 +1,21 @@
+{
+    "category": "quest_items",
+    "item_id": "",
+    "name": "",
+
+    "description": "",
+    "task_hint": "",
+    "trigger_condition": "",
+    "triggered": false,
+    "can_transfer": false,
+    "weight": 0.1,
+  
+    "content": null,         
+    "contains": null,       
+    "key_for": null,        
+    "composes_into": null,   
+    "required_parts": null,  
+    "usage_location": null, 
+    "hidden_secret": null,  
+    "other": null
+  }

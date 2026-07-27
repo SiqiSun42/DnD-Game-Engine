@@ -11,6 +11,17 @@ from config import (
     DEEPSEEK_MODEL,
     DEEPSEEK_THINKING_ENABLED,
     DEEPSEEK_USER_PROMPT_PATCH,
+    OLLAMA_MAX_TOKENS,
+)
+
+_THINKING_TAG = r"(?:think(?:ing)?|redacted_thinking|redacted_reasoning)"
+_THINKING_BLOCK_PATTERN = re.compile(
+    rf"<{_THINKING_TAG}>([\s\S]*?)</{_THINKING_TAG}>",
+    re.IGNORECASE,
+)
+_UNCLOSED_THINKING_PATTERN = re.compile(
+    rf"<{_THINKING_TAG}>([\s\S]*)$",
+    re.IGNORECASE,
 )
 
 
@@ -34,10 +45,20 @@ class DeepSeekClient:
         self._attach_user_prompt_patch = DEEPSEEK_USER_PROMPT_PATCH
         self._dice_roll_pattern = re.compile(r'\[DICE_ROLL:(\w+)\](d\d+)\[/DICE_ROLL:\1\]', re.IGNORECASE)
         self._dice_ref_pattern = re.compile(r'\[ROLL:(\w+)\]', re.IGNORECASE)
+        self._is_local = "localhost" in self._base_url or "127.0.0.1" in self._base_url
 
     def _ensure_configured(self) -> None:
-        if not self._api_key:
+        if not self._api_key and not self._is_local:
             raise DeepSeekError("DEEPSEEK_API_KEY is not configured")
+
+    def _get_api_url(self) -> str:
+        """获取API端点URL"""
+        if self._is_local:
+            # Ollama兼容OpenAI API，端点是 /v1/chat/completions
+            return f"{self._base_url}/v1/chat/completions"
+        else:
+            # Deepseek官方API
+            return f"{self._base_url}/chat/completions"
 
     def _roll_dice(self, dice_spec: str) -> int:
         """Roll a dice specified by format like 'd20', 'd6', 'd100'."""
@@ -69,6 +90,45 @@ class DeepSeekClient:
         text = self._dice_roll_pattern.sub(replace_dice_block, text)
         text = self._dice_ref_pattern.sub(replace_roll_ref, text)
         return text
+
+    def _split_thinking_from_content(self, raw_content: str) -> tuple[str, str]:
+        raw = raw_content or ""
+        reasoning_parts: list[str] = []
+
+        def collect_block(match: re.Match[str]) -> str:
+            block = (match.group(1) or "").strip()
+            if block:
+                reasoning_parts.append(block)
+            return ""
+
+        visible = _THINKING_BLOCK_PATTERN.sub(collect_block, raw).strip()
+        if not reasoning_parts:
+            unclosed = _UNCLOSED_THINKING_PATTERN.search(raw)
+            if unclosed:
+                block = (unclosed.group(1) or "").strip()
+                if block:
+                    reasoning_parts.append(block)
+                visible = _UNCLOSED_THINKING_PATTERN.sub("", raw).strip()
+
+        reasoning = "\n\n".join(reasoning_parts).strip()
+        return visible, reasoning
+
+    def _normalize_completion_text(
+        self,
+        raw_content: str,
+        reasoning_content: str,
+    ) -> tuple[str, str]:
+        content = raw_content or ""
+        reasoning = (reasoning_content or "").strip()
+        if _THINKING_BLOCK_PATTERN.search(content) or _UNCLOSED_THINKING_PATTERN.search(content):
+            parsed_content, parsed_reasoning = self._split_thinking_from_content(content)
+            content = parsed_content
+            if not reasoning:
+                reasoning = parsed_reasoning
+        else:
+            content = content.strip()
+        content = self._expand_dice_rolls(content.strip())
+        return content, reasoning
 
     def _build_payload_messages(
         self,
@@ -120,7 +180,9 @@ class DeepSeekClient:
             "messages": payload_messages,
         }
 
-        if use_thinking:
+        if self._is_local:
+            payload["temperature"] = temperature
+        elif use_thinking:
             payload["reasoning_effort"] = "high"
             payload["thinking"] = {"type": "enabled"}
         else:
@@ -129,12 +191,14 @@ class DeepSeekClient:
             payload["response_format"] = response_format
         if max_tokens is not None:
             payload["max_tokens"] = max_tokens
+        elif self._is_local and OLLAMA_MAX_TOKENS is not None:
+            payload["max_tokens"] = OLLAMA_MAX_TOKENS
 
-        url = f"{self._base_url}/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {self._api_key}",
-            "Content-Type": "application/json",
-        }
+        url = self._get_api_url()
+        headers = {"Content-Type": "application/json"}
+
+        if not self._is_local:
+            headers["Authorization"] = f"Bearer {self._api_key}"
 
         async with httpx.AsyncClient(timeout=180.0) as client:
             response = await client.post(url, json=payload, headers=headers)
@@ -145,9 +209,16 @@ class DeepSeekClient:
         data = response.json()
         try:
             message = data["choices"][0]["message"]
-            content = str(message.get("content") or "").strip()
-            reasoning_content = str(message.get("reasoning_content") or "").strip()
-            content = self._expand_dice_rolls(content)
+            raw_content = str(message.get("content") or "")
+            reasoning_content = str(
+                message.get("reasoning_content")
+                or message.get("reasoning")
+                or ""
+            )
+            content, reasoning_content = self._normalize_completion_text(
+                raw_content,
+                reasoning_content,
+            )
             return ChatCompletionResult(
                 content=content,
                 reasoning_content=reasoning_content,

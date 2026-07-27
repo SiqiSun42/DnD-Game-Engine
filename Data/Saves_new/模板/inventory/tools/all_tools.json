@@ -1,0 +1,45 @@
+{
+    "category": "tools",
+    "name": "",
+    "item_id": "",
+    "description": "",
+    "max_charges": -1,
+    "consumption_rate": -1,
+    "price": {
+      "base_price": -1,
+      "fluctuation_range": -1
+    },
+    "recharge_cost": {
+      "base_price": -1,
+      "fluctuation_range": -1,
+      "recharge_condition": ""
+    },
+    "effects": [
+      {
+        "type": "",
+        "target_attribute": "",
+        "dice": "",
+        "fixed_value": -1,
+        "modifier": "",
+        "bonus": -1,
+        "spell": "",
+        "remove_condition": "",
+        "range": "",
+        "special": "",
+        "time": {
+          "duration": -1
+        },
+        "concentration": false,
+        "saving_throw": "",
+        "description": ""
+      }
+    ],
+    "usage_conditions": {
+      "action_type": "",
+      "target": "",
+      "extra_conditions": ""
+    },
+    "rarity": "",
+    "weight": -1,
+    "other": ""
+  }

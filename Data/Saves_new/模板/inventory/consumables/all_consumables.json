@@ -1,0 +1,38 @@
+{
+    "category": "consumables",
+    "item_id": "",
+    "name": "",
+    "description": "",
+    "price": {
+      "base_price": -1,
+      "fluctuation_range": -1
+    },
+    "effects": [
+      {
+        "type": "",
+        "target_attribute": "",
+        "dice": "",
+        "fixed_value": -1,
+        "modifier": "",
+        "bonus": -1,
+        "spell": "",
+        "remove_condition": "",
+        "range": "",
+        "special": "",
+        "time": {
+          "duration": -1
+        },
+        "concentration": false,
+        "saving_throw": "",
+        "description": ""
+      }
+    ],
+    "usage_conditions": {
+      "action_type": "",
+      "target": "",
+      "extra_conditions": ""
+    },
+    "rarity": "",
+    "weight": -1,
+    "other": ""
+  }

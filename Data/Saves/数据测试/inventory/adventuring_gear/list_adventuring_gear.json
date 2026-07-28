@@ -1,0 +1,43 @@
+{
+    "backpacks": [
+      {
+        "character_id": "kevin",
+        "identity": "pc",
+        "inventory": [
+          {
+            "item_id": "pebble",
+            "name": "鹅卵石",
+            "quantity": 3
+          },
+          {
+            "item_id": "mirror_shard",
+            "name": "镜子碎片",
+            "quantity": 1
+          },
+          {
+            "item_id": "chalk",
+            "name": "粉笔",
+            "quantity": 1
+          },
+          {
+            "item_id": "wooden_whistle",
+            "name": "木制哨子",
+            "quantity": 1
+          }
+        ]
+      }
+    ],
+    "stocks": [
+      {
+        "location_id": "",
+        "type": "",
+        "inventory": [
+          {
+            "item_id": "",
+            "name": "",
+            "quantity": -1
+          }
+        ]
+      }
+    ]
+  }

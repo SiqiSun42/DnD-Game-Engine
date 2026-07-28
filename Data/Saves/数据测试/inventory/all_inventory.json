@@ -1,0 +1,16 @@
+{
+    "backpacks": [
+      {
+        "character_id": "kevin",
+        "identity": "pc"
+      }
+    ],
+    "stocks": [
+      {
+        "location_id": "",
+        "type": "",
+        "is_triggered": "",
+        "trigger_condition": ""
+      }
+    ]
+  }

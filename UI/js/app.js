@@ -339,6 +339,7 @@ async function handleSaveAction(action) {
         docType: save.docType || 'game',
         pinned: false,
         lastPlayed: Date.now(),
+        localOnly: true,
       });
       persistSavesIndex();
       await duplicateSaveData(save.name, copyName);

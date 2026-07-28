@@ -1,0 +1,36 @@
+{
+    "backpacks": [
+      {
+        "character_id": "kevin",
+        "identity": "pc",
+        "inventory": [
+          {
+            "item_id": "flint",
+            "name": "燧石",
+            "quantity": 1,
+            "remaining_charges": null
+          },
+          {
+            "item_id": "lantern",
+            "name": "提灯",
+            "quantity": 1,
+            "remaining_charges": 0
+          }
+        ]
+      }
+    ],
+    "stocks": [
+      {
+        "location_id": "",
+        "type": "",
+        "inventory": [
+          {
+            "item_id": "",
+            "name": "",
+            "quantity": -1,
+            "remaining_charges": -1
+          }
+        ]
+      }
+    ]
+  }

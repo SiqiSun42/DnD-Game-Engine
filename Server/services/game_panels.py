@@ -75,13 +75,29 @@ def _summarize_status(context: dict) -> str:
 
 def _summarize_inventory(context: dict) -> str:
     inventory = context.get("inventory") or {}
+    derived = context.get("derived") or {}
+    inventory_derived = derived.get("inventory") or inventory.get("_derived") or {}
     categories = inventory.get("categories") or {}
     counts = []
     for key, items in categories.items():
+        if key == "current_status":
+            continue
         if isinstance(items, list) and items:
             counts.append(f"{key} {len(items)}")
-    wealth = inventory.get("wealth") or context.get("wealth") or "未知"
+    total_gold = inventory_derived.get("totalGoldGp")
+    weight = inventory_derived.get("currentWeightLb")
+    wealth = total_gold if total_gold is not None else (
+        inventory.get("wealth") or context.get("wealth") or "未知"
+    )
     summary = "，".join(counts) if counts else "无物品"
+    extra = []
+    if weight is not None:
+        extra.append(f"负重 {weight} lb")
+    if total_gold is not None:
+        extra.append(f"金币 {total_gold} gp")
+    tail = "；".join(extra)
+    if tail:
+        return f"wealth={wealth}；{summary}；{tail}"
     return f"wealth={wealth}；{summary}"
 
 
@@ -200,13 +216,16 @@ def extract_panel_payload(context: dict, panel_id: str) -> dict | list | None:
 def format_game_meta(context: dict | None) -> str:
     if not context:
         return "（未提供游戏状态）"
+    derived = context.get("derived") or {}
+    inventory_derived = derived.get("inventory") or (context.get("inventory") or {}).get("_derived") or {}
     meta = {
         "saveName": context.get("saveName"),
         "location": context.get("location"),
         "locationDescription": context.get("locationDescription"),
         "inCombat": context.get("inCombat", False),
         "participants": context.get("participants", -1),
-        "wealth": context.get("wealth") or (context.get("inventory") or {}).get("wealth"),
+        "wealth": context.get("wealth") or inventory_derived.get("totalGoldGp"),
+        "derived": derived,
     }
     return f"```json\n{json.dumps(meta, ensure_ascii=False, indent=2)}\n```"
 

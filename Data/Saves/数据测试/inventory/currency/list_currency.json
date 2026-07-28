@@ -1,0 +1,38 @@
+{
+    "backpacks": [
+      {
+        "character_id": "kevin",
+        "identity": "pc",
+        "inventory": [
+          {
+            "item_id": "gold_piece",
+            "name": "金币",
+            "quantity": 30
+          },
+          {
+            "item_id": "silver_piece",
+            "name": "银币",
+            "quantity": 40
+          },
+          {
+            "item_id": "copper_piece",
+            "name": "铜币",
+            "quantity": 50
+          }
+        ]
+      }
+    ],
+    "stocks": [
+      {
+        "location_id": "",
+        "type": "",
+        "inventory": [
+          {
+            "item_id": "",
+            "name": "",
+            "quantity": -1
+          }
+        ]
+      }
+    ]
+  }

@@ -14,7 +14,7 @@ const GameData = {
 };
 
 async function fetchJSON(path) {
-  const response = await fetch(path);
+  const response = await fetch(path, { cache: 'no-store' });
   if (!response.ok) {
     throw new Error(`Failed to load ${path}: ${response.status}`);
   }
@@ -27,6 +27,30 @@ function getLocalSaveKey(saveName) {
 
 function getLocalSavesIndexKey() {
   return 'dnd-engine/saves-index';
+}
+
+const STORAGE_SCHEMA_VERSION = 2;
+const STORAGE_VERSION_KEY = 'dnd-engine/storage-version';
+
+function migrateBrowserStorage() {
+  let currentVersion = 0;
+  try {
+    currentVersion = Number.parseInt(localStorage.getItem(STORAGE_VERSION_KEY) || '0', 10) || 0;
+  } catch (_) {
+    currentVersion = 0;
+  }
+  if (currentVersion >= STORAGE_SCHEMA_VERSION) return;
+
+  try {
+    localStorage.removeItem(getLocalSavesIndexKey());
+    for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+      const key = localStorage.key(index);
+      if (key && key.startsWith('dnd-engine/save/')) {
+        localStorage.removeItem(key);
+      }
+    }
+    localStorage.setItem(STORAGE_VERSION_KEY, String(STORAGE_SCHEMA_VERSION));
+  } catch (_) {}
 }
 
 function getLocalGlobalSettingsKey() {
@@ -91,34 +115,79 @@ function normalizeSaveEntry(save) {
     docType: save.docType === 'conversation' ? 'conversation' : 'game',
     pinned: !!save.pinned,
     lastPlayed: save.lastPlayed || 0,
+    localOnly: !!save.localOnly,
   };
 }
 
 function mergeSavesIndex(fileIndex, localIndex) {
   const fileSaves = (fileIndex?.saves || []).map(normalizeSaveEntry).filter(Boolean);
-  const localSaves = (localIndex?.saves || []).map(normalizeSaveEntry).filter(Boolean);
-  const localByName = new Map(localSaves.map(save => [save.name, save]));
-  const merged = [];
-  const seen = new Set();
+  const localByName = new Map(
+    (localIndex?.saves || []).map(normalizeSaveEntry).filter(Boolean).map(save => [save.name, save]),
+  );
 
-  fileSaves.forEach(fileSave => {
-    const localSave = localByName.get(fileSave.name);
-    merged.push(localSave ? {
-      name: fileSave.name,
-      docType: fileSave.docType,
+  return {
+    saves: fileSaves.map(fileSave => {
+      const localSave = localByName.get(fileSave.name);
+      if (!localSave) return { ...fileSave };
+      return {
+        name: fileSave.name,
+        docType: fileSave.docType,
+        pinned: localSave.pinned,
+        lastPlayed: Math.max(localSave.lastPlayed || 0, fileSave.lastPlayed || 0),
+      };
+    }),
+  };
+}
+
+function appendLocalOnlySaves(index, localIndex) {
+  const saves = [...(index?.saves || [])];
+  const seen = new Set(saves.map(save => save.name));
+  (localIndex?.saves || []).map(normalizeSaveEntry).filter(Boolean).forEach(localSave => {
+    if (seen.has(localSave.name) || !localSave.localOnly) return;
+    saves.push({
+      name: localSave.name,
+      docType: localSave.docType,
       pinned: localSave.pinned,
-      lastPlayed: Math.max(localSave.lastPlayed || 0, fileSave.lastPlayed || 0),
-    } : { ...fileSave });
-    seen.add(fileSave.name);
+      lastPlayed: localSave.lastPlayed || 0,
+      localOnly: true,
+    });
+    seen.add(localSave.name);
   });
+  return { saves };
+}
 
-  localSaves.forEach(localSave => {
-    if (!seen.has(localSave.name)) {
-      merged.push({ ...localSave });
+const BUILTIN_SAVE_ENTRIES = [
+  {
+    name: '咨询城主',
+    docType: 'conversation',
+    pinned: false,
+    lastPlayed: 0,
+  },
+];
+
+function applyBuiltinSaves(index) {
+  const saves = [...(index?.saves || [])];
+  BUILTIN_SAVE_ENTRIES.forEach(entry => {
+    if (!saves.some(save => save.name === entry.name)) {
+      saves.push({ ...entry });
     }
   });
+  return { saves };
+}
 
-  return { saves: merged };
+function pruneStaleLocalSaveData(validSaveNames) {
+  const valid = new Set(validSaveNames);
+  BUILTIN_SAVE_ENTRIES.forEach(entry => valid.add(entry.name));
+  try {
+    for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+      const key = localStorage.key(index);
+      if (!key || !key.startsWith('dnd-engine/save/')) continue;
+      const saveName = decodeURIComponent(key.slice('dnd-engine/save/'.length));
+      if (!valid.has(saveName)) {
+        localStorage.removeItem(key);
+      }
+    }
+  } catch (_) {}
 }
 
 function mergeGlobalUISettings(fileSettings, localSettings) {
@@ -150,11 +219,14 @@ function getSaveFolderBase(saveName) {
 }
 
 async function initGameData() {
+  migrateBrowserStorage();
+
+  const savesIndexPath = `${DATA_ROOT}/saves-index.json?v=${STORAGE_SCHEMA_VERSION}`;
   const [panelSchemas, settingsUISchema, settingsGameSchema, fileIndex, fileUISettings] = await Promise.all([
     fetchJSON(`${UI_DATA_ROOT}/ui-schemas/panels.json`),
     fetchJSON(`${UI_DATA_ROOT}/ui-schemas/settings-ui.json`),
     fetchJSON(`${UI_DATA_ROOT}/ui-schemas/settings-game.json`),
-    fetchJSON(`${DATA_ROOT}/saves-index.json`),
+    fetchJSON(savesIndexPath),
     fetchJSON(`${DATA_ROOT}/settings/ui.json`),
   ]);
 
@@ -163,7 +235,9 @@ async function initGameData() {
   GameData.settingsGameSchema = settingsGameSchema;
 
   const localIndex = readLocalJSON(getLocalSavesIndexKey());
-  GameData.savesIndex = mergeSavesIndex(fileIndex, localIndex);
+  const mergedIndex = appendLocalOnlySaves(mergeSavesIndex(fileIndex, localIndex), localIndex);
+  GameData.savesIndex = applyBuiltinSaves(mergedIndex);
+  pruneStaleLocalSaveData(GameData.savesIndex.saves.map(save => save.name));
   persistSavesIndex();
 
   const localUISettings = readLocalJSON(getLocalGlobalSettingsKey());
@@ -231,7 +305,7 @@ async function loadTemplateData() {
   const base = `${UI_DATA_ROOT}/templates/${encodeURIComponent(TEMPLATE_NAME)}`;
   const [chat, inventory, characters, status, world, notes, settingsGame] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
-    fetchJSON(`${base}/inventory.json`),
+    loadInventoryData(base),
     fetchJSON(`${base}/characters.json`),
     fetchJSON(`${base}/status.json`),
     fetchJSON(`${base}/world.json`),
@@ -251,7 +325,7 @@ async function loadSaveDataFromFolder(saveName) {
   const base = getSaveFolderBase(saveName);
   const [chat, inventory, characters, status, world, notes, settingsGame] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
-    fetchJSON(`${base}/inventory.json`),
+    loadInventoryData(base),
     fetchJSON(`${base}/characters.json`),
     fetchJSON(`${base}/status.json`),
     fetchJSON(`${base}/world.json`),
@@ -276,11 +350,15 @@ async function loadSave(saveName) {
   } else {
     const templateData = await loadTemplateData();
     const saveData = await loadSaveDataFromFolder(saveMeta.name);
-    fileData = deepMerge(templateData, saveData);
+    const { inventory: saveInventory, ...restSaveData } = saveData;
+    const { inventory: templateInventory, ...restTemplateData } = templateData;
+    fileData = deepMerge(restTemplateData, restSaveData);
+    fileData.inventory = saveInventory ?? templateInventory;
   }
 
   const localData = readLocalJSON(getLocalSaveKey(saveName));
-  if (localData) {
+  const saveEntry = findSave(saveMeta.name);
+  if (localData && saveEntry?.localOnly) {
     fileData = deepMerge(fileData, localData);
   }
 
@@ -315,8 +393,10 @@ function getPanelSchema(panelId) {
 
 function getPanelData(panelId) {
   if (!GameData.activeSaveData) return null;
+  if (panelId === 'backpack') {
+    return resolveInventoryForUi(GameData.activeSaveData.inventory);
+  }
   const map = {
-    backpack: GameData.activeSaveData.inventory,
     character: GameData.activeSaveData.characters,
     status: GameData.activeSaveData.status,
     world: GameData.activeSaveData.world,
@@ -677,6 +757,7 @@ async function createSaveFromTemplate(name, docType = 'game') {
     docType: type,
     pinned: false,
     lastPlayed: Date.now(),
+    localOnly: true,
   };
 
   GameData.savesIndex.saves.push(saveMeta);
@@ -695,15 +776,18 @@ async function duplicateSaveData(sourceName, newName) {
 
   let data = readLocalJSON(getLocalSaveKey(sourceName));
 
-  if (!data) {
-    if (source.docType === 'conversation') {
-      data = await loadConversationSaveData(source.name);
-    } else {
-      const templateData = await loadTemplateData();
-      const saveData = await loadSaveDataFromFolder(source.name);
-      data = deepMerge(templateData, saveData);
+    if (!data) {
+      if (source.docType === 'conversation') {
+        data = await loadConversationSaveData(source.name);
+      } else {
+        const templateData = await loadTemplateData();
+        const saveData = await loadSaveDataFromFolder(source.name);
+        const { inventory: saveInventory, ...restSaveData } = saveData;
+        const { inventory: templateInventory, ...restTemplateData } = templateData;
+        data = deepMerge(restTemplateData, restSaveData);
+        data.inventory = saveInventory ?? templateInventory;
+      }
     }
-  }
 
   writeLocalJSON(getLocalSaveKey(newName), deepClone(data));
   return deepClone(data);

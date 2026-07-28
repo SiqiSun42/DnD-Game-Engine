@@ -23,6 +23,7 @@
         "target_attribute": "",
         "override_value": -1,
         "bonus_type": "",
+        "bonus_value": null,
         "damage_dice": "",
         "damage_type": "",
         "weapon_properties": [

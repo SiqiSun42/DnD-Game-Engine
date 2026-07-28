@@ -130,3 +130,61 @@ function formatEquipmentTagLabel(tag) {
   if (tag === EQUIPMENT_TAG_ARMOR) return '护甲/防具';
   return '';
 }
+
+const EQUIPMENT_SLOT_EMOJI = {
+  main_hand: '⚔️',
+  off_hand: '🛡️',
+  armor: '🥋',
+};
+
+function normalizeEquipmentSlotToken(slot) {
+  return String(slot || '').trim();
+}
+
+function formatEquipmentSlotGroup(group) {
+  const slots = (Array.isArray(group) ? group : [])
+    .map(normalizeEquipmentSlotToken)
+    .filter(Boolean);
+  if (!slots.length) return '';
+  if (slots.length === 1) return slots[0];
+  return slots.join(' + ');
+}
+
+function formatEquipmentAvailableSlots(equipmentSlots) {
+  if (!Array.isArray(equipmentSlots) || !equipmentSlots.length) return '';
+  return equipmentSlots
+    .map(formatEquipmentSlotGroup)
+    .filter(Boolean)
+    .join(' / ');
+}
+
+function resolveEquipmentUsedSlots(equipmentSlots, equippedSlot) {
+  const slot = normalizeEquipmentSlotToken(equippedSlot);
+  if (!slot) return '';
+  if (!Array.isArray(equipmentSlots) || !equipmentSlots.length) return slot;
+
+  for (const group of equipmentSlots) {
+    if (!Array.isArray(group)) continue;
+    const tokens = group.map(normalizeEquipmentSlotToken).filter(Boolean);
+    if (tokens.includes(slot)) {
+      return formatEquipmentSlotGroup(group);
+    }
+  }
+
+  return slot;
+}
+
+function formatEquipmentEquippedListBadge(usedSlotsDisplay) {
+  const display = String(usedSlotsDisplay || '').trim();
+  if (!display) return '';
+
+  const slotTokens = display.includes('+')
+    ? display.split('+').map(part => normalizeEquipmentSlotToken(part)).filter(Boolean)
+    : [normalizeEquipmentSlotToken(display)];
+
+  const slotEmojis = slotTokens
+    .map(token => EQUIPMENT_SLOT_EMOJI[token] || token)
+    .join('');
+
+  return slotEmojis || '';
+}

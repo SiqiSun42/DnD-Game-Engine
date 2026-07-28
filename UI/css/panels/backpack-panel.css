@@ -28,7 +28,10 @@
 }
 
 .backpack-panel-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
   padding: 8px 6px;
   margin-bottom: 1px;
@@ -49,6 +52,18 @@
 .backpack-panel-item.active {
   background: var(--bg-active);
   color: var(--text-heading);
+}
+
+.backpack-panel-item .backpack-list-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.backpack-equip-badge {
+  flex-shrink: 0;
+  margin-left: auto;
+  opacity: 0.92;
+  letter-spacing: 0.02em;
 }
 
 .backpack-categories {
@@ -90,9 +105,10 @@
   font-size: var(--font-action-panel-body);
   font-weight: 500;
   color: var(--text-heading);
-  padding: 8px 0 0;
-  margin: 0 0 6px;
+  padding: 8px 0 8px;
+  margin: 0 0 10px;
   line-height: 1.4;
+  border-bottom: 1px solid var(--border);
 }
 
 .backpack-detail-body {
@@ -106,4 +122,27 @@
   font-size: var(--font-action-panel-body);
   color: var(--text-muted);
   padding: 8px 0;
+}
+
+.backpack-currency-table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+}
+
+.backpack-currency-table th,
+.backpack-currency-table td {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.backpack-currency-table th {
+  color: var(--text-heading);
+  font-weight: 500;
+  background: var(--bg-hover);
 }

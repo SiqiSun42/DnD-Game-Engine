@@ -1,11 +1,13 @@
 {
   "backpack": {
-    "wealthLabel": "财产：",
     "categories": [
-      { "id": "consumable", "label": "消耗品" },
-      { "id": "tool", "label": "道具" },
+      { "id": "current_status", "label": "当前状态" },
+      { "id": "consumables", "label": "消耗品" },
+      { "id": "tools", "label": "工具" },
       { "id": "equipment", "label": "装备" },
-      { "id": "key", "label": "关键物品" }
+      { "id": "valuables", "label": "财物" },
+      { "id": "adventuring_gear", "label": "杂物" },
+      { "id": "quest_items", "label": "任务物品" }
     ]
   },
   "character": {

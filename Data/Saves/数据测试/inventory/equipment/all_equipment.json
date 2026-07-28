@@ -1,0 +1,130 @@
+[
+  {
+    "category": "equipment",
+    "item_id": "longsword",
+    "name": "长剑",
+    "type": "weapon",
+    "subtype": "martial_weapon",
+    "equipment_slots": [
+      [
+        "main_hand"
+      ],
+      [
+        "off_hand"
+      ]
+    ],
+    "description": "一把标准的锻造长剑，剑刃锋利，适合挥砍。",
+    "price": {
+      "base_price": 80.0,
+      "fluctuation_range": 0.1
+    },
+    "effects": [
+      {
+        "type": "damage",
+        "target_attribute": "hp",
+        "override_value": null,
+        "bonus_type": null,
+        "bonus_value": null,
+        "damage_dice": "1d8",
+        "damage_type": "slashing",
+        "weapon_properties": [
+          "versatile"
+        ],
+        "dex_cap": null,
+        "special": null
+      }
+    ],
+    "restrictions": {
+      "proficiency_requirement": "martial_weapon",
+      "strength_requirement": null,
+      "extra_conditions": null
+    },
+    "is_magic": false,
+    "requires_attunement": false,
+    "rarity": "common",
+    "weight": 3.0,
+    "other": null
+  },
+  {
+    "category": "equipment",
+    "item_id": "wooden_shield",
+    "name": "木盾",
+    "type": "shield",
+    "subtype": "shield",
+    "equipment_slots": [
+      [
+        "off_hand"
+      ]
+    ],
+    "description": "一面由厚重木材和金属包边制成的坚固盾牌，能有效抵挡攻击。",
+    "price": {
+      "base_price": 50.0,
+      "fluctuation_range": 0.1
+    },
+    "effects": [
+      {
+        "type": "bonus",
+        "target_attribute": "ac",
+        "override_value": null,
+        "bonus_type": "shield",
+        "bonus_value": 2,
+        "damage_dice": null,
+        "damage_type": null,
+        "weapon_properties": [],
+        "dex_cap": null,
+        "special": null
+      }
+    ],
+    "restrictions": {
+      "proficiency_requirement": null,
+      "strength_requirement": null,
+      "extra_conditions": null
+    },
+    "is_magic": false,
+    "requires_attunement": false,
+    "rarity": "common",
+    "weight": 6.0,
+    "other": null
+  },
+  {
+    "category": "equipment",
+    "item_id": "leather_armor",
+    "name": "皮甲",
+    "type": "armor",
+    "subtype": "light_armor",
+    "equipment_slots": [
+      [
+        "armor"
+      ]
+    ],
+    "description": "经过煮沸和特殊处理的皮革制成，在提供一定防护的同时保证了身体的灵活。",
+    "price": {
+      "base_price": 30.0,
+      "fluctuation_range": 0.1
+    },
+    "effects": [
+      {
+        "type": "override",
+        "target_attribute": "ac",
+        "override_value": 11,
+        "bonus_type": "armor",
+        "bonus_value": null,
+        "damage_dice": null,
+        "damage_type": null,
+        "weapon_properties": [],
+        "dex_cap": null,
+        "special": null
+      }
+    ],
+    "restrictions": {
+      "proficiency_requirement": null,
+      "strength_requirement": null,
+      "extra_conditions": null
+    },
+    "is_magic": false,
+    "requires_attunement": false,
+    "rarity": "common",
+    "weight": 10.0,
+    "other": null
+  }
+]

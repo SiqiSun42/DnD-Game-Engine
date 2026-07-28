@@ -1,0 +1,40 @@
+[
+  {
+    "category": "quest_items",
+    "item_id": "guild_commission_letter",
+    "name": "冒险家工会委托信",
+    "description": "一封盖有冒险家工会火漆印章的信件，纸张略显粗糙，但字迹十分工整。",
+    "task_hint": "前往小渔村解决哥布林问题",
+    "trigger_condition": null,
+    "triggered": null,
+    "can_transfer": false,
+    "weight": 0.1,
+    "content": "致勇敢的冒险者：近日，小渔村周边频繁遭到哥布林侵扰，村民苦不堪言。工会现正式委托您前往该地，调查并清除哥布林威胁。完成后，请带上村长的证明返回工会领取赏金。冒险家工会敬上。",
+    "contains": null,
+    "key_for": null,
+    "composes_into": null,
+    "required_parts": null,
+    "usage_location": null,
+    "hidden_secret": null,
+    "other": null
+  },
+  {
+    "category": "quest_items",
+    "item_id": "goblin_cave_map",
+    "name": "哥布林洞穴地图",
+    "description": "一张画在羊皮纸上的地图，上面用颜料标记了洞穴的地形和路线。",
+    "task_hint": "按照地图指示在洞穴的三个分叉路口前进",
+    "trigger_condition": null,
+    "triggered": null,
+    "can_transfer": false,
+    "weight": 0.1,
+    "content": "地图上标注了三个分叉路口的行进方向：第一个路口向右，第二个路口向左，第三个路口向右。",
+    "contains": null,
+    "key_for": null,
+    "composes_into": null,
+    "required_parts": null,
+    "usage_location": "goblin_cave",
+    "hidden_secret": "地图上第三个路口指向右侧的标记实际上是错误的。如果按照地图朝右边走，会落入陷阱",
+    "other": null
+  }
+]

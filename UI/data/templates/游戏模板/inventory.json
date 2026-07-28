@@ -1,9 +1,10 @@
 {
-  "wealth": "",
   "categories": {
-    "consumable": [],
-    "tool": [],
+    "consumables": [],
+    "tools": [],
     "equipment": [],
-    "key": []
+    "valuables": [],
+    "adventuring_gear": [],
+    "quest_items": []
   }
 }

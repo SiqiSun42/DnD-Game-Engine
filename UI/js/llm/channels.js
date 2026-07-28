@@ -65,14 +65,18 @@ function buildGameContext() {
     ? findLocationNode(locationId, world.locationTree || [])
     : null;
 
-  return {
+  const inventoryView = typeof resolveInventoryForUi === 'function'
+    ? resolveInventoryForUi(data.inventory)
+    : (data.inventory || null);
+
+  const context = {
     saveName: typeof getActiveSaveName === 'function' ? getActiveSaveName() : null,
     location: locationNode?.name || locationId || null,
     locationDescription: locationNode?.description || null,
     locationNode: locationNode || null,
     world: world,
-    wealth: data.inventory?.wealth || null,
-    inventory: data.inventory || null,
+    wealth: inventoryView?._derived?.totalGoldGp ?? inventoryView?.wealth ?? null,
+    inventory: inventoryView || null,
     status: data.status || null,
     inCombat: data.status?.inCombat ?? false,
     participants: data.status?.participants ?? -1,
@@ -84,4 +88,10 @@ function buildGameContext() {
     settingsGame: data.settingsGame || null,
     promptFile: data.settingsGame?.promptFile || null,
   };
+
+  if (typeof attachSaveDerivedToContext === 'function') {
+    attachSaveDerivedToContext(context, data);
+  }
+
+  return context;
 }

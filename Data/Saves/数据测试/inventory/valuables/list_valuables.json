@@ -1,0 +1,28 @@
+{
+    "backpacks": [
+      {
+        "character_id": "kevin",
+        "identity": "pc",
+        "inventory": [
+          {
+            "item_id": "ruby_ring",
+            "name": "红宝石戒指",
+            "quantity": 1
+          }
+        ]
+      }
+    ],
+    "stocks": [
+      {
+        "location_id": "",
+        "type": "",
+        "inventory": [
+          {
+            "item_id": "",
+            "name": "",
+            "quantity": -1
+          }
+        ]
+      }
+    ]
+  }

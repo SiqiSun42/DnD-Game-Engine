@@ -1,0 +1,78 @@
+[
+  {
+    "category": "consumables",
+    "item_id": "potion_of_healing",
+    "name": "治疗药水",
+    "description": "一瓶装在玻璃瓶中的红色液体，散发着淡淡的草药香气。",
+    "price": {
+      "base_price": 50,
+      "fluctuation_range": 0.1
+    },
+    "effects": [
+      {
+        "type": "restore",
+        "target_attribute": "hp",
+        "dice": "2d4",
+        "fixed_value": 10,
+        "modifier": null,
+        "bonus": null,
+        "spell": null,
+        "remove_condition": null,
+        "range": null,
+        "special": null,
+        "time": {
+          "duration": 0
+        },
+        "concentration": false,
+        "saving_throw": null,
+        "description": "药水入口即化，一股温暖流过全身，恢复生命值。"
+      }
+    ],
+    "usage_conditions": {
+      "action_type": "action",
+      "target": "self",
+      "extra_conditions": null
+    },
+    "rarity": "common",
+    "weight": 0.5,
+    "other": null
+  },
+  {
+    "category": "consumables",
+    "item_id": "torch",
+    "name": "火把",
+    "description": "一根短木棍，顶端缠绕着浸透了焦油的破布。",
+    "price": {
+      "base_price": 10,
+      "fluctuation_range": 0.1
+    },
+    "effects": [
+      {
+        "type": "illumination",
+        "target_attribute": "environment",
+        "dice": null,
+        "fixed_value": null,
+        "modifier": null,
+        "bonus": null,
+        "spell": null,
+        "remove_condition": null,
+        "range": 20,
+        "special": null,
+        "time": {
+          "duration": 60
+        },
+        "concentration": false,
+        "saving_throw": null,
+        "description": "散发20尺半径的明亮光照，持续时间结束后火把烧毁。"
+      }
+    ],
+    "usage_conditions": {
+      "action_type": "action",
+      "target": "self",
+      "extra_conditions": "需要燧石或魔法火源来点燃"
+    },
+    "rarity": "common",
+    "weight": 1.0,
+    "other": null
+  }
+]

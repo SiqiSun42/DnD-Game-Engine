@@ -1,0 +1,16 @@
+[
+    {
+      "event_id": "battle_of_shadow_rift",
+      "name": "暗影裂谷战役",
+      "sub_events": [
+        {
+          "event_id": "defense_of_lightshaven",
+          "name": "光明港保卫战"
+        },
+        {
+          "event_id": "sealing_ritual_of_the_rift",
+          "name": "裂隙封印仪式"
+        }
+      ]
+    }
+  ]

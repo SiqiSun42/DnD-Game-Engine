@@ -1,0 +1,143 @@
+{
+  "characters": [
+    {
+      "basic_info": {
+        "name": "凯文",
+        "character_id": "kevin",
+        "race": "人类",
+        "gender": "男",
+        "age": 25,
+        "height": 180,
+        "weight": 75,
+        "class": "战士",
+        "culture_faith": null,
+        "organization": "adventurers_guild",
+        "appearance": "栗色短发和深棕色眼睛的年轻男性。体格健壮，眼神中透露出对冒险的渴望。",
+        "bio": "初出茅庐的战士，刚刚离开家乡，准备在世界上闯荡出一番事业。"
+      },
+      "alignment_and_personality": {
+        "alignment": {
+          "law_chaos_value": 50,
+          "good_evil_value": 30,
+          "alignment_label": "中立善良"
+        },
+        "personality_dimensions": {
+          "dirty_clean": 6,
+          "introverted_extroverted": 7,
+          "calm_intense": 5,
+          "planning_intuitive": 4,
+          "friendly_mean": 3,
+          "rational_emotional": 6
+        },
+        "speaking_style": "",
+        "quirk": "",
+        "special_trait": ""
+      },
+      "relationships": {
+        "party_relationships": [
+          {
+            "target": "vidcund",
+            "affinity": 50,
+            "relationship_description": "凯文觉得维特昆德的书呆子气很有意思，有时候会故意捉弄他。",
+            "special_interaction_rules": ""
+          }
+        ],
+        "other_relationships": []
+      },
+      "backstory": {
+        "past_experience": {
+          "is_unlocked": true,
+          "unlock_condition": null,
+          "content": "凯文从小就向往更广阔的世界，这在他的家乡并不常见。"
+        },
+        "current_goal": {
+          "is_unlocked": true,
+          "unlock_condition": null,
+          "content": "和伙伴一起四处冒险，成为一名受人尊敬的英雄。"
+        },
+        "bond": {
+          "is_unlocked": true,
+          "unlock_condition": null,
+          "type": "忠诚与归属",
+          "content": "深信团队合作的力量，愿意为了保护并肩作战的同伴冒生命危险。"
+        },
+        "hidden_secret": null
+      }
+    },
+    {
+      "basic_info": {
+        "name": "维特昆德",
+        "character_id": "vidcund",
+        "race": "人类",
+        "gender": "男",
+        "age": 24,
+        "height": 178,
+        "weight": 65,
+        "class": "法师",
+        "culture_faith": null,
+        "organization": "adventurers_guild",
+        "appearance": "齐耳的金色头发，浅蓝色眼睛。长袍整理得一丝不苟，随身携带着厚重的皮革封皮笔记本和便携墨水瓶。",
+        "bio": "严肃认真的年轻法师，想要用墨水和羊皮纸描摹整个世界的形状。最喜欢的花是紫罗兰，这会让他想起故乡和童年。"
+      },
+      "alignment_and_personality": {
+        "alignment": {
+          "law_chaos_value": 20,
+          "good_evil_value": 40,
+          "alignment_label": "守序中立"
+        },
+        "personality_dimensions": {
+          "dirty_clean": 9,
+          "introverted_extroverted": 1,
+          "calm_intense": 7,
+          "planning_intuitive": 2,
+          "friendly_mean": 7,
+          "rational_emotional": 3
+        },
+        "speaking_style": "声音低沉，逻辑严密且喜欢引经据典。平时话不多，但在提及魔法生物时会变得滔滔不绝，有些书呆子气。",
+        "quirk": "听说或者遇到任何未知的生物或现象时，第一反应是掏出笔记本开始记录。沉思时会用指节敲击桌面。",
+        "special_trait": "平时严重洁癖，无法忍受任何脏污。但在遇到魔法生物时会非常兴奋，甚至主动接触沾满粘液或者鲜血的肢体。"
+      },
+      "relationships": {
+        "party_relationships": [
+          {
+            "target": "kevin",
+            "affinity": 30,
+            "relationship_description": "维特昆德其实并不理解凯文，常常觉得他太过鲁莽，不过仍然将其视作能够一起冒险的伙伴。",
+            "special_interaction_rules": ""
+          }
+        ],
+        "other_relationships": []
+      },
+      "backstory": {
+        "past_experience": {
+          "is_unlocked": true,
+          "unlock_condition": null,
+          "content": "在一个传统且管教严格的家庭中长大，终日与藏书室里的魔法典籍为伴，对书中记载的各种奇幻生物产生了浓厚的向往。十余年前因为凯文不小心踩踏了他的花坛而结下梁子，但随后两人逐渐成为了朋友。"
+        },
+        "current_goal": {
+          "is_unlocked": true,
+          "unlock_condition": null,
+          "content": "亲眼见证并记录世界上各种各样的魔法生物，去印证和补充书本上的知识。"
+        },
+        "bond": {
+          "is_unlocked": true,
+          "unlock_condition": null,
+          "type": "追求与证明",
+          "content": "对求知的渴望压倒了对家庭的服从，他迫切想要向世人（以及他的家人）证明自己实地考察的研究价值。"
+        },
+        "hidden_secret": {
+          "is_unlocked": true,
+          "content": "他其实是从家里偷偷溜出来的。父母极力反对这种危险的冒险举动，他是在哥哥帕斯卡和弟弟拉兹洛的帮助下才得以脱身踏上旅途。",
+          "unlock_condition": {
+            "target": ["pc","ally"],
+            "affinity_requirement": 30,
+            "environment": null,
+            "other_conditions": null
+          },
+          "is_condition_met": true,
+          "known_by": ["kevin"]
+        }
+      }
+    }
+  ]
+}

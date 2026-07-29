@@ -306,9 +306,9 @@ async function loadTemplateData() {
   const [chat, inventory, characters, status, world, notes, settingsGame] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
     loadInventoryData(base),
-    fetchJSON(`${base}/characters.json`),
+    loadCharacterData(base),
     fetchJSON(`${base}/status.json`),
-    fetchJSON(`${base}/world.json`),
+    loadWorldData(base),
     fetchJSON(`${base}/notes.json`),
     fetchJSON(`${base}/settings-game.json`),
   ]);
@@ -326,9 +326,9 @@ async function loadSaveDataFromFolder(saveName) {
   const [chat, inventory, characters, status, world, notes, settingsGame] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
     loadInventoryData(base),
-    fetchJSON(`${base}/characters.json`),
+    loadCharacterData(base),
     fetchJSON(`${base}/status.json`),
-    fetchJSON(`${base}/world.json`),
+    loadWorldData(base),
     fetchJSON(`${base}/notes.json`),
     fetchJSON(`${base}/settings-game.json`),
   ]);
@@ -396,10 +396,14 @@ function getPanelData(panelId) {
   if (panelId === 'backpack') {
     return resolveInventoryForUi(GameData.activeSaveData.inventory);
   }
+  if (panelId === 'character') {
+    return resolveCharactersForUi(GameData.activeSaveData.characters);
+  }
+  if (panelId === 'world') {
+    return resolveWorldForUi(GameData.activeSaveData.world);
+  }
   const map = {
-    character: GameData.activeSaveData.characters,
     status: GameData.activeSaveData.status,
-    world: GameData.activeSaveData.world,
     notes: GameData.activeSaveData.notes,
   };
   return map[panelId] || null;

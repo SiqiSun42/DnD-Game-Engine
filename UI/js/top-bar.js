@@ -116,6 +116,17 @@ function refreshStatusPanelIfOpen() {
   mountStatusPanel(contentEl, getPanelSchema('status'), getPanelData('status'));
 }
 
+function refreshWorldPanelIfOpen() {
+  const panel = document.querySelector('#action-panel');
+  const activeTab = document.querySelector('.action-tab.active');
+  if (!panel || panel.classList.contains('hidden') || !activeTab || activeTab.dataset.tab !== 'world') {
+    return;
+  }
+  const contentEl = document.querySelector('#action-panel-content');
+  if (!contentEl || typeof mountWorldPanel !== 'function') return;
+  mountWorldPanel(contentEl, getPanelSchema('world'), getPanelData('world'));
+}
+
 function initActionPanel(container, tabs) {
   const tabEls = container.querySelectorAll('.action-tab');
   const panel = container.querySelector('#action-panel');

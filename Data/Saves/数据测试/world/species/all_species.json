@@ -1,0 +1,92 @@
+[
+  {
+    "name": "人类",
+    "species_id": "human",
+    "description": "也被称为长身人。体型中等，寿命较短，肤色、发色和体态多样，在大多数地区是数量最多的种族。",
+    "personality": "富于野心，适应力极强，个体差异巨大，既有圣徒也有暴君。",
+    "culture": "拥有庞大且复杂的帝国和城邦，文化多元，注重贸易、法律与领土扩张。",
+    "common_habitats": "平原、城市、几乎所有可居住区域",
+    "relationships": [
+      {
+        "target_species": "精灵",
+        "relationship_description": "保持谨慎的友好贸易关系。"
+      },
+      {
+        "target_species": "矮人",
+        "relationship_description": "在锻造和军事上有着紧密的合作与同盟。"
+      }
+    ]
+  },
+  {
+    "name": "精灵",
+    "species_id": "elf",
+    "description": "寿命极长，外貌俊美，身姿轻盈，天生与魔法和自然有着紧密的联系。",
+    "personality": "优雅、长情且有时显得傲慢，由于寿命漫长，看待事物的眼光往往更为长远和抽离。",
+    "culture": "崇尚自然、艺术和魔法，多为古老而隐秘的林地王国，社会步调缓慢。",
+    "common_habitats": "古老森林、隐秘幽谷、魔法圣地",
+    "relationships": [
+      {
+        "target_species": "人类",
+        "relationship_description": "认为人类短命且急躁，但偶尔也会惊叹于他们的活力与创造力。"
+      },
+      {
+        "target_species": "矮人",
+        "relationship_description": "由于历史渊源和价值观的巨大差异，双方关系较为冷淡甚至时有摩擦。"
+      }
+    ]
+  },
+  {
+    "name": "矮人",
+    "species_id": "dwarf",
+    "description": "身材矮壮，结实有力，寿命较长，大多留着浓密的胡须并以此为荣。",
+    "personality": "坚韧、顽固、极度重视家族荣耀、传统以及对神明与先祖的信仰。",
+    "culture": "以精湛的锻造工艺和宏伟的地下堡垒闻名，社会结构严密且注重宗族血脉。",
+    "common_habitats": "深山、地下洞穴、矿脉附近",
+    "relationships": [
+      {
+        "target_species": "精灵",
+        "relationship_description": "觉得精灵轻浮且不切实际，彼此互不信任。"
+      },
+      {
+        "target_species": "哥布林",
+        "relationship_description": "不共戴天的死敌，经常在地下深处争夺生存空间与矿产。"
+      }
+    ]
+  },
+  {
+    "name": "哥布林",
+    "species_id": "goblin",
+    "description": "体型矮小，皮肤多为绿色或黄褐色，生存和繁殖能力极强。",
+    "personality": "狡猾、怯懦且贪婪，通常欺软怕硬，在数量占优时会变得异常残忍和凶狠。",
+    "culture": "以部落形式聚居，崇尚弱肉强食，大多以掠夺、劫掠和拾荒为生，缺乏成体系的文明。",
+    "common_habitats": "废弃洞穴、荒野、黑暗阴暗的角落",
+    "relationships": [
+      {
+        "target_species": "矮人",
+        "relationship_description": "长期的死敌，经常为了地下资源发生流血冲突。"
+      },
+      {
+        "target_species": "人类",
+        "relationship_description": "视人类的边缘村落为绝佳的劫掠目标。"
+      }
+    ]
+  },
+  {
+    "name": "半身人",
+    "species_id": "halfling",
+    "description": "体型只有人类一半大小，灵巧敏捷，大多长着毛茸茸的脚，步履轻盈无声。",
+    "personality": "乐观、友善、极度热爱美食与安逸的生活，同时也充满旺盛的好奇心。",
+    "culture": "向往田园牧歌式的乡村生活，注重家庭、邻里和舒适感，很少建立庞大的国家体系。",
+    "common_habitats": "宁静的丘陵、乡村牧场、人类城市的边缘地带",
+    "relationships": [
+      {
+        "target_species": "人类",
+        "relationship_description": "经常混居在人类社会中，相处极为融洽。"
+      },
+      {
+        "target_species": "精灵",
+        "relationship_description": "对精灵的优雅感到敬畏，但觉得他们的生活方式过于严肃和无趣。"
+      }
+    ]
+  }
+]

@@ -1,0 +1,32 @@
+{
+    "organizations": [
+      {
+        "name": "冒险家协会",
+        "organization_id": "adventurers_guild",
+        "type": "中立公会",
+        "description": "一个遍布大陆的松散组织，旨在为自由冒险者提供任务中介、物资交易和信息交流的平台。",
+        "size": "拥有数万名注册冒险者，各个主要城镇均设有分部或联络点。",
+        "objective": "规范冒险者行为，保障雇主与冒险者的双向权益，并探索未知领域。",
+        "symbol": "一面木盾上交叉着长剑与法杖的图案。",
+        "motto": "探索未知，无畏前行。",
+        "area_of_operation": "全大陆几乎所有的人类及多种族聚居区。",
+        "funding_sources": "任务悬赏抽成、会员注册费、各地商会的赞助。",
+        "recruitment_method": "公开招募，申请者只需通过最基础的体能或魔法测试，缴纳少量费用即可注册成为初级会员。",
+        "founders_and_notable_members": "由传奇勇者奥兰多于三百年前创立；现任总会长为大法师‘星陨’玛丽亚。",
+        "notable_events": "百年前曾集结全大陆的精锐冒险者击退了深渊魔物的入侵；建立了全大陆通用的任务与怪物危险度评级系统。",
+        "reputation": {
+          "attitude": "正面",
+          "description": "广受平民和商人的欢迎与信任。贵族和政客虽然觉得冒险者难以管束，但也经常需要依赖协会来解决棘手的麻烦。"
+        },
+        "allies": null,
+        "enemies": null,
+        "services": null,
+        "quests": null,
+        "can_join": true,
+        "is_member": true,
+        "current_affinity": 0,
+        "relationship_label": "中立",
+        "relationship_description": "你尚未与协会建立深厚的联系，目前只是一名普通的注册冒险者。"
+      }
+    ]
+  }

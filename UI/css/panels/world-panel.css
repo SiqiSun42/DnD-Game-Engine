@@ -51,6 +51,59 @@
   color: var(--text-heading);
 }
 
+.world-list-item {
+  display: block;
+  width: 100%;
+  margin-bottom: 1px;
+}
+
+.world-list-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.world-list-item:hover .world-list-row,
+.world-list-item:focus-within .world-list-row {
+  background: var(--bg-hover);
+}
+
+.world-list-item.active .world-list-row {
+  background: var(--bg-active);
+}
+
+.world-list-item.active .world-list-btn {
+  color: var(--text-heading);
+}
+
+.world-list-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 4px 8px 6px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: var(--font-action-panel-body);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.world-list-member-badge {
+  flex-shrink: 0;
+  margin-right: 6px;
+  font-size: var(--font-action-panel-body);
+  line-height: 1;
+  pointer-events: none;
+}
+
 .world-location-item {
   margin-bottom: 1px;
 }
@@ -137,6 +190,90 @@
   color: var(--text-heading);
 }
 
+.world-tree-item {
+  display: block;
+  width: 100%;
+  margin-bottom: 1px;
+}
+
+.world-tree-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.world-tree-item:hover .world-tree-row,
+.world-tree-item:focus-within .world-tree-row {
+  background: var(--bg-hover);
+}
+
+.world-tree-item.active .world-tree-row {
+  background: var(--bg-active);
+}
+
+.world-tree-item.active .world-tree-btn {
+  color: var(--text-heading);
+}
+
+.world-tree-row--depth-0 .world-tree-btn {
+  padding-left: 6px;
+}
+
+.world-tree-row--depth-1 .world-tree-btn {
+  padding-left: 18px;
+}
+
+.world-tree-row--depth-2 .world-tree-btn {
+  padding-left: 30px;
+}
+
+.world-tree-row--depth-3 .world-tree-btn {
+  padding-left: 42px;
+}
+
+.world-tree-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 4px 8px 6px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: var(--font-action-panel-body);
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.world-tree-expand-btn {
+  flex-shrink: 0;
+  margin-right: 4px;
+  padding: 4px 8px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.world-tree-expand-btn:hover {
+  background: var(--save-menu-hover-bg);
+  color: var(--text-heading);
+}
+
+.world-panel-item--indented {
+  padding-left: 18px;
+}
+
 .world-detail-inner {
   min-height: 0;
   padding: 0 6px;
@@ -157,6 +294,24 @@
   line-height: 1.65;
   margin: 0;
   white-space: pre-wrap;
+}
+
+.world-detail-paragraph {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin: 0 0 4px;
+  white-space: pre-wrap;
+}
+
+.world-detail-paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.world-detail-entry-title {
+  color: var(--text-heading);
+  font-weight: 500;
+  margin-top: 8px;
 }
 
 .world-detail-section {

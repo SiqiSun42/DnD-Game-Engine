@@ -1,0 +1,16 @@
+[
+    {
+      "name": "",
+      "species_id": "",
+      "description": "",
+      "personality": "",
+      "culture": "",
+      "common_habitats": "",
+      "relationships": [
+        {
+          "target_species": "",
+          "relationship_description": ""
+        }
+      ]
+    }
+  ]

@@ -1,0 +1,32 @@
+{
+  "organizations": [
+    {
+      "name": "",
+      "organization_id": "",
+      "type": "",
+      "description": "",
+      "size": "",
+      "objective": "",
+      "symbol": "",
+      "motto": "",
+      "area_of_operation": "",
+      "funding_sources": "",
+      "recruitment_method": "",
+      "founders_and_notable_members": "",
+      "notable_events": "",
+      "reputation": {
+      "attitude": "",
+      "description": ""
+      },
+      "allies": null,
+      "enemies": null,
+      "services": null,
+      "quests": null,
+      "can_join": false,
+      "is_member": false,
+      "current_affinity": -1,
+      "relationship_label": "",
+      "relationship_description": ""
+    }
+  ]
+}

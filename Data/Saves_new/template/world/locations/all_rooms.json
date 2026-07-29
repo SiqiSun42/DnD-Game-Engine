@@ -1,0 +1,75 @@
+{
+    "rooms": [
+      {
+        "name": "",
+        "room_id": "",
+        "location": "",
+        "description": "",
+        "lighting": "",
+        "security_status": "",
+        "characters": [
+          {
+            "name": "",
+            "description": ""
+          }
+        ],
+        "exits": [
+          {
+            "target": "",
+            "status": "",
+            "check": "",
+            "note": ""
+          }
+        ],
+        "services": [
+          {
+            "name": "",
+            "description": "",
+            "effect": {
+              "target": "",
+              "value": ""
+            },
+            "price": {
+              "unit_price": 0,
+              "unit": ""
+            }
+          }
+        ],
+        "inventory": "",
+        "plots": [
+          {
+            "name": "",
+            "description": "",
+            "trigger_condition": "",
+            "is_repeatable": false
+          }
+        ],
+        "traits": [],
+        "can_trigger_battle": false,
+        "triggerable_battles": [
+          {
+            "battle_id": "",
+            "is_triggered": false,
+            "trigger_condition": ""
+          }
+        ],
+        "actions": [
+          {
+            "name": "",
+            "description": "",
+            "trigger_condition": "",
+            "skill_check": {
+              "attribute": "",
+              "skill": "",
+              "initial_dc": 0
+            },
+            "success_effect": "",
+            "failure_effect": "",
+            "attempts_made": 0,
+            "max_attempts": -1,
+            "retry_effect": ""
+          }
+        ]
+      }
+    ]
+  }

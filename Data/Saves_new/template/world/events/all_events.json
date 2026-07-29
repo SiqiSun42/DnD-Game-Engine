@@ -1,0 +1,27 @@
+[
+    {
+      "name": "",
+      "event_id": "",
+      "description": "",
+      "has_started": false,
+      "start_conditions": null,
+      "start_time": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "has_ended": false,
+      "end_time": {
+        "year": null,
+        "month": null,
+        "day": null
+      },
+      "possible_outcomes": [],
+      "outcome": null,
+      "associated_characters": null,
+      "associated_organizations": null,
+      "associated_locations": null,
+      "associated_events": null,
+      "impacts": null
+    }
+  ]

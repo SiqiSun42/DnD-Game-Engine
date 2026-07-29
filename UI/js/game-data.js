@@ -301,9 +301,17 @@ function updateSaveMeta(saveName, patch) {
   return save;
 }
 
+async function loadCurrentData(basePath) {
+  try {
+    return await fetchJSON(`${basePath}/current.json`);
+  } catch (_) {
+    return { current_location: null };
+  }
+}
+
 async function loadTemplateData() {
   const base = `${UI_DATA_ROOT}/templates/${encodeURIComponent(TEMPLATE_NAME)}`;
-  const [chat, inventory, characters, status, world, notes, settingsGame] = await Promise.all([
+  const [chat, inventory, characters, status, world, notes, settingsGame, current] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
     loadInventoryData(base),
     loadCharacterData(base),
@@ -311,8 +319,9 @@ async function loadTemplateData() {
     loadWorldData(base),
     fetchJSON(`${base}/notes.json`),
     fetchJSON(`${base}/settings-game.json`),
+    loadCurrentData(base),
   ]);
-  return { chat, inventory, characters, status, world, notes, settingsGame };
+  return { chat, inventory, characters, status, world, notes, settingsGame, current };
 }
 
 async function loadConversationSaveData(saveName) {
@@ -323,7 +332,7 @@ async function loadConversationSaveData(saveName) {
 
 async function loadSaveDataFromFolder(saveName) {
   const base = getSaveFolderBase(saveName);
-  const [chat, inventory, characters, status, world, notes, settingsGame] = await Promise.all([
+  const [chat, inventory, characters, status, world, notes, settingsGame, current] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
     loadInventoryData(base),
     loadCharacterData(base),
@@ -331,8 +340,9 @@ async function loadSaveDataFromFolder(saveName) {
     loadWorldData(base),
     fetchJSON(`${base}/notes.json`),
     fetchJSON(`${base}/settings-game.json`),
+    loadCurrentData(base),
   ]);
-  return { chat, inventory, characters, status, world, notes, settingsGame };
+  return { chat, inventory, characters, status, world, notes, settingsGame, current };
 }
 
 async function loadSave(saveName) {
@@ -400,7 +410,8 @@ function getPanelData(panelId) {
     return resolveCharactersForUi(GameData.activeSaveData.characters);
   }
   if (panelId === 'world') {
-    return resolveWorldForUi(GameData.activeSaveData.world);
+    const currentLocationId = GameData.activeSaveData.current?.current_location || null;
+    return resolveWorldForUi(GameData.activeSaveData.world, currentLocationId);
   }
   const map = {
     status: GameData.activeSaveData.status,

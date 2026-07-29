@@ -7,12 +7,15 @@
         "description": "",
         "lighting": "",
         "security_status": "",
-        "characters": [
-          {
-            "name": "",
-            "description": ""
-          }
-        ],
+        "npcs": {
+          "location_npc":[
+            {
+              "name": "",
+              "description": ""
+            }
+          ],
+          "character_npc":[]
+        },
         "exits": [
           {
             "target": "",
@@ -21,41 +24,14 @@
             "note": ""
           }
         ],
-        "services": [
-          {
-            "name": "",
-            "description": "",
-            "effect": {
-              "target": "",
-              "value": ""
-            },
-            "price": {
-              "unit_price": 0,
-              "unit": ""
-            }
-          }
-        ],
-        "inventory": "",
-        "plots": [
-          {
-            "name": "",
-            "description": "",
-            "trigger_condition": "",
-            "is_repeatable": false
-          }
-        ],
+        "services": [],
+        "inventory": [],
+        "missions": [],
         "traits": [],
-        "can_trigger_battle": false,
-        "triggerable_battles": [
-          {
-            "battle_id": "",
-            "is_triggered": false,
-            "trigger_condition": ""
-          }
-        ],
         "actions": [
           {
             "name": "",
+            "action_id": "",
             "description": "",
             "trigger_condition": "",
             "skill_check": {

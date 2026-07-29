@@ -23,6 +23,10 @@ const WORLD_CATEGORY_CONFIG = {
   },
 };
 
+const LOCATION_LEVEL1_TYPES = new Set(['plane', 'world', 'continent', 'nation', 'region', 'town']);
+const LOCATION_LEVEL2_TYPES = new Set(['site', 'room']);
+const LOCATION_ROOT_KEY = '__root__';
+
 const WORLD_SCALAR_FIELDS = {
   species: [
     ['description', '简述'],
@@ -135,6 +139,7 @@ function normalizeWorldList(listData, categoryId) {
   if (Array.isArray(listData.organizations)) return listData.organizations;
   if (Array.isArray(listData.species)) return listData.species;
   if (Array.isArray(listData.cultures)) return listData.cultures;
+  if (categoryId === 'location' && Array.isArray(listData.locations)) return listData.locations;
   if (categoryId === 'event' && Array.isArray(listData.sub_events)) return [listData];
   return [];
 }
@@ -185,6 +190,262 @@ function buildEventCategory(listData, allData) {
   return { list, entriesById };
 }
 
+function findLocationAllEntry(id, catalogs) {
+  if (!id || !catalogs) return null;
+  const groups = [
+    catalogs.allLocations?.locations,
+    catalogs.allTowns?.towns,
+    catalogs.allSites?.sites,
+    catalogs.allRooms?.rooms,
+  ];
+  for (const group of groups) {
+    for (const item of group || []) {
+      const itemId = item?.location_id || item?.room_id;
+      if (itemId === id) return item;
+    }
+  }
+  return null;
+}
+
+function buildLocationsIndex(locationBundle) {
+  if (!locationBundle) return null;
+  const list = normalizeWorldList(locationBundle.list, 'location');
+  const catalogs = {
+    allLocations: locationBundle.allLocations,
+    allTowns: locationBundle.allTowns,
+    allSites: locationBundle.allSites,
+    allRooms: locationBundle.allRooms,
+  };
+  const entriesById = {};
+  const childrenByParentId = {};
+
+  list.forEach(listEntry => {
+    if (listEntry.is_unlocked === false) return;
+    const id = listEntry.location_id;
+    if (!id) return;
+    const allEntry = findLocationAllEntry(id, catalogs) || {};
+    entriesById[id] = {
+      ...allEntry,
+      ...listEntry,
+      id,
+      name: listEntry.name || allEntry.name || id,
+    };
+    const parentKey = listEntry.parent_id || LOCATION_ROOT_KEY;
+    if (!childrenByParentId[parentKey]) {
+      childrenByParentId[parentKey] = [];
+    }
+    childrenByParentId[parentKey].push(id);
+  });
+
+  return { entriesById, childrenByParentId, list };
+}
+
+function resolveLevel2AnchorId(currentLocationId, entriesById) {
+  if (!currentLocationId || !entriesById[currentLocationId]) {
+    return currentLocationId || null;
+  }
+  let node = entriesById[currentLocationId];
+  if (node.type === 'town') {
+    return currentLocationId;
+  }
+  while (node) {
+    if (node.type === 'town') {
+      return node.id;
+    }
+    if (!node.parent_id) break;
+    node = entriesById[node.parent_id];
+  }
+  return currentLocationId;
+}
+
+function buildLocationsUiCategory(locationBundle, currentLocationId) {
+  const index = buildLocationsIndex(locationBundle);
+  if (!index) {
+    return {
+      currentLocationId: null,
+      currentLocationName: null,
+      level2AnchorId: null,
+      entriesById: {},
+      childrenByParentId: {},
+      macroRootIds: [],
+    };
+  }
+
+  const { entriesById, childrenByParentId, list } = index;
+  const fallbackId = list.find(item => item.is_unlocked !== false)?.location_id || null;
+  const resolvedCurrentId = currentLocationId && entriesById[currentLocationId]
+    ? currentLocationId
+    : fallbackId;
+  const currentEntry = resolvedCurrentId ? entriesById[resolvedCurrentId] : null;
+
+  return {
+    currentLocationId: resolvedCurrentId,
+    currentLocationName: currentEntry?.name || null,
+    level2AnchorId: resolveLevel2AnchorId(resolvedCurrentId, entriesById),
+    entriesById,
+    childrenByParentId,
+    macroRootIds: list
+      .filter(item => item.is_unlocked !== false && LOCATION_LEVEL1_TYPES.has(item.type) && !item.parent_id)
+      .map(item => item.location_id),
+  };
+}
+
+function resolveLocationsCategoryFromData(data) {
+  if (!data || typeof data !== 'object') {
+    return buildLocationsUiCategory(null, null);
+  }
+  if (data.locationsCategory?.entriesById) {
+    return data.locationsCategory;
+  }
+  const bundle = data.categories?.location;
+  if (bundle) {
+    return buildLocationsUiCategory(bundle, data.currentLocationId);
+  }
+  return buildLocationsUiCategory(null, data.currentLocationId || null);
+}
+
+function getLocationChildIds(parentId, childrenByParentId, entriesById, level) {
+  const key = parentId || LOCATION_ROOT_KEY;
+  return (childrenByParentId[key] || []).filter(id => {
+    const entry = entriesById[id];
+    if (!entry || entry.is_unlocked === false) return false;
+    if (level === 'macro') return LOCATION_LEVEL1_TYPES.has(entry.type);
+    if (level === 'local') return LOCATION_LEVEL2_TYPES.has(entry.type);
+    if (level === 'all') return true;
+    return true;
+  });
+}
+
+function getLocationExpandPathFromAncestor(ancestorId, targetId, entriesById) {
+  const path = [];
+  let node = entriesById[targetId];
+  while (node && node.id !== ancestorId) {
+    path.unshift(node.id);
+    if (!node.parent_id) break;
+    node = entriesById[node.parent_id];
+  }
+  return node?.id === ancestorId ? path : [];
+}
+
+function getLocalDefaultExpandedLocationIds(currentLocationId, anchorId, entriesById) {
+  if (!currentLocationId || !anchorId || !entriesById[currentLocationId]) {
+    return new Set();
+  }
+  const path = getLocationExpandPathFromAncestor(anchorId, currentLocationId, entriesById);
+  return new Set(path.slice(0, -1));
+}
+
+function getMacroDefaultExpandedLocationIds(currentLocationId, entriesById) {
+  const expandIds = [];
+  let node = entriesById[currentLocationId];
+  while (node) {
+    if (LOCATION_LEVEL1_TYPES.has(node.type)) {
+      expandIds.unshift(node.id);
+    }
+    if (!node.parent_id) break;
+    node = entriesById[node.parent_id];
+  }
+  return new Set(expandIds.slice(0, -1));
+}
+
+function getAllDefaultExpandedLocationIds(currentLocationId, entriesById) {
+  const expandIds = [];
+  let node = entriesById[currentLocationId];
+  while (node?.parent_id) {
+    expandIds.unshift(node.parent_id);
+    node = entriesById[node.parent_id];
+  }
+  return new Set(expandIds);
+}
+
+function getVisibleAllLocationRowsFromParent(parentId, entriesById, childrenByParentId, expandedIds, depth) {
+  const rows = [];
+  getLocationChildIds(parentId, childrenByParentId, entriesById, 'all').forEach(id => {
+    const entry = entriesById[id];
+    if (!entry) return;
+    const hasChildren = getLocationChildIds(id, childrenByParentId, entriesById, 'all').length > 0;
+    rows.push({ id, name: entry.name, depth, hasChildren });
+    if (hasChildren && expandedIds.has(id)) {
+      rows.push(...getVisibleAllLocationRowsFromParent(id, entriesById, childrenByParentId, expandedIds, depth + 1));
+    }
+  });
+  return rows;
+}
+
+function getVisibleAllLocationRows(entriesById, childrenByParentId, macroRootIds, expandedIds) {
+  const rows = [];
+  macroRootIds.forEach(id => {
+    const entry = entriesById[id];
+    if (!entry) return;
+    const hasChildren = getLocationChildIds(id, childrenByParentId, entriesById, 'all').length > 0;
+    rows.push({ id, name: entry.name, depth: 0, hasChildren });
+    if (hasChildren && expandedIds.has(id)) {
+      rows.push(...getVisibleAllLocationRowsFromParent(id, entriesById, childrenByParentId, expandedIds, 1));
+    }
+  });
+  return rows;
+}
+
+function getVisibleLocalLocationRows(anchorId, entriesById, childrenByParentId, expandedIds, depth = 0) {
+  const rows = [];
+  getLocationChildIds(anchorId, childrenByParentId, entriesById, 'local').forEach(id => {
+    const entry = entriesById[id];
+    if (!entry) return;
+    const hasChildren = getLocationChildIds(id, childrenByParentId, entriesById, 'local').length > 0;
+    rows.push({ id, name: entry.name, depth, hasChildren });
+    if (hasChildren && expandedIds.has(id)) {
+      rows.push(...getVisibleLocalLocationRows(id, entriesById, childrenByParentId, expandedIds, depth + 1));
+    }
+  });
+  return rows;
+}
+
+function getVisibleMacroLocationRowsFromParent(parentId, entriesById, childrenByParentId, expandedIds, depth) {
+  const rows = [];
+  getLocationChildIds(parentId, childrenByParentId, entriesById, 'macro').forEach(id => {
+    const entry = entriesById[id];
+    if (!entry) return;
+    const hasChildren = getLocationChildIds(id, childrenByParentId, entriesById, 'macro').length > 0;
+    rows.push({ id, name: entry.name, depth, hasChildren });
+    if (hasChildren && expandedIds.has(id)) {
+      rows.push(...getVisibleMacroLocationRowsFromParent(id, entriesById, childrenByParentId, expandedIds, depth + 1));
+    }
+  });
+  return rows;
+}
+
+function getVisibleMacroLocationRows(entriesById, childrenByParentId, macroRootIds, expandedIds) {
+  const rows = [];
+  macroRootIds.forEach(id => {
+    const entry = entriesById[id];
+    if (!entry) return;
+    const hasChildren = getLocationChildIds(id, childrenByParentId, entriesById, 'macro').length > 0;
+    rows.push({ id, name: entry.name, depth: 0, hasChildren });
+    if (hasChildren && expandedIds.has(id)) {
+      rows.push(...getVisibleMacroLocationRowsFromParent(id, entriesById, childrenByParentId, expandedIds, 1));
+    }
+  });
+  return rows;
+}
+
+async function loadLocationBundle(basePath) {
+  const locBase = `${basePath}/world/locations`;
+  const [list, allLocations, allTowns, allSites, allRooms] = await Promise.all([
+    fetchJSON(`${locBase}/list_locations.json`).catch(() => []),
+    fetchJSON(`${locBase}/all_locations.json`).catch(() => ({})),
+    fetchJSON(`${locBase}/all_towns.json`).catch(() => ({})),
+    fetchJSON(`${locBase}/all_sites.json`).catch(() => ({})),
+    fetchJSON(`${locBase}/all_rooms.json`).catch(() => ({})),
+  ]);
+  return {
+    list: normalizeWorldList(list, 'location'),
+    allLocations,
+    allTowns,
+    allSites,
+    allRooms,
+  };
+}
+
 function resolveEventCategoryFromData(data) {
   if (!data || typeof data !== 'object') {
     return { list: [], entriesById: {} };
@@ -217,21 +478,26 @@ function resolveEventCategoryFromData(data) {
   return { list: [], entriesById: {} };
 }
 
-function resolveLegacyWorldForUi(world) {
+function resolveLegacyWorldForUi(world, currentLocationId) {
   const base = world || {};
   return {
     locationTree: Array.isArray(base.locationTree) ? base.locationTree : [],
     defaultLocationId: base.defaultLocationId || null,
+    currentLocationId: currentLocationId || base.currentLocationId || null,
     species: Array.isArray(base.species) ? base.species : [],
     organization: Array.isArray(base.organization) ? base.organization : [],
     culture: Array.isArray(base.culture) ? base.culture : [],
     eventsCategory: resolveEventCategoryFromData(base),
+    locationsCategory: resolveLocationsCategoryFromData({
+      ...base,
+      currentLocationId: currentLocationId || base.currentLocationId || null,
+    }),
   };
 }
 
-function resolveWorldForUi(world) {
+function resolveWorldForUi(world, currentLocationId) {
   if (!isWorldBundle(world)) {
-    return resolveLegacyWorldForUi(world);
+    return resolveLegacyWorldForUi(world, currentLocationId);
   }
 
   const categories = world.categories || {};
@@ -239,6 +505,7 @@ function resolveWorldForUi(world) {
   return {
     locationTree: Array.isArray(world.locationTree) ? world.locationTree : [],
     defaultLocationId: world.defaultLocationId || null,
+    currentLocationId: currentLocationId || world.currentLocationId || null,
     species: buildFlatWorldEntries(
       categories.species?.list,
       categories.species?.all,
@@ -255,6 +522,7 @@ function resolveWorldForUi(world) {
       'culture_id',
     ),
     eventsCategory: buildEventCategory(categories.event?.list, categories.event?.all),
+    locationsCategory: buildLocationsUiCategory(categories.location, currentLocationId),
   };
 }
 
@@ -292,6 +560,11 @@ async function loadWorldBundle(basePath) {
       list: result.list,
     };
   });
+
+  const locationData = await loadLocationBundle(basePath).catch(() => null);
+  if (locationData) {
+    bundle.categories.location = locationData;
+  }
 
   return bundle;
 }
@@ -523,6 +796,13 @@ function renderWorldCategoryDetail(categoryId, entry) {
 
   if (categoryId === 'event') {
     return renderWorldEventDetail(entry);
+  }
+
+  if (categoryId === 'location' || categoryId === 'current_location' || categoryId === 'all_locations') {
+    return [
+      renderWorldTextSection('简介', entry.description),
+      renderWorldTextSection('位置', entry.location),
+    ].filter(Boolean).join('');
   }
 
   return renderWorldTextSection('描述', entry.description);

@@ -1,0 +1,79 @@
+{
+    "missions": [
+        {
+            "name": "哥布林任务",
+            "mission_id": "goblin_mission",
+            "description": "村庄现在遭到哥布林的侵扰，需要你前往洞穴并打败那里的哥布林。",
+            "type": ["main_mission"],
+            "is_triggered": true,
+            "trigger_condition": {
+                "required_missions": ["accept_goblin_mission"],
+                "related_missions": [""],
+                "required_conditions": "",
+                "related_conditions": ""
+            },
+            "npc_involved": null,
+            "combat_involved": null,
+            "content": "前往洞穴并打败那里的哥布林。",
+            "is_completed": false,
+            "completed_conditions": "打败哥布林大王，并离开村庄",
+            "is_ended": false,
+            "ended_conditions": "离开村庄"
+        },
+        {
+            "name": "接受哥布林任务",
+            "mission_id": "accept_goblin_mission",
+            "description": "从冒险者工会接受哥布林任务",
+            "type": ["exploration"],
+            "is_triggered": true,
+            "trigger_condition": null,
+            "npc_involved": null,
+            "combat_involved": null,
+            "content": "从冒险者工会接受哥布林任务",
+            "is_completed": true,
+            "completed_conditions": "从冒险者工会接受哥布林任务",
+            "is_ended": true,
+            "ended_conditions": "从冒险者工会接受哥布林任务，或者拒绝。"
+        },
+        {
+            "name": "抵达村庄",
+            "mission_id": "arrive_village",
+            "description": "抵达任务地点，一个海边的小村庄",
+            "type": ["exploration"],
+            "is_triggered": true,
+            "trigger_condition": {
+                "required_missions": ["accept_goblin_mission"],
+                "related_missions": [""],
+                "required_conditions": "",
+                "related_conditions": "抵达村庄或者附近地区"
+            },
+            "npc_involved": null,
+            "combat_involved": null,
+            "content": "抵达村庄或者附近地区",
+            "is_completed": true,
+            "completed_conditions": "抵达村庄或者附近地区",
+            "is_ended": true,
+            "ended_conditions": "抵达村庄或者附近地区"
+        },
+        {
+            "name": "哥布林遭遇战",
+            "mission_id": "goblin_encounter",
+            "description": "在村庄附近发现哥布林，需要你帮助村民打败他们。",
+            "type": ["combat"],
+            "is_triggered": false,
+            "trigger_condition": {
+                "required_missions": ["arrive_village"],
+                "related_missions": [""],
+                "required_conditions": "前往查看村庄附近的吵闹，并选择触发战斗",
+                "related_conditions": ""
+            },
+            "npc_involved": [],
+            "combat_involved": ["goblin_encounter"],
+            "content": "帮助村民打败哥布林",
+            "is_completed": false,
+            "completed_conditions": "在和哥布林的战斗中获胜",
+            "is_ended": false,
+            "ended_conditions": "战斗获胜或者失败，或者不触发战斗"
+        }
+    ]
+}

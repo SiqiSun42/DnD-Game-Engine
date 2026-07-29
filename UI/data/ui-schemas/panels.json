@@ -30,6 +30,8 @@
   },
   "world": {
     "categories": [
+      { "id": "current_location", "label": "当前地点" },
+      { "id": "all_locations", "label": "所有地点" },
       { "id": "species", "label": "物种" },
       { "id": "organization", "label": "组织" },
       { "id": "culture", "label": "文化" },

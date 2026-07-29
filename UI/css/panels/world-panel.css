@@ -1,6 +1,6 @@
 .world-panel {
   display: grid;
-  grid-template-columns: 1fr 1fr 3fr;
+  grid-template-columns: 3fr 5fr 12fr;
   height: 100%;
   min-height: 0;
 }
@@ -102,6 +102,82 @@
   font-size: var(--font-action-panel-body);
   line-height: 1;
   pointer-events: none;
+}
+
+.world-location-header {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 4px 6px 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.world-location-header.active {
+  background: var(--bg-active);
+}
+
+.world-location-header-prefix {
+  flex-shrink: 0;
+  font-size: var(--font-action-panel-body);
+  color: var(--text-heading);
+  line-height: 1.4;
+}
+
+.world-location-header-name {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: var(--font-action-panel-body);
+  color: var(--text-heading);
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.world-location-header-name:hover {
+  color: var(--text-secondary);
+}
+
+.world-location-header.active .world-location-header-name {
+  font-weight: 500;
+}
+
+.world-location-header-title {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--font-action-panel-body);
+  color: var(--text-heading);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.world-location-nav-btn {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: var(--font-action-panel-body);
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.world-location-nav-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-heading);
 }
 
 .world-location-item {
@@ -232,6 +308,22 @@
 
 .world-tree-row--depth-3 .world-tree-btn {
   padding-left: 42px;
+}
+
+.world-tree-row--depth-4 .world-tree-btn {
+  padding-left: 54px;
+}
+
+.world-tree-row--depth-5 .world-tree-btn {
+  padding-left: 66px;
+}
+
+.world-tree-row--depth-6 .world-tree-btn {
+  padding-left: 78px;
+}
+
+.world-tree-row--depth-7 .world-tree-btn {
+  padding-left: 90px;
 }
 
 .world-tree-btn {

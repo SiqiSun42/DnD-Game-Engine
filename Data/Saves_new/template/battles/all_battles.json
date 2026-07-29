@@ -1,0 +1,19 @@
+{
+    "battles": [
+        {
+            "name": "",
+            "battle_id": "",
+            "description": "",
+            "enemies_involved": [""],
+            "is_triggered": false,
+            "is_avoidable": true,
+            "trigger_condition": "",
+            "avoid_conditions": "",
+            "booty": [""],
+            "is_completed": false,
+            "completed_conditions": "",
+            "is_ended": false,
+            "ended_conditions": ""
+        }
+    ]
+}

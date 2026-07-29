@@ -1,0 +1,102 @@
+{
+    "sites": [
+        {
+            "name": "哥布林洞穴",
+            "location_id": "goblin_cave",
+            "type": "site",
+            "location": "",
+            "description": "阴森恐怖的哥布林巢穴，洞穴深处有哥布林大王和他的卫队。",
+            "lighting": "dark",
+            "npcs": null,
+            "exits": {
+                "upper_level": {
+                    "target": "salt_tide_forest",
+                    "distance": "10",
+                    "note": "沿着路往回走，可以回到盐潮森林"
+                },
+                "same_level": null,
+                "lower_level": null
+            },
+            "services": null,
+            "inventory": null,
+            "missions": null,
+            "traits": null,
+            "actions": null
+        },
+        {
+            "name": "盐潮商店",
+            "location_id": "salt_tide_shop",
+            "type": "site",
+            "location": "在盐潮村的北部",
+            "description": "一座普通的小商店，可以在这里买到必需品",
+            "lighting": "normal",
+            "npcs": null,
+            "exits": null,
+            "services": null,
+            "inventory": null,
+            "missions": null,
+            "traits": null,
+            "actions": null
+        },
+        {
+            "name": "盐潮酒馆",
+            "location_id": "salt_tide_inn",
+            "type": "site",
+            "location": "在盐潮村的南部",
+            "description": "一座普通的小酒馆，可以在这里打听消息，招募队友。",
+            "lighting": "normal",
+            "npcs": null,
+            "exits": null,
+            "services": null,
+            "inventory": null,
+            "missions": null,
+            "traits": null,
+            "actions":null
+        },
+        {
+            "name": "村长办公室",
+            "location_id": "mayor_office",
+            "type": "site",
+            "location": "在盐潮村的中心",
+            "description": "村长的办公室，可以在这里找到村长。",
+            "lighting": "normal",
+            "npcs": null,
+            "exits": null,
+            "services": null,
+            "inventory": null,
+            "missions": null,
+            "traits": null,
+            "actions":null
+        },
+        {
+            "name": "林间空地",
+            "location_id": "forest_clearing",
+            "type": "site",
+            "location": "在盐潮森林的北部",
+            "description": "一块普通的林间空地。周围树木茂盛，不能再往前走，只能原路返回。",
+            "lighting": "normal",
+            "npcs": null,
+            "exits": null,
+            "services": null,
+            "inventory": null,
+            "missions": null,
+            "traits": null,
+            "actions":null
+        },
+        {
+            "name": "悬崖",
+            "location_id": "cliff",
+            "type": "site",
+            "location": "在盐潮森林的西部",
+            "description": "一座普通的悬崖。不能再往前走，只能原路返回。",
+            "lighting": "normal",
+            "npcs": null,
+            "exits": null,
+            "services": null,
+            "inventory": null,
+            "missions": null,
+            "traits": null,
+            "actions":null
+        }
+    ]
+}

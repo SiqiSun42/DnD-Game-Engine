@@ -1,0 +1,49 @@
+{
+    "battles": [
+        {
+            "name": "哥布林遭遇战1",
+            "battle_id": "goblin_encounter_1",
+            "description": "在村庄附近的遭遇战",
+            "enemies_involved": ["goblin_1", "goblin_2", "goblin_3"],
+            "is_triggered": false,
+            "is_avoidable": true,
+            "trigger_condition": "前往查看村庄附近的吵闹，并选择触发战斗",
+            "avoid_conditions": "不前往查看村庄附近的吵闹，或者选择不触发战斗",
+            "booty": ["booty_1"],
+            "is_completed": false,
+            "completed_conditions": "在和哥布林的战斗中获胜",
+            "is_ended": false,
+            "ended_conditions": "战斗获胜或者失败，或者不触发战斗"
+        },
+        {
+            "name": "哥布林遭遇战2",
+            "battle_id": "goblin_encounter_2",
+            "description": "在洞穴第二段通道的遭遇战",
+            "enemies_involved": ["goblin_4", "goblin_5", "goblin_6"],
+            "is_triggered": false,
+            "is_avoidable": true,
+            "trigger_condition": "直接触发战斗，或者潜行鉴定失败",
+            "avoid_conditions": "潜行鉴定(DC 15)成功",
+            "booty": ["booty_2"],
+            "is_completed": false,
+            "completed_conditions": "在和哥布林的战斗中获胜",
+            "is_ended": false,
+            "ended_conditions": "战斗获胜，或者哥布林大王已经被战胜"
+        },
+        {
+            "name": "哥布林大王遭遇战",
+            "battle_id": "goblin_boss_encounter",
+            "description": "在洞穴第三段通道的遭遇战",
+            "enemies_involved": ["goblin_7", "goblin_8", "goblin_king"],
+            "is_triggered": false,
+            "is_avoidable": false,
+            "trigger_condition": "进入哥布林大王巢穴",
+            "avoid_conditions": null,
+            "booty": ["booty_3"],
+            "is_completed": false,
+            "completed_conditions": "战斗获胜",
+            "is_ended": false,
+            "ended_conditions": "战斗获胜"
+        }
+    ]
+}

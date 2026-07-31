@@ -527,7 +527,7 @@ function resolveInventoryForUi(inventory) {
 
   if (!isInventoryBundle(inventory)) {
     const categories = { ...(inventory?.categories || {}) };
-    categories.current_status = buildCurrentStatusItems(derived);
+    categories.backpack_status = buildCurrentStatusItems(derived);
     return { categories, _derived: derived };
   }
 
@@ -538,7 +538,7 @@ function resolveInventoryForUi(inventory) {
     categories[uiCategoryId] = collectCategoryItems(sourceDirs, bundleCategories);
   });
 
-  categories.current_status = buildCurrentStatusItems(derived);
+  categories.backpack_status = buildCurrentStatusItems(derived);
 
   return { categories, _derived: derived };
 }

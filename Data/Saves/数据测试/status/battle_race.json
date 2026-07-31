@@ -1,0 +1,14 @@
+{
+    "racial_modifiers": [
+      {   
+        "character_id": "kevin",
+        "race": "human",
+        "subrace": null
+      },
+      {
+        "character_id": "vidcund",
+        "race": "human ",
+        "subrace": null
+      }
+    ]
+}

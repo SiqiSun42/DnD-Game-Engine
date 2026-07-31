@@ -19,7 +19,7 @@ function mountGameTemplate(container, options = {}) {
   `;
 
   setViewTitle(container, options.title || '未命名');
-  initActionPanel(container, ALL_PANEL_TABS);
+  initActionPanel(container, getAllPanelTabs());
 
   const playerLabel = options.playerLabel || 'A';
   const chat = initChat(container.querySelector('.chat-root'), {

@@ -44,15 +44,15 @@
             "trigger_condition": {
                 "required_missions": ["accept_goblin_mission"],
                 "related_missions": [""],
-                "required_conditions": "",
-                "related_conditions": "抵达村庄或者附近地区"
+                "required_conditions": "抵达村庄或者附近地区",
+                "related_conditions": ""
             },
             "npc_involved": null,
             "combat_involved": null,
             "content": "抵达村庄或者附近地区",
             "is_completed": true,
             "completed_conditions": "抵达村庄或者附近地区",
-            "is_ended": true,
+            "is_ended": false,
             "ended_conditions": "抵达村庄或者附近地区"
         },
         {

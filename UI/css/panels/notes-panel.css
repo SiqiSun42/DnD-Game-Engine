@@ -204,3 +204,48 @@
   color: var(--text-muted);
   padding: 8px 0;
 }
+
+.notes-mission-section {
+  margin-bottom: 16px;
+}
+
+.notes-mission-list {
+  padding: 0 6px;
+}
+
+.notes-mission-section:last-child {
+  margin-bottom: 0;
+}
+
+.notes-mission-section-title {
+  font-size: var(--font-action-panel-body);
+  font-weight: 500;
+  color: var(--text-heading);
+  margin: 0;
+  padding: 8px 6px 6px;
+  line-height: 1.4;
+}
+
+.notes-mission-item {
+  padding: 4px 6px 10px;
+}
+
+.notes-mission-name {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-heading);
+  line-height: 1.5;
+}
+
+.notes-mission-content {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.notes-mission-empty {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-muted);
+  margin: 0;
+  padding: 0 6px 4px;
+}

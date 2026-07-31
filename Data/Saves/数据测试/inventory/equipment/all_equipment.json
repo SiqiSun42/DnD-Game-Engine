@@ -4,7 +4,7 @@
     "item_id": "longsword",
     "name": "长剑",
     "type": "weapon",
-    "subtype": "martial_weapon",
+    "subtype": "martial",
     "equipment_slots": [
       [
         "main_hand"
@@ -91,7 +91,7 @@
     "item_id": "leather_armor",
     "name": "皮甲",
     "type": "armor",
-    "subtype": "light_armor",
+    "subtype": "light",
     "equipment_slots": [
       [
         "armor"

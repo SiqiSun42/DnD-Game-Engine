@@ -1,0 +1,14 @@
+{
+    "other_statuses": [
+        {
+            "character_id": "kevin",
+            "hp_bonus": 0,
+            "ac_bonus": 1,
+            "attack_bonus": 0,
+            "damage_bonus": 0,
+            "qualified_traits":["fighting_tyle","second_wind"],
+            "un_qualified_traits":[],
+            "temp_buffs": []
+        }
+    ]
+}

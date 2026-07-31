@@ -1,0 +1,55 @@
+{
+    "class_modifiers": [
+        {
+            "character_id": "kevin",
+            "class_name": "fighter",
+            "level": 1,
+            "proficiencies": {
+                "armor": ["light", "medium", "heavy", "shields"],
+                "weapons": ["simple", "martial"],
+                "saves": ["strength", "constitution"]
+            },
+            "proficiency_bonus": 2,
+            "traits": [
+                {
+                    "trait_id": "fighting_style",
+                    "target": "ac",
+                    "description": "在穿戴护甲时，AC增加1点。"
+                },
+                {
+                    "trait_id": "second_wind",
+                    "target": "hp",
+                    "description": "消耗一个额外动作，恢复（1d10 + 当前等级点数）HP。可以在短休息或长休息时恢复。"
+                }
+            ]
+        },
+        {
+            "character_id": "vidcund",
+            "class_name": "wizard",
+            "level": 1,
+            "proficiencies": {
+                "armor": null,
+                "weapons": ["quarterstaff"],
+                "saves": ["intelligence", "wisdom"]
+            },
+            "proficiency_bonus": 2,
+            "traits": [
+                {
+                    "trait_id": "arcane_recovery",
+                    "target": "spell_slots",
+                    "description": "短休时恢复总法术位一半（向上取整）的法术位，每天一次。"
+                }
+            ],
+            "spellcasting": {
+                "cantrips": ["fire_bolt", "mage_hand", "light"],
+                "spells": ["magic_missile", "shield", "mage_armor"],
+                "spell_slots": [
+                    {
+                        "level": 1,
+                        "slots": 2
+                    }
+                ]
+            }
+        }
+    ]
+}

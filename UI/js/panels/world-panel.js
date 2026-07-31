@@ -478,7 +478,6 @@ function mountWorldPanel(container, schema, data) {
     const detailSections = renderWorldCategoryDetail(detailCategoryId, entry);
     detailEl.innerHTML = `
       <div class="world-detail-inner">
-        <h3 class="world-detail-title">${escapePanelText(entry.name)}</h3>
         ${detailSections || '<p class="world-detail-empty">暂无详情</p>'}
       </div>
     `;

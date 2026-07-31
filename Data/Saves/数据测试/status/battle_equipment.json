@@ -1,0 +1,11 @@
+{
+    "battle_equipment": [
+        {
+            "character_id": "kevin",
+            "equipment": {
+                "inventory": "kevin",
+                "temp": null
+            }
+        }
+    ]
+}

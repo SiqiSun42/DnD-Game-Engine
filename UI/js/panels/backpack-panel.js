@@ -111,7 +111,6 @@ function mountBackpackPanel(container, schema, data) {
   function renderEncumbranceDetail(item) {
     detailEl.innerHTML = `
       <div class="backpack-detail-inner">
-        <h3 class="backpack-detail-title">${escapePanelText(item.name)}</h3>
         ${renderDetailBodyLines([
           `最大负重(lb)：${formatWeightLbDisplay(item.maxWeightLb)}`,
           `当前负重(lb)：${formatWeightLbDisplay(item.currentWeightLb)}`,
@@ -124,7 +123,6 @@ function mountBackpackPanel(container, schema, data) {
   function renderCurrencyDetail(item) {
     detailEl.innerHTML = `
       <div class="backpack-detail-inner">
-        <h3 class="backpack-detail-title">${escapePanelText(item.name)}</h3>
         ${renderDetailBodyLines([`总金额(gp)：${formatGoldGpDisplay(item.totalGoldGp)}`])}
         ${renderCurrencyTable(item.currencyRows || [])}
       </div>
@@ -163,7 +161,6 @@ function mountBackpackPanel(container, schema, data) {
       }
       detailEl.innerHTML = `
         <div class="backpack-detail-inner">
-          <h3 class="backpack-detail-title">${escapePanelText(item.name)}</h3>
           ${renderDetailBodyLines(headerLines)}
           ${bodyLines.length ? renderDetailBodyLines(bodyLines) : ''}
           ${footerLines.length ? renderDetailBodyLines(footerLines) : ''}
@@ -229,7 +226,6 @@ function mountBackpackPanel(container, schema, data) {
 
     detailEl.innerHTML = `
       <div class="backpack-detail-inner">
-        <h3 class="backpack-detail-title">${escapePanelText(item.name)}</h3>
         ${renderDetailBodyLines(headerLines)}
         ${effectLines.length ? renderDetailBodyLines(effectLines) : ''}
         ${footerLines.length ? renderDetailBodyLines(footerLines) : ''}

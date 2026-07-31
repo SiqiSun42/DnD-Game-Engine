@@ -138,6 +138,74 @@
           "known_by": ["kevin"]
         }
       }
+    },
+    {
+      "basic_info": {
+        "name": "迪伦",
+        "character_id": "dylan",
+        "race": "人类",
+        "gender": "男",
+        "age": 16,
+        "height": 172,
+        "weight": 62,
+        "class": "平民",
+        "culture_faith": ["ocean_goddess_worship"],
+        "organization": null,
+        "appearance": "瘦削的渔村少年，褐色的蓬乱短发，皮肤黝黑。穿着打补丁的破旧衣物，腰间系着一条绳索，手腕上戴着贝壳编织的护符。",
+        "bio": "盐潮村最坐不住的男孩。生在渔村，却对大海另一端的世界充满想象。每一个过路冒险家的故事都会点燃他眼中的火焰。"
+      },
+      "alignment_and_personality": {
+        "alignment": {
+          "law_chaos_value": 65,
+          "good_evil_value": 55,
+          "alignment_label": "中立善良"
+        },
+        "personality_dimensions": {
+          "dirty_clean": 3,
+          "introverted_extroverted": 8,
+          "calm_intense": 8,
+          "planning_intuitive": 7,
+          "friendly_mean": 8,
+          "rational_emotional": 6
+        },
+        "speaking_style": "声音清脆，语速快，充满热情和手势。思维跳跃，经常打断别人说话。带着浓厚的村庄口音。",
+        "quirk": "当兴奋时会不停地摇晃身体。经常跳上高处眺望。会下意识地收集闪闪发光的小东西——贝壳、玻璃珠、金属碎片。",
+        "special_trait": null
+      },
+      "relationships": {
+        "party_relationships": [],
+        "other_relationships": []
+      },
+      "backstory": {
+        "past_experience": {
+          "is_unlocked": true,
+          "unlock_condition": null,
+          "content": "在贫穷的渔民家庭长大，有许多兄弟姐妹。从小就帮着家里干活，然而对这样的生活感到厌倦。"
+        },
+        "current_goal": {
+          "is_unlocked": true,
+          "unlock_condition": null,
+          "content": "离开盐潮村，加入冒险队伍，探索世界。他想成为故事中的主人公，而不是坐在火塘边听故事的观众。"
+        },
+        "bond": {
+          "is_unlocked": true,
+          "unlock_condition": null,
+          "type": "追求与证明",
+          "content": "他渴望离开当前的生活，去看看外面的世界，证明自己可以不必作为碌碌无名的渔夫度过一生。"
+        },
+        "hidden_secret": {
+          "is_unlocked": true,
+          "content": "尽管知道家里人绝对不会同意，他还是经常背着父母到村庄附近的酒馆和码头，试图说服过路的商队和冒险家带上他。",
+          "unlock_condition": {
+            "target": ["pc","ally"],
+            "affinity_requirement": 40,
+            "environment": null,
+            "other_conditions": null
+          },
+          "is_condition_met": false,
+          "known_by": []
+        }
+      }
     }
   ]
 }

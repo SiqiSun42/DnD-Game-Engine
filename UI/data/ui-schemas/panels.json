@@ -1,7 +1,14 @@
 {
+  "_actionTabs": [
+    { "id": "backpack", "icon": "🎒", "label": "背包" },
+    { "id": "status", "icon": "⚔", "label": "状态" },
+    { "id": "character", "icon": "👤", "label": "人物" },
+    { "id": "world", "icon": "🌏", "label": "世界" },
+    { "id": "notes", "icon": "📋", "label": "任务" }
+  ],
   "backpack": {
     "categories": [
-      { "id": "current_status", "label": "当前状态" },
+      { "id": "backpack_status", "label": "背包状态" },
       { "id": "consumables", "label": "消耗品" },
       { "id": "tools", "label": "工具" },
       { "id": "equipment", "label": "装备" },
@@ -20,13 +27,14 @@
     ]
   },
   "status": {
-    "categories": [
-      { "id": "team", "label": "团队", "combatOnly": false },
-      { "id": "enemy", "label": "敌人", "combatOnly": true }
-    ],
-    "defaultStatusFields": [
-      { "key": "detail", "label": "状态" }
-    ]
+    "sectionLabels": {
+      "current": "当前状态",
+      "basic": "基础修正",
+      "race": "种族修正",
+      "class": "职业修正",
+      "equipment": "装备修正",
+      "temp": "临时修正"
+    }
   },
   "world": {
     "categories": [
@@ -43,12 +51,13 @@
   },
   "notes": {
     "categories": [
-      { "id": "quest", "label": "任务" },
-      { "id": "devPlot", "label": "开发者剧情" }
+      { "id": "current_chapter", "label": "当前章节" },
+      { "id": "history_chapter", "label": "历史章节" }
     ],
-    "questLabels": {
-      "currentPage": "当前任务",
-      "historyRoot": "历史任务"
+    "sectionLabels": {
+      "chapterMissions": "章节任务",
+      "currentMissions": "当前任务",
+      "historyMissions": "历史任务"
     }
   }
 }

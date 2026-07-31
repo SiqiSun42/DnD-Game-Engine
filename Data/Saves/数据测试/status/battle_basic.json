@@ -1,0 +1,24 @@
+{
+    "basic_statuses": [
+        {
+            "character_id": "kevin",
+            "base_hp": 10,
+            "base_ac": 10,
+            "base_attributes": {
+                "strength": 10,
+                "dexterity": 10,
+                "constitution": 10,
+                "intelligence": 10,
+                "wisdom": 10,
+                "charisma": 10
+            },
+            "base_speed": {
+                "walking": 30,
+                "flying": 0,
+                "swimming": 0,
+                "burrowing": 0,
+                "climbing": 0
+            }
+        }
+    ]
+}

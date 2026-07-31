@@ -1,0 +1,71 @@
+{
+    "races": [
+    {
+        "race_id": "human",
+        "size": "medium",
+        "modifiers": {
+            "strength": 1,
+            "dexterity": 1,
+            "constitution": 1,
+            "intelligence": 1,
+            "wisdom": 1,
+            "charisma": 1
+        },
+        "traits": []
+    },
+    {
+        "race_id": "halfling",
+        "size": "small",
+        "modifiers": {
+            "dexterity": 2
+        },
+        "traits": [
+        {
+            "id": "halfling_lucky",
+            "name": "幸运",
+            "target": "d20_check",
+            "value": null,
+            "description": "当你进行攻击检定、属性检定或豁免检定并骰出自然1时，你可以重骰一次，且必须使用新的结果。"
+        },
+        {
+            "id": "halfling_brave",
+            "name": "勇气",
+            "target": "saving_throw_vs_frightened",
+            "value": null,
+            "description": "你在对抗恐慌的豁免检定上具有优势。"
+        },
+        {
+            "id": "halfling_nimbleness",
+            "name": "半身人灵巧",
+            "target": "movement",
+            "value": null,
+            "description": "你可以穿过体型比你大的生物所占据的空间。"
+        }
+        ]
+    },
+    {
+        "race_id": "goblin",
+        "size": "small",
+        "modifiers": {
+            "dexterity": 2,
+            "constitution": 1
+        },
+        "traits": [
+        {
+            "id": "goblin_darkvision",
+            "name": "黑暗视觉",
+            "target": "sight_range",
+            "value": 60,
+            "description": "在微光环境下，你可以如同在明亮光照下一样视物至60尺；在黑暗环境下则如同在微光下一样视物，且无法分辨颜色，只能看到灰白的阴影。"
+        },
+        {
+            "id": "goblin_fury_of_the_small",
+            "name": "小体型之怒",
+            "target": "damage",
+            "value": null,
+            "description": "当你用攻击或法术对一个体型比你大的生物造成伤害时，你可以额外造成等于你等级的伤害。使用此特性后，你必须完成一次短休或长休才能再次使用。"
+        }
+      ]
+    }
+  ]
+}

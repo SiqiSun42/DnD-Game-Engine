@@ -1,0 +1,41 @@
+{
+    "temp_buff_definitions": [
+        {
+            "buff_id": "bless",
+            "source": "Bless",
+            "duration": "1 minute",
+            "concentration": true,
+            "modifiers": [
+                { "type": "attack_roll", "value": "1d4" },
+                { "type": "saving_throw", "value": "1d4" }
+            ]
+        },
+        {
+            "buff_id": "shield_of_faith",
+            "source": "Shield of Faith",
+            "duration": "10 minutes",
+            "concentration": true,
+            "modifiers": [
+                { "type": "ac", "value": 2 }
+            ]
+        },
+        {
+            "buff_id": "shield",
+            "source": "Shield",
+            "duration": "1 round",
+            "concentration": false,
+            "modifiers": [
+                { "type": "ac", "value": 5 }
+            ]
+        },
+        {
+            "buff_id": "longstrider",
+            "source": "Longstrider",
+            "duration": "1 hour",
+            "concentration": false,
+            "modifiers": [
+                { "type": "speed", "value": 10 }
+            ]
+        }
+    ]
+  }

@@ -3,6 +3,7 @@ const UI_DATA_ROOT = 'data';
 const TEMPLATE_NAME = '游戏模板';
 
 const GameData = {
+  actionTabs: null,
   panelSchemas: null,
   settingsUISchema: null,
   settingsGameSchema: null,
@@ -222,14 +223,16 @@ async function initGameData() {
   migrateBrowserStorage();
 
   const savesIndexPath = `${DATA_ROOT}/saves-index.json?v=${STORAGE_SCHEMA_VERSION}`;
-  const [panelSchemas, settingsUISchema, settingsGameSchema, fileIndex, fileUISettings] = await Promise.all([
-    fetchJSON(`${UI_DATA_ROOT}/ui-schemas/panels.json`),
+  const [panelSchemasRaw, settingsUISchema, settingsGameSchema, fileIndex, fileUISettings] = await Promise.all([
+    fetchJSON(`${UI_DATA_ROOT}/ui-schemas/panels.json?v=${STORAGE_SCHEMA_VERSION}`),
     fetchJSON(`${UI_DATA_ROOT}/ui-schemas/settings-ui.json`),
     fetchJSON(`${UI_DATA_ROOT}/ui-schemas/settings-game.json`),
     fetchJSON(savesIndexPath),
     fetchJSON(`${DATA_ROOT}/settings/ui.json`),
   ]);
 
+  const { _actionTabs, ...panelSchemas } = panelSchemasRaw || {};
+  GameData.actionTabs = Array.isArray(_actionTabs) ? _actionTabs : null;
   GameData.panelSchemas = panelSchemas;
   GameData.settingsUISchema = settingsUISchema;
   GameData.settingsGameSchema = settingsGameSchema;
@@ -311,17 +314,18 @@ async function loadCurrentData(basePath) {
 
 async function loadTemplateData() {
   const base = `${UI_DATA_ROOT}/templates/${encodeURIComponent(TEMPLATE_NAME)}`;
-  const [chat, inventory, characters, status, world, notes, settingsGame, current] = await Promise.all([
+  const [chat, inventory, characters, status, world, notes, missions, settingsGame, current] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
     loadInventoryData(base),
     loadCharacterData(base),
-    fetchJSON(`${base}/status.json`),
+    loadStatusData(base),
     loadWorldData(base),
     fetchJSON(`${base}/notes.json`),
+    loadMissionData(base),
     fetchJSON(`${base}/settings-game.json`),
     loadCurrentData(base),
   ]);
-  return { chat, inventory, characters, status, world, notes, settingsGame, current };
+  return { chat, inventory, characters, status, world, notes, missions, settingsGame, current };
 }
 
 async function loadConversationSaveData(saveName) {
@@ -332,17 +336,18 @@ async function loadConversationSaveData(saveName) {
 
 async function loadSaveDataFromFolder(saveName) {
   const base = getSaveFolderBase(saveName);
-  const [chat, inventory, characters, status, world, notes, settingsGame, current] = await Promise.all([
+  const [chat, inventory, characters, status, world, notes, missions, settingsGame, current] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
     loadInventoryData(base),
     loadCharacterData(base),
-    fetchJSON(`${base}/status.json`),
+    loadStatusData(base),
     loadWorldData(base),
     fetchJSON(`${base}/notes.json`),
+    loadMissionData(base),
     fetchJSON(`${base}/settings-game.json`),
     loadCurrentData(base),
   ]);
-  return { chat, inventory, characters, status, world, notes, settingsGame, current };
+  return { chat, inventory, characters, status, world, notes, missions, settingsGame, current };
 }
 
 async function loadSave(saveName) {
@@ -413,10 +418,16 @@ function getPanelData(panelId) {
     const currentLocationId = GameData.activeSaveData.current?.current_location || null;
     return resolveWorldForUi(GameData.activeSaveData.world, currentLocationId);
   }
-  const map = {
-    status: GameData.activeSaveData.status,
-    notes: GameData.activeSaveData.notes,
-  };
+  if (panelId === 'notes') {
+    return resolveMissionsForUi(GameData.activeSaveData.missions);
+  }
+  if (panelId === 'status') {
+    return resolveStatusForUi(
+      GameData.activeSaveData.status,
+      GameData.activeSaveData.inventory,
+    );
+  }
+  const map = {};
   return map[panelId] || null;
 }
 

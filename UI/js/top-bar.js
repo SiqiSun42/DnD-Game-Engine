@@ -1,14 +1,23 @@
-const MAIN_ACTION_TABS = [
+const DEFAULT_MAIN_ACTION_TABS = [
   { id: 'backpack', icon: '🎒', label: '背包' },
   { id: 'status', icon: '⚔', label: '状态' },
   { id: 'character', icon: '👤', label: '人物' },
   { id: 'world', icon: '🌏', label: '世界' },
-  { id: 'notes', icon: '📒', label: '笔记' },
+  { id: 'notes', icon: '📋', label: '任务' },
 ];
 
 const SETTINGS_TAB = { id: 'settings', icon: '⚙', label: '设置' };
 
-const ALL_PANEL_TABS = [...MAIN_ACTION_TABS, SETTINGS_TAB];
+function getMainActionTabs() {
+  if (typeof GameData !== 'undefined' && Array.isArray(GameData.actionTabs) && GameData.actionTabs.length) {
+    return GameData.actionTabs;
+  }
+  return DEFAULT_MAIN_ACTION_TABS;
+}
+
+function getAllPanelTabs() {
+  return [...getMainActionTabs(), SETTINGS_TAB];
+}
 
 function buildTabButton(tab) {
   return `<button type="button" class="action-tab" data-tab="${tab.id}">
@@ -18,7 +27,7 @@ function buildTabButton(tab) {
 }
 
 function buildCenterTabsHtml() {
-  return MAIN_ACTION_TABS.map((tab, i) => {
+  return getMainActionTabs().map((tab, i) => {
     const divider = i > 0 ? '<span class="action-tab-divider"></span>' : '';
     return divider + buildTabButton(tab);
   }).join('');

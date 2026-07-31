@@ -14,5 +14,9 @@
     {
       "species_id": "goblin",
       "name": "哥布林"
+    },
+    {
+      "species_id": "halfling",
+      "name": "半身人"
     }
   ]

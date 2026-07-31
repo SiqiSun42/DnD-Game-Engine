@@ -1,3 +1,25 @@
 {
-    "if_battle": false
+    "battle_id": "goblin_king_battle",
+    "allies":[
+        {
+            "character_id": "kevin",
+            "type": "pc",
+            "order": 1,
+            "status": "alive"
+        },
+        {
+            "character_id": "vidcund",
+            "type": "ally",
+            "order": 2,
+            "status": "unconscious"
+        }
+    ],
+    "enemies": [
+        {
+            "character_id": "goblin",
+            "type": "enemy",
+            "order": 3,
+            "status": "defeated"
+        }
+    ]
 }

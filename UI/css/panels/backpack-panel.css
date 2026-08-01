@@ -146,3 +146,7 @@
   font-weight: 500;
   background: var(--bg-hover);
 }
+
+.backpack-encumbrance-overweight {
+  color: #e05252;
+}

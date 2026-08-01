@@ -1,0 +1,55 @@
+{
+    "battle_equipment": [
+        {
+            "character_id": "kevin",
+            "equipment": {
+                "inventory": "kevin",
+                "temp": null
+            }
+        },
+        {
+            "character_id": "vidcund",
+            "equipment": {
+                "inventory": null,
+                "temp": {
+                    "main_hand": "quarterstaff",
+                    "off_hand": null,
+                    "armor": null
+                }
+            }
+        },
+        {
+            "character_id": "goblin_1",
+            "equipment": {
+                "inventory": null,
+                "temp": {
+                    "main_hand": "dagger",
+                    "off_hand": null,
+                    "armor": "leather_armor"
+                }
+            }
+        },
+        {
+            "character_id": "goblin_2",
+            "equipment": {
+                "inventory": null,
+                "temp": {
+                    "main_hand": "dagger",
+                    "off_hand": null,
+                    "armor": "leather_armor"
+                }
+            }
+        },
+        {
+            "character_id": "goblin_3",
+            "equipment": {
+                "inventory": null,
+                "temp": {
+                    "main_hand": "dagger",
+                    "off_hand": null,
+                    "armor": "leather_armor"
+                }
+            }
+        }
+    ]
+}

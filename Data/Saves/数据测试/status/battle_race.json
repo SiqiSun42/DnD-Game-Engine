@@ -9,6 +9,11 @@
         "character_id": "vidcund",
         "race": "human ",
         "subrace": null
+      },
+      {
+        "character_id": "goblin_1",
+        "race": "goblin",
+        "subrace": null
       }
     ]
 }

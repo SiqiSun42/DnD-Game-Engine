@@ -1,0 +1,34 @@
+[
+  {
+    "category": "adventuring_gear",
+    "item_id": "pebble",
+    "name": "鹅卵石",
+    "description": "圆润的小石头。",
+    "weight": 0.1,
+    "other": null
+  },
+  {
+    "category": "adventuring_gear",
+    "item_id": "mirror_shard",
+    "name": "镜子碎片",
+    "description": "被粗糙打磨过的镜片。",
+    "weight": 0.1,
+    "other": null
+  },
+  {
+    "category": "adventuring_gear",
+    "item_id": "chalk",
+    "name": "粉笔",
+    "description": "白色的粉笔，可以在墙壁或地板上画下记号。",
+    "weight": 0.05,
+    "other": null
+  },
+  {
+    "category": "adventuring_gear",
+    "item_id": "wooden_whistle",
+    "name": "木制哨子",
+    "description": "雕工粗糙的木头哨子。",
+    "weight": 0.1,
+    "other": null
+  }
+]

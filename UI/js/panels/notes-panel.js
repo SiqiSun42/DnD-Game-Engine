@@ -1,5 +1,5 @@
-const CHAPTER_MISSIONS_PAGE_ID = 'chapter_missions';
-const CURRENT_MISSIONS_PAGE_ID = 'current_missions';
+const MAIN_PLOT_PAGE_ID = 'main_plot';
+const SIDE_QUEST_PAGE_ID = 'side_quest';
 const HISTORY_MISSIONS_PAGE_ID = 'history_missions';
 
 function buildNotesCategories(schema) {
@@ -17,15 +17,15 @@ function mountNotesPanel(container, schema, data) {
   }
 
   const NOTES_CATEGORIES = buildNotesCategories(schema);
-  const CHAPTER_MISSIONS = data.chapter || [];
-  const CURRENT_MISSIONS = data.current || [];
+  const MAIN_PLOT_MISSIONS = data.mainPlot || [];
+  const SIDE_QUEST_MISSIONS = data.sideQuest || [];
   const HISTORY_MISSIONS = data.history || [];
-  const chapterMissionsLabel = schema.sectionLabels?.chapterMissions || '章节任务';
-  const currentMissionsLabel = schema.sectionLabels?.currentMissions || '当前任务';
+  const mainPlotLabel = schema.sectionLabels?.mainPlot || '主线任务';
+  const sideQuestLabel = schema.sectionLabels?.sideQuest || '支线任务';
   const historyMissionsLabel = schema.sectionLabels?.historyMissions || '历史任务';
 
   let activeCategory = 'current_chapter';
-  let activeMissionPage = CURRENT_MISSIONS_PAGE_ID;
+  let activeMissionPage = MAIN_PLOT_PAGE_ID;
 
   container.innerHTML = `
     <div class="notes-panel" id="notes-panel">
@@ -40,9 +40,9 @@ function mountNotesPanel(container, schema, data) {
   const detailEl = container.querySelector('#notes-detail');
 
   function getMissionsForPage(pageId) {
-    if (pageId === CHAPTER_MISSIONS_PAGE_ID) return CHAPTER_MISSIONS;
+    if (pageId === MAIN_PLOT_PAGE_ID) return MAIN_PLOT_MISSIONS;
     if (pageId === HISTORY_MISSIONS_PAGE_ID) return HISTORY_MISSIONS;
-    return CURRENT_MISSIONS;
+    return SIDE_QUEST_MISSIONS;
   }
 
   function renderMissionItem(mission) {
@@ -51,16 +51,27 @@ function mountNotesPanel(container, schema, data) {
 
     const name = document.createElement('div');
     name.className = 'notes-mission-name';
-    name.textContent = `${getMissionStatusIcon(mission)} ${mission.name}`;
+    name.textContent = `${getQuestStatusIcon(mission)} ${mission.name}`;
 
-    const content = document.createElement('div');
-    content.className = 'notes-mission-content';
-    content.textContent = mission.content || '';
+    const intro = document.createElement('div');
+    intro.className = 'notes-mission-intro';
+    intro.textContent = `简介：${mission.description || ''}`;
 
     item.appendChild(name);
-    if (mission.content) {
-      item.appendChild(content);
+    item.appendChild(intro);
+
+    if (mission.nodes?.length) {
+      const nodesEl = document.createElement('div');
+      nodesEl.className = 'notes-mission-nodes';
+      mission.nodes.forEach(node => {
+        const nodeEl = document.createElement('div');
+        nodeEl.className = 'notes-mission-node';
+        nodeEl.textContent = `${getNodeStatusIcon(node)} ${node.description || ''}`;
+        nodesEl.appendChild(nodeEl);
+      });
+      item.appendChild(nodesEl);
     }
+
     return item;
   }
 
@@ -90,7 +101,7 @@ function mountNotesPanel(container, schema, data) {
       btn.addEventListener('click', () => {
         activeCategory = cat.id;
         if (activeCategory === 'current_chapter') {
-          activeMissionPage = CURRENT_MISSIONS_PAGE_ID;
+          activeMissionPage = MAIN_PLOT_PAGE_ID;
         }
         renderAll();
       });
@@ -119,8 +130,8 @@ function mountNotesPanel(container, schema, data) {
       return;
     }
 
-    renderMissionNavItem(CHAPTER_MISSIONS_PAGE_ID, chapterMissionsLabel);
-    renderMissionNavItem(CURRENT_MISSIONS_PAGE_ID, currentMissionsLabel);
+    renderMissionNavItem(MAIN_PLOT_PAGE_ID, mainPlotLabel);
+    renderMissionNavItem(SIDE_QUEST_PAGE_ID, sideQuestLabel);
     renderMissionNavItem(HISTORY_MISSIONS_PAGE_ID, historyMissionsLabel);
   }
 

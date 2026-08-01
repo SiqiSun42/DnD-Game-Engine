@@ -1,0 +1,28 @@
+{
+    "proficencies": [
+        {
+            "proficency_id": "fighter",
+            "proficencies": {
+                "armor": ["light", "medium", "heavy", "shields"],
+                "weapons": ["simple", "martial"],
+                "saves": ["strength", "constitution"]
+            }
+        },
+        {
+            "proficency_id": "wizard",
+            "proficencies": {
+                "armor": [],
+                "weapons": ["dagger", "dart", "sling", "quarterstaff", "light crossbow"],
+                "saves": ["intelligence", "wisdom"]
+            }
+        },
+        {
+            "proficency_id": "goblin",
+            "proficencies": {
+            "armor": ["light", "shield"],
+            "weapons": ["shortsword", "shortbow"],
+            "saves": null
+            }
+          }
+    ]
+}

@@ -1,0 +1,23 @@
+[
+  {
+    "category": "currency",
+    "item_id": "gold_piece",
+    "name": "金币",
+    "exchange_rate": 1.0,
+    "description": "最主要的流通货币。"
+  },
+  {
+    "category": "currency",
+    "item_id": "silver_piece",
+    "name": "银币",
+    "exchange_rate": 0.1,
+    "description": "常见的辅币。"
+  },
+  {
+    "category": "currency",
+    "item_id": "copper_piece",
+    "name": "铜币",
+    "exchange_rate": 0.01,
+    "description": "价值最低的硬币，用于平民的日常小额交易。"
+  }
+]

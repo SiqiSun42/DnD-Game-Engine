@@ -1,0 +1,207 @@
+{
+    "side_quest": [
+        {
+            "name": "哥布林遭遇战",
+            "mission_id": "goblin_encounter",
+            "description": "在村庄附近，你看到几只哥布林正在抢劫村民。你会选择帮忙吗？",
+            "type": ["side_mission"],
+            "is_unlocked": false,
+            "unlock_condition": "在听到村庄附近的吵闹时选择查看。",
+            "quest_item": null,
+            "node":[
+                {
+                    "node_id": "help_the_villagers",
+                    "description": "帮助无辜的村民，阻止哥布林的抢劫。",
+                    "is_unlocked": true,
+                    "unlock_condition": "选择介入抢劫，帮助村民。",
+                    "content":"触发和哥布林的第一场遭遇战。无论是否击败哥布林，都视作完成。村民会感谢你的帮助，并告诉你村长办公室的位置。",
+                    "is_completed": false
+                }
+            ],
+            "is_completed": false,
+            "is_failed": false,
+            "end_condition": "无论是否击败哥布林，都视作完成；而发现抢劫但没有选择介入则视为失败。如果没有选择查看，或者没有触发战斗，抢劫立刻结束，且不可再次触发。"
+        },
+        {
+            "name": "村长支线",
+            "mission_id": "village_chief_quest",
+            "description": "为什么不去认识一下这个小村庄的村长呢？",
+            "type": ["side_mission"],
+            "is_unlocked": false,
+            "unlock_condition": "如果触发哥布林遭遇战，会从村民口中得知村长办公室的位置，自动解锁。否则可以通过和任意村民npc对话，或者直接进入村长办公室解锁。",
+            "quest_item": [
+                {
+                    "quest_item_id": "goblin_cave_map",
+                    "obtain_condition": "和村长第一次对话结束时，村长会叫住你并主动赠与。"
+                }
+            ],
+            "node":[
+                {
+                    "node_id": "talk_to_village_chief",
+                    "description": "和村长对话，了解当前情况。",
+                    "is_unlocked": false,
+                    "unlock_condition": "和村长第一次对话，自动解锁。",
+                    "content":"村长会告诉你村庄已经闹了半年哥布林，三批冒险家都失败了。他非常感谢你们的到来，并希望你们能解决这个问题。他会送给你一张地图，并提示你酒馆里面有个叫塞拉的姑娘很适合招募。",
+                    "is_completed": false
+                },
+                {
+                    "node_id": "realize_something_is_wrong",
+                    "description": "地图的最后一个分叉路口的标记通往毒气陷阱！这是怎么回事呢？",
+                    "is_unlocked": false,
+                    "unlock_condition": "如果在最后一个路口按照地图指引，走了错误的方向而落入陷阱，自动解锁。或者通过任何其他合理方法发现该信息，也视作解锁。",
+                    "content":"村长似乎隐瞒了什么重要信息。但如果在战胜哥布林大王之前就回去找他，他会想尽办法狡辩，不肯承认。",
+                    "is_completed": false
+                },
+                {
+                    "node_id": "find_the_real_enemy",
+                    "description": "原来村长是一切的幕后黑手，该怎么处置他呢？",
+                    "is_unlocked": false,
+                    "unlock_condition": "在战胜哥布林大王，并从他口中得知村长设计了整个毒气陷阱和假地图的阴谋以后，自动解锁。",
+                    "content":"在打败哥布林大王以后，村长不得不吐露他的秘密，并向你们提出500金币的贿赂。你可以决定他的命运。如果塞拉在队伍中，则无法触发该剧情，她会直接告诉全村人村长才是幕后黑手。",
+                    "is_completed": false
+                }
+            ],
+            "is_completed": false,
+            "is_failed": false,
+            "end_condition": "如果从哥布林大王口中解锁村长的秘密并决定了村长的最终命运，则视为成功；否则视作失败。除非击败哥布林大王，否则村长会对所有指控矢口否认。"
+        },
+        {
+            "name": "招募支线",
+            "mission_id": "recruit_quest",
+            "description": "酒馆里似乎有一些适合招募的人选。要不要叫上他们一起探险呢？",
+            "type": ["side_mission"],
+            "is_unlocked": false,
+            "unlock_condition": "和村长对话之后自动解锁。如果没有和村长对话，则第一次进入酒馆时解锁。",
+            "quest_item": null,
+            "node":[
+                {
+                    "node_id": "introduce_the_allies",
+                    "description": "和酒馆老板打听一些关于潜在队友的信息。",
+                    "is_unlocked": false,
+                    "unlock_condition": "和酒馆老板对话，他会自动把话题引导到招募上，并告诉你一些本地人的信息。",
+                    "content": "酒馆老板会向你介绍酒馆里的塞拉、迪伦和芬南，并建议你和他们交流。",
+                    "is_completed": false
+                },
+                {
+                    "node_id": "recruit_allies",
+                    "description": "你觉得是否需要更多队友呢？",
+                    "is_unlocked": false,
+                    "unlock_condition": "和任意一个潜在队友对话解锁",
+                    "content": "队伍最多只能有3个队友，达到人数之后其他人会拒绝你的招募。随时可以解散新队友，他们会自动回到酒馆。当队伍人数未满（包括有队友死亡）时，可以在酒馆进行招募。",
+                    "is_completed": false
+                }
+            ],
+            "is_completed": false,
+            "is_failed": false,
+            "end_condition": "本支线不会失败。只要招募过队友就视作完成。"
+        },
+        {
+            "name": "塞拉支线",
+            "mission_id": "sela_quest",
+            "description": "酒馆里的塞拉似乎有些事情想拜托你。",
+            "type": ["side_mission"],
+            "is_unlocked": false,
+            "unlock_condition": "第一次和塞拉对话后解锁。",
+            "quest_item": [
+                {
+                    "quest_item_id": "darian_badge",
+                    "obtain_condition": "战胜哥布林大王后，从战利品中获得达里安的冒险者徽章。"
+                }
+            ],
+            "node":[
+                {
+                    "node_id": "talk_to_sela",
+                    "description": "和塞拉对话，了解她的请求。",
+                    "is_unlocked": false,
+                    "unlock_condition": "和塞拉对话，自动解锁。",
+                    "content": "塞拉会告诉你，她的哥哥是半年前第一批进入哥布林洞穴的冒险家之一，却再也没有回来。她希望能够至少收回她的遗物，达里安的冒险者徽章。",
+                    "is_completed": false
+                },
+                {
+                    "node_id": "return_the_badge",
+                    "description": "找到达里安的冒险者徽章。",
+                    "is_unlocked": false,
+                    "unlock_condition": "战胜哥布林大王后，在战利品中得到达里安的冒险者徽章。",
+                    "content": "找到徽章之后，回到酒馆将徽章交给塞拉，她会非常感激你。如果塞拉在队伍中，则在找到徽章时立即完成。",
+                    "is_completed": false
+                }
+            ],
+            "is_completed": false,
+            "is_failed": false,
+            "end_condition": "塞拉得到徽章后自动完成。如果塞拉在战斗中死亡，则失败。"
+        },
+        {
+            "name": "芬南支线",
+            "mission_id": "fennan_quest",
+            "description": "酒馆里的芬南似乎有些事情想拜托你。",
+            "type": ["side_mission"],
+            "is_unlocked": false,
+            "unlock_condition": "第一次和芬南对话后解锁。",
+            "quest_item": [
+                {
+                    "quest_item_id": "fennan_account",
+                    "obtain_condition": "战胜哥布林大王后，从战利品中获得芬南的账本。"
+                }
+            ],
+            "node":[
+                {
+                    "node_id": "talk_to_fennan",
+                    "description": "和芬南对话，了解他的请求。",
+                    "is_unlocked": false,
+                    "unlock_condition": "和芬南对话，自动解锁。",
+                    "content": "芬南会告诉你，他在两个星期前来到盐潮村进货，却被哥布林抢劫了。他不在意钱，但希望你能帮他找回账本，这是生意人最重要的。如果你帮他找到了账本，他会给你100金币的报酬。",
+                    "is_completed": false
+                },
+                {
+                    "node_id": "find_the_account",
+                    "description": "找到芬南的账本。",
+                    "is_unlocked": false,
+                    "unlock_condition": "战胜哥布林大王后，在战利品中得到芬南的账本。",
+                    "content": "找到账本之后，回到酒馆将账本交给芬南。他非常感激你，并给你100金币的报酬。如果芬南在队伍中，则在找到账本时立即完成。",
+                    "is_completed": false
+                }
+            ],
+            "is_completed": false,
+            "is_failed": false,
+            "end_condition": "芬南得到账本后自动完成。如果芬南在战斗中死亡，则失败。"
+        },
+        {
+            "name": "告别盐潮村",
+            "mission_id": "goodbye_salt_tide",
+            "description": "是时候告别盐潮村了。",
+            "type": ["side_mission"],
+            "is_unlocked": false,
+            "unlock_condition": "击败哥布林大王，决定村长命运后自动解锁",
+            "quest_item": null,
+            "node": [
+                {
+                    "node_id": "sera_ending",
+                    "description": "盐潮村的故事告一段落，你会怎么告别这位坚毅的姑娘呢？",
+                    "is_unlocked": false,
+                    "unlock_condition": "完成塞拉支线，或者塞拉在队伍中且没有死去，则在离开村庄时自动解锁。",
+                    "content": "塞拉会非常感谢你们帮助她找回哥哥的遗物。她会送给你们达里安的一把旧剑，并希望你们能够继续前进，去寻找更多的冒险。如果塞拉在队伍中，她会和你们告别并离开队伍，因为她必须留在盐潮村。",
+                    "is_completed": false
+                },
+                {
+                    "node_id": "fennan_ending",
+                    "description": "盐潮村的故事告一段落，你会怎么告别这位精明的商人呢？",
+                    "is_unlocked": false,
+                    "unlock_condition": "完成芬南支线，或者芬南在队伍中且没有死去，则在离开村庄自动解锁。顺序在塞拉结局之后。",
+                    "content": "芬南会非常感谢你们帮助他找回账本。如果他在队伍中，他会和你们告别并离开队伍，因为他已经过了冒险的年纪，但他仍然祝愿你们能够成为伟大的冒险家。",
+                    "is_completed": false
+                },
+                {
+                    "node_id": "dylan_ending",
+                    "description": "盐潮村的故事告一段落，这位活泼的少年将会何去何从？",
+                    "is_unlocked": false,
+                    "unlock_condition": "和迪伦交谈过，或者迪伦在队伍且没有死去，则在离开村庄时自动解锁。顺序在芬南结局之后。",
+                    "content": "无论迪伦是否在队伍中，他都会请求加入你们的队伍；此时他的父母会出现，要求迪伦立刻回家。你们可以选择让迪伦离开，或者劝说迪伦的父母同意迪伦继续冒险。如果迪伦留下，他会永久加入队伍。",
+                    "is_completed": false
+                }
+            ],
+            "is_completed": false,
+            "is_failed": false,
+            "end_condition": "离开村庄时自动完成。本任务不会失败。"
+        }
+    ]
+}

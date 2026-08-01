@@ -5,51 +5,53 @@
             "class_name": "fighter",
             "level": 1,
             "proficiencies": {
-                "armor": ["light", "medium", "heavy", "shields"],
-                "weapons": ["simple", "martial"],
-                "saves": ["strength", "constitution"]
+                "proficency_id": "fighter",
+                "armor_bonus": null,
+                "weapons_bonus": null,
+                "saves_bonus": null
             },
             "proficiency_bonus": 2,
-            "traits": [
-                {
-                    "trait_id": "fighting_style",
-                    "target": "ac",
-                    "description": "在穿戴护甲时，AC增加1点。"
-                },
-                {
-                    "trait_id": "second_wind",
-                    "target": "hp",
-                    "description": "消耗一个额外动作，恢复（1d10 + 当前等级点数）HP。可以在短休息或长休息时恢复。"
-                }
-            ]
+            "skills": ["athletics", "perception"],
+            "traits": ["fighting_style", "second_wind"],
+            "spellcasting": null
         },
         {
             "character_id": "vidcund",
             "class_name": "wizard",
             "level": 1,
             "proficiencies": {
-                "armor": null,
-                "weapons": ["quarterstaff"],
-                "saves": ["intelligence", "wisdom"]
+                "proficency_id": "wizard",
+                "armor_bonus": null,
+                "weapons_bonus": null,
+                "saves_bonus": null
             },
             "proficiency_bonus": 2,
-            "traits": [
-                {
-                    "trait_id": "arcane_recovery",
-                    "target": "spell_slots",
-                    "description": "短休时恢复总法术位一半（向上取整）的法术位，每天一次。"
-                }
-            ],
+            "skills": ["arcana", "investigation"],
+            "traits": ["arcane_recovery", "arcane_tradition"],
             "spellcasting": {
-                "cantrips": ["fire_bolt", "mage_hand", "light"],
-                "spells": ["magic_missile", "shield", "mage_armor"],
-                "spell_slots": [
+                "spells": ["fire_bolt", "mage_hand", "light", "magic_missile", "shield", "mage_armor"],
+                "max_spell_slots": [
                     {
                         "level": 1,
                         "slots": 2
                     }
                 ]
             }
+        },
+        {
+            "character_id": "goblin_1",
+            "class_name": null,
+            "level": 1,
+            "proficiencies": {
+                "proficency_id": "goblin",
+                "armor_bonus": null,
+                "weapons_bonus": null,
+                "saves_bonus": null
+            },
+            "proficiency_bonus": 2,
+            "skills": ["stealth"],
+            "traits": null,
+            "spellcasting": null
         }
     ]
 }

@@ -225,10 +225,10 @@ async function initGameData() {
   const savesIndexPath = `${DATA_ROOT}/saves-index.json?v=${STORAGE_SCHEMA_VERSION}`;
   const [panelSchemasRaw, settingsUISchema, settingsGameSchema, fileIndex, fileUISettings] = await Promise.all([
     fetchJSON(`${UI_DATA_ROOT}/ui-schemas/panels.json?v=${STORAGE_SCHEMA_VERSION}`),
-    fetchJSON(`${UI_DATA_ROOT}/ui-schemas/settings-ui.json`),
-    fetchJSON(`${UI_DATA_ROOT}/ui-schemas/settings-game.json`),
-    fetchJSON(savesIndexPath),
-    fetchJSON(`${DATA_ROOT}/settings/ui.json`),
+    fetchJSON(`${UI_DATA_ROOT}/ui-schemas/settings-ui.json`).catch(() => ({})),
+    fetchJSON(`${UI_DATA_ROOT}/ui-schemas/settings-game.json`).catch(() => ({})),
+    fetchJSON(savesIndexPath).catch(() => ({ saves: [] })),
+    fetchJSON(`${DATA_ROOT}/settings/ui.json`).catch(() => ({})),
   ]);
 
   const { _actionTabs, ...panelSchemas } = panelSchemasRaw || {};
@@ -409,7 +409,10 @@ function getPanelSchema(panelId) {
 function getPanelData(panelId) {
   if (!GameData.activeSaveData) return null;
   if (panelId === 'backpack') {
-    return resolveInventoryForUi(GameData.activeSaveData.inventory);
+    return resolveInventoryForUi(
+      GameData.activeSaveData.inventory,
+      GameData.activeSaveData.status,
+    );
   }
   if (panelId === 'character') {
     return resolveCharactersForUi(GameData.activeSaveData.characters);

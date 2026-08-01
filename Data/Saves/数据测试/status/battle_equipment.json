@@ -6,6 +6,28 @@
                 "inventory": "kevin",
                 "temp": null
             }
+        },
+        {
+            "character_id": "vidcund",
+            "equipment": {
+                "inventory": null,
+                "temp": {
+                    "main_hand": "quarterstaff",
+                    "off_hand": null,
+                    "armor": null
+                }
+            }
+        },
+        {
+            "character_id": "goblin_1",
+            "equipment": {
+                "inventory": null,
+                "temp": {
+                    "main_hand": "dagger",
+                    "off_hand": null,
+                    "armor": "leather_armor"
+                }
+            }
         }
     ]
 }

@@ -1,0 +1,49 @@
+{
+    "locations": [
+      {
+        "name": "利齿礁群",
+        "location_id": "the_teeth",
+        "type": "region",
+        "location": "在白石酋长国的东北部",
+        "description": "数百座尖锐礁石突出海面，吞噬过无数船只。",
+        "geography": "Coastal",
+        "culture":["ocean_goddess_worship"]
+      },
+      {
+        "name": "白石酋长国",
+        "location_id": "white_stone_chiefdom",
+        "type": "nation",
+        "location": "在沙棘半岛的北部",
+        "description": "文明程度不高的部落联合体。",
+        "geography": null,
+        "culture":null
+      },
+      {
+        "name": "沙棘半岛",
+        "location_id": "sandthorn_peninsula",
+        "type": "continent",
+        "location": "在干涸之地的西部",
+        "description": "一个有些荒凉的半岛，只有少数部落居住在此。",
+        "geography": null,
+        "culture":null
+      },
+      {
+        "name": "干涸之地",
+        "location_id": "aridus",
+        "type": "world",
+        "location": "在主物质位面的南部",
+        "description": "荒凉而干涸的地方",
+        "geography": null,
+        "culture":null
+      },
+      {
+        "name": "主物质位面",
+        "location_id": "material_plane",
+        "type": "plane",
+        "location": null,
+        "description": "主物质位面是最大的位面，也是最稳定的位面。",
+        "geography": null,
+        "culture":null
+      }
+    ]
+}

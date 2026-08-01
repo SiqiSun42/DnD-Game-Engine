@@ -66,7 +66,7 @@ function buildGameContext() {
     : null;
 
   const inventoryView = typeof resolveInventoryForUi === 'function'
-    ? resolveInventoryForUi(data.inventory)
+    ? resolveInventoryForUi(data.inventory, data.status)
     : (data.inventory || null);
 
   const context = {

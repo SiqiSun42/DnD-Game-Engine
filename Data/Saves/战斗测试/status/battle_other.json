@@ -1,0 +1,79 @@
+{
+    "other_statuses": [
+        {
+            "character_id": "kevin",
+            "hp_bonus": 0,
+            "ac_bonus": 1,
+            "ac_override": 0,
+            "advantage": null,
+            "disadvantage": null,
+            "qualified_traits": [
+                { "catalog": "traits", "id": "fighting_style" },
+                { "catalog": "traits", "id": "second_wind" }
+            ],
+            "unqualified_traits": [],
+            "temp_buffs": [],
+            "conditions": []
+        },
+        {
+            "character_id": "vidcund",
+            "hp_bonus": 0,
+            "ac_bonus": 0,
+            "ac_override": 0,
+            "advantage": null,
+            "disadvantage": null,
+            "qualified_traits": [
+                { "catalog": "traits", "id": "arcane_recovery" },
+                { "catalog": "traits", "id": "arcane_tradition" }
+            ],
+            "unqualified_traits": [],
+            "temp_buffs": [],
+            "conditions": []
+        },
+        {
+            "character_id": "goblin_1",
+            "hp_bonus": 0,
+            "ac_bonus": 0,
+            "ac_override": null,
+            "advantage": null,
+            "disadvantage": null,
+            "qualified_traits": [
+                { "catalog": "races", "id": "goblin_darkvision" },
+                { "catalog": "races", "id": "goblin_fury_of_the_small" }
+            ],
+            "unqualified_traits": [],
+            "temp_buffs": [],
+            "conditions": []
+        },
+        {
+            "character_id": "goblin_2",
+            "hp_bonus": 0,
+            "ac_bonus": 0,
+            "ac_override": null,
+            "advantage": null,
+            "disadvantage": null,
+            "qualified_traits": [
+                { "catalog": "races", "id": "goblin_darkvision" },
+                { "catalog": "races", "id": "goblin_fury_of_the_small" }
+            ],
+            "unqualified_traits": [],
+            "temp_buffs": [],
+            "conditions": []
+        },
+        {
+            "character_id": "goblin_3",
+            "hp_bonus": 0,
+            "ac_bonus": 0,
+            "ac_override": 0,
+            "advantage": null,
+            "disadvantage": null,
+            "qualified_traits": [
+                { "catalog": "races", "id": "goblin_darkvision" },
+                { "catalog": "races", "id": "goblin_fury_of_the_small" }
+            ],
+            "unqualified_traits": [],
+            "temp_buffs": [],
+            "conditions": []
+        }
+    ]
+}

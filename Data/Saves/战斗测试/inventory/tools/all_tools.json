@@ -1,0 +1,137 @@
+[
+  {
+    "category": "tools",
+    "name": "燧石",
+    "item_id": "flint",
+    "description": "一块坚硬的石头，用于敲击产生火花。",
+    "max_charges": null,
+    "consumption_rate": null,
+    "price": {
+      "base_price": 5,
+      "fluctuation_range": 0.1
+    },
+    "recharge_cost": {
+      "base_price": null,
+      "fluctuation_range": null,
+      "recharge_condition": null
+    },
+    "effects": [
+      {
+        "type": "action",
+        "target_attribute": null,
+        "dice": null,
+        "fixed_value": null,
+        "modifier": null,
+        "bonus": null,
+        "spell": null,
+        "remove_condition": null,
+        "range": null,
+        "special": null,
+        "time": {
+          "duration": null
+        },
+        "concentration": false,
+        "saving_throw": null,
+        "description": "通过敲击产生火花来点燃火把或营火。"
+      }
+    ],
+    "usage_conditions": {
+      "action_type": "action",
+      "target": "environment",
+      "extra_conditions": "需要可燃物"
+    },
+    "rarity": "common",
+    "weight": 0.1,
+    "other": null
+  },
+  {
+    "category": "tools",
+    "name": "绳索 (50尺)",
+    "item_id": "rope_50",
+    "description": "由大麻纤维搓成的粗绳，长50尺。",
+    "max_charges": null,
+    "consumption_rate": null,
+    "price": {
+      "base_price": 10.0,
+      "fluctuation_range": 0.1
+    },
+    "recharge_cost": {
+      "base_price": null,
+      "fluctuation_range": null,
+      "recharge_condition": null
+    },
+    "effects": [
+      {
+        "type": "action",
+        "target_attribute": null,
+        "dice": null,
+        "fixed_value": null,
+        "modifier": null,
+        "bonus": null,
+        "spell": null,
+        "remove_condition": null,
+        "range": 50,
+        "special": null,
+        "time": {
+          "duration": null
+        },
+        "concentration": false,
+        "saving_throw": null,
+        "description": "用于攀爬或捆绑"
+      }
+    ],
+    "usage_conditions": {
+      "action_type": "action",
+      "target": "environment",
+      "extra_conditions": null
+    },
+    "rarity": "common",
+    "weight": 3.0,
+    "other": null
+  },
+  {
+    "category": "tools",
+    "name": "提灯",
+    "item_id": "lantern",
+    "description": "黄铜提灯，提供稳定的光源。",
+    "max_charges": 6,
+    "consumption_rate": 1,
+    "price": {
+      "base_price": 30.0,
+      "fluctuation_range": 0.1
+    },
+    "recharge_cost": {
+      "base_price": 5,
+      "fluctuation_range": 0.1,
+      "recharge_condition": "在提供该服务的商店补充灯油"
+    },
+    "effects": [
+      {
+        "type": "illumination",
+        "target_attribute": "environment",
+        "dice": null,
+        "fixed_value": null,
+        "modifier": null,
+        "bonus": null,
+        "spell": null,
+        "remove_condition": null,
+        "range": 30,
+        "special": null,
+        "time": {
+          "duration": 60
+        },
+        "concentration": false,
+        "saving_throw": null,
+        "description": "散发30尺半径的光照，不受普通风雨影响。"
+      }
+    ],
+    "usage_conditions": {
+      "action_type": "action",
+      "target": "self",
+      "extra_conditions": "需要燧石或魔法火源来点燃"
+    },
+    "rarity": "common",
+    "weight": 2.0,
+    "other": null
+  }
+]

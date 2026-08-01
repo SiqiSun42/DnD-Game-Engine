@@ -187,16 +187,42 @@ function getInventoryBundleCategories(inventory) {
   return {};
 }
 
-function resolveInventoryDerived(inventory) {
+const CARRY_WEIGHT_PER_STRENGTH = 15;
+
+function computeMaxCarryWeightLb(strength) {
+  if (strength === null || strength === undefined) return null;
+  const num = Number(strength);
+  if (!Number.isFinite(num)) return null;
+  return num * CARRY_WEIGHT_PER_STRENGTH;
+}
+
+function formatMaxCarryWeightFormula(strength, maxWeightLb) {
+  if (strength === null || strength === undefined || maxWeightLb === null || maxWeightLb === undefined) {
+    return null;
+  }
+  return `${strength} * ${CARRY_WEIGHT_PER_STRENGTH} = ${formatWeightLbDisplay(maxWeightLb)}`;
+}
+
+function resolveEncumbranceStatusLabel(currentWeightLb, maxWeightLb) {
+  if (maxWeightLb === null || maxWeightLb === undefined) return '正常';
+  if (currentWeightLb > maxWeightLb) return '超重';
+  return '正常';
+}
+
+function resolveInventoryDerived(inventory, status) {
   const bundleCategories = getInventoryBundleCategories(inventory);
   const currentWeightLb = computePcTotalWeightLb(bundleCategories);
   const currencyData = buildCurrencyStatusData(bundleCategories);
+  const strength = typeof getPcStrength === 'function' ? getPcStrength(status) : null;
+  const maxWeightLb = computeMaxCarryWeightLb(strength);
 
   return {
     currentWeightLb,
     totalGoldGp: currencyData.totalGoldGp,
-    maxWeightLb: 100,
-    encumbranceStatusLabel: '正常',
+    strength,
+    maxWeightLb,
+    maxWeightFormula: formatMaxCarryWeightFormula(strength, maxWeightLb),
+    encumbranceStatusLabel: resolveEncumbranceStatusLabel(currentWeightLb, maxWeightLb),
     currencyRows: currencyData.rows,
   };
 }
@@ -210,6 +236,7 @@ function buildCurrentStatusItems(derived) {
       name: '负重',
       statusType: 'encumbrance',
       maxWeightLb: stats.maxWeightLb,
+      maxWeightFormula: stats.maxWeightFormula,
       currentWeightLb: stats.currentWeightLb,
       statusLabel: stats.encumbranceStatusLabel,
     },
@@ -522,8 +549,8 @@ function formatWealthFromCurrency(bundleCategories) {
     .join(' ');
 }
 
-function resolveInventoryForUi(inventory) {
-  const derived = resolveInventoryDerived(inventory);
+function resolveInventoryForUi(inventory, status) {
+  const derived = resolveInventoryDerived(inventory, status);
 
   if (!isInventoryBundle(inventory)) {
     const categories = { ...(inventory?.categories || {}) };

@@ -33,7 +33,7 @@
       "race": "种族修正",
       "class": "职业修正",
       "equipment": "装备修正",
-      "temp": "临时修正"
+      "other": "其他修正"
     }
   },
   "world": {
@@ -55,8 +55,8 @@
       { "id": "history_chapter", "label": "历史章节" }
     ],
     "sectionLabels": {
-      "chapterMissions": "章节任务",
-      "currentMissions": "当前任务",
+      "mainPlot": "主线任务",
+      "sideQuest": "支线任务",
       "historyMissions": "历史任务"
     }
   }

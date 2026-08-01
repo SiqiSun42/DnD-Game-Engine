@@ -1,0 +1,15 @@
+{
+    "backpacks": [
+      {
+        "character_id": "kevin",
+        "identity": "pc",
+        "inventory": [
+          {
+            "item_id": "potion_of_healing",
+            "name": "治疗药水",
+            "quantity": 2
+          }
+        ]
+      }
+    ]
+  }

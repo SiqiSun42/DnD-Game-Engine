@@ -6,21 +6,18 @@
         "inventory": [
           {
             "item_id": "longsword",
-            "name": "长剑",
             "quantity": 1,
             "is_equipped": true,
             "equipped_slot": "main_hand"
           },
           {
             "item_id": "wooden_shield",
-            "name": "木盾",
             "quantity": 1,
             "is_equipped": true,
             "equipped_slot": "off_hand"
           },
           {
             "item_id": "leather_armor",
-            "name": "皮甲",
             "quantity": 1,
             "is_equipped": true,
             "equipped_slot": "armor"

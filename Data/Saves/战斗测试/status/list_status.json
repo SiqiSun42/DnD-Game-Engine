@@ -1,0 +1,29 @@
+{
+    "statuses": [
+        {
+            "character_id": "kevin",
+            "name": "凯文",
+            "type": "pc"
+        },
+        {
+            "character_id": "vidcund",
+            "name": "维特昆德",
+            "type": "ally"
+        },
+        {
+            "character_id": "goblin_1",
+            "name": "哥布林1",
+            "type": "ally"
+        },
+        {
+            "character_id": "goblin_2",
+            "name": "哥布林2",
+            "type": "ally"
+        },
+        {
+            "character_id": "goblin_3",
+            "name": "哥布林3",
+            "type": "ally"
+        }
+    ] 
+}

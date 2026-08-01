@@ -1,0 +1,149 @@
+[
+    {
+      "location_id": "material_plane",
+      "name": "主物质位面",
+      "type": "plane",
+      "parent_id": null,
+      "is_unlocked": true
+    },
+    {
+      "location_id": "aridus",
+      "name": "干涸之地",
+      "type": "world",
+      "parent_id": "material_plane",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "sandthorn_peninsula",
+      "name": "沙棘半岛",
+      "type": "continent",
+      "parent_id": "aridus",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "white_stone_chiefdom",
+      "name": "白石酋长国",
+      "type": "nation",
+      "parent_id": "sandthorn_peninsula",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "the_teeth",
+      "name": "利齿礁群",
+      "type": "region",
+      "parent_id": "white_stone_chiefdom",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "salt_tide_forest",
+      "name": "盐潮森林",
+      "type": "town",
+      "parent_id": "the_teeth",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "salt_tide_village",
+      "name": "盐潮村",
+      "type": "town",
+      "parent_id": "the_teeth",
+      "is_unlocked": true 
+    },
+    {
+      "location_id": "goblin_cave",
+      "name": "哥布林洞穴",
+      "type": "site",
+      "parent_id": "salt_tide_forest",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "salt_tide_shop",
+      "name": "盐潮商店",
+      "type": "site",
+      "parent_id": "salt_tide_village",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "salt_tide_inn",
+      "name": "盐潮酒馆",
+      "type": "site",
+      "parent_id": "salt_tide_village",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "mayor_office",
+      "name": "村长办公室",
+      "type": "site",
+      "parent_id": "salt_tide_village",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "forest_clearing",
+      "name": "林间空地",
+      "type": "site",
+      "parent_id": "salt_tide_forest",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "cliff",
+      "name": "悬崖",
+      "type": "site",
+      "parent_id": "salt_tide_forest",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "fork_01",
+      "name": "分叉口1",
+      "type": "room",
+      "parent_id": "goblin_cave",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "dead_end_01",
+      "name": "死路1",
+      "type": "room",
+      "parent_id": "goblin_cave",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "channel_01",
+      "name": "通道1",
+      "type": "room",
+      "parent_id": "goblin_cave",
+      "is_unlocked": true
+    },  
+    {
+      "location_id": "fork_02",
+      "name": "分叉口2",
+      "type": "room",
+      "parent_id": "goblin_cave",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "dead_end_02",
+      "name": "死路2",
+      "type": "room",
+      "parent_id": "goblin_cave",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "fork_03",
+      "name": "分叉口3",
+      "type": "room",
+      "parent_id": "goblin_cave",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "dead_end_03",
+      "name": "死路3",
+      "type": "room",
+      "parent_id": "goblin_cave",
+      "is_unlocked": true
+    },
+    {
+      "location_id": "goblin_king_cave",
+      "name": "哥布林大王巢穴",
+      "type": "site",
+      "parent_id": "goblin_cave",
+      "is_unlocked": true
+    }
+  ]

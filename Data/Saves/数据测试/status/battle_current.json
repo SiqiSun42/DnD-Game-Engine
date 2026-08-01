@@ -2,7 +2,23 @@
     "current_statuses": [
         {
             "character_id": "kevin",
-            "current_hp": 10
+            "current_hp": 10,
+            "current_spell_slots": null
+        },
+        {
+            "character_id": "vidcund",
+            "current_hp": 10,
+            "current_spell_slots": [
+                {
+                    "level": 1,
+                    "slots": 2
+                }
+            ]
+        },
+        {
+            "character_id": "goblin_1",
+            "current_hp": 7,
+            "current_spell_slots": null
         }
     ]
 }

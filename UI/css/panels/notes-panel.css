@@ -243,6 +243,25 @@
   white-space: pre-wrap;
 }
 
+.notes-mission-intro {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-top: 2px;
+}
+
+.notes-mission-nodes {
+  padding-left: 1.4em;
+  margin-top: 4px;
+}
+
+.notes-mission-node {
+  font-size: var(--font-action-panel-body);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  margin-top: 2px;
+}
+
 .notes-mission-empty {
   font-size: var(--font-action-panel-body);
   color: var(--text-muted);

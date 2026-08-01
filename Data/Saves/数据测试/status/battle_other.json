@@ -4,11 +4,70 @@
             "character_id": "kevin",
             "hp_bonus": 0,
             "ac_bonus": 1,
-            "attack_bonus": 0,
-            "damage_bonus": 0,
-            "qualified_traits":["fighting_tyle","second_wind"],
-            "un_qualified_traits":[],
-            "temp_buffs": []
+            "ac_override": null,
+            "advantage": null,
+            "disadvantage": null,
+            "qualified_traits": [
+                { "catalog": "traits", "id": "fighting_style" },
+                { "catalog": "traits", "id": "second_wind" }
+            ],
+            "unqualified_traits": [],
+            "temp_buffs": [
+                {
+                    "buff_id": "shield",
+                    "remaining_duration": {
+                        "value": 1,
+                        "unit": "round"
+                    }
+                }
+            ],
+            "conditions": [
+                {
+                    "condition_id": "poisoned",
+                    "remaining_duration": {
+                        "value": null,
+                        "unit": "until_removed"
+                    }
+                }
+            ]
+        },
+        {
+            "character_id": "vidcund",
+            "hp_bonus": 0,
+            "ac_bonus": 0,
+            "ac_override": 13,
+            "advantage": null,
+            "disadvantage": null,
+            "qualified_traits": [
+                { "catalog": "traits", "id": "arcane_recovery" },
+                { "catalog": "traits", "id": "arcane_tradition" }
+            ],
+            "unqualified_traits": [],
+            "temp_buffs": [
+                {
+                    "buff_id": "mage_armor",
+                    "remaining_duration": {
+                        "value": 8,
+                        "unit": "hour"
+                    }
+                }
+            ],
+            "conditions": []
+        },
+        {
+            "character_id": "goblin_1",
+            "hp_bonus": 0,
+            "ac_bonus": 0,
+            "ac_override": null,
+            "advantage": null,
+            "disadvantage": null,
+            "qualified_traits": [
+                { "catalog": "races", "id": "goblin_darkvision" },
+                { "catalog": "races", "id": "goblin_fury_of_the_small" }
+            ],
+            "unqualified_traits": [],
+            "temp_buffs": [],
+            "conditions": []
         }
     ]
 }

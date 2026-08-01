@@ -1,0 +1,30 @@
+{
+    "services": [
+        {
+            "name": "为提灯加油",
+            "service_id": "add_light_oil",
+            "description": "为提灯添加燃油，按次收费",
+            "price": {
+                "base_price": 5,
+                "fluctuation_range": 0.1
+            },
+            "content": {
+                "action":"为提灯添加一次燃油",
+                "information": null
+            }
+        },
+        {
+            "name": "打听消息",
+            "service_id": "get_information",
+            "description": "向酒保打听消息，需要先买一杯啤酒",
+            "price": {
+                "base_price": 10,
+                "fluctuation_range": 0.1
+            },
+            "content": {
+                "action": null,
+                "information": "村子里已经闹了大半年哥布林。先后已经进入过三批冒险者，全部都有去无回"
+            }
+        }
+    ]
+}

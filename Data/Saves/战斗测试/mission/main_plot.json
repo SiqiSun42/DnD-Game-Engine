@@ -1,0 +1,47 @@
+{
+    "main_plot": [
+        {   
+            "name": "哥布林任务",
+            "mission_id": "goblin_mission",
+            "description": "盐潮村遭到哥布林的侵扰，需要你们前往洞穴并打败那里的哥布林。",
+            "type": ["main_mission"],
+            "is_unlocked": true,
+            "unlock_condition": "领取该任务。",
+            "quest_item": [
+                {
+                    "quest_item_id": "guild_commission_letter",
+                    "obtain_condition": "领取任务后自动获得。"
+                }
+            ],
+            "node":[
+                {
+                    "node_id": "find_goblin_cave",
+                    "description": "你需要先找到哥布林洞穴的入口。",
+                    "is_unlocked": true,
+                    "unlock_condition": null,
+                    "content":"哥布林洞穴在盐潮森林西边的路上。可以和任意村民npc对话得知哥布林洞穴的位置。也可以在森林对四条路进行DC12的视觉鉴定，通过就可以看到哥布林的脚印在哪条路上。只要最终找到入口就视作完成。",
+                    "is_completed": false
+                },
+                {
+                    "node_id": "enter_goblin_cave",
+                    "description": "你是否满足洞穴探索的条件呢？",
+                    "is_unlocked": false,
+                    "unlock_condition": "找到哥布林洞穴以后自动解锁。",
+                    "content":"需要满足条件才可以进入哥布林洞穴：点燃照明物品，或者队伍中有人能够使用照明术。",
+                    "is_completed": false
+                },
+                {
+                    "node_id": "beat_goblin_king",
+                    "description": "打败哥布林大王，这就是任务的关键",
+                    "is_unlocked": false,
+                    "unlock_condition": "进入哥布林洞穴以后自动解锁。",
+                    "content":"战胜哥布林大王。战斗结束以后，如果没有立刻打昏或者杀死哥布林大王，他会求饶并主动告诉你是村长设计了整个毒气陷阱和假地图的阴谋。",
+                    "is_completed": false
+                }
+            ],
+            "is_completed": false,
+            "is_failed": false,
+            "end_condition": "从盐潮森林东边的路离开该地区，无论是否击败哥布林大王，都视作结束该章节。"
+        }
+    ]
+}

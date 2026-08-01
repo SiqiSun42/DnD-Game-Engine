@@ -1,0 +1,77 @@
+[
+  {
+    "name": "暗影裂谷战役",
+    "event_id": "battle_of_shadow_rift",
+    "description": "人类联盟与地下深渊魔物之间爆发的一场决定性战役，旨在封印通往地表的深渊裂隙，阻止魔物的大规模入侵。",
+    "has_started": true,
+    "start_conditions": null,
+    "start_time": {
+      "year": 1250,
+      "month": null,
+      "day": null
+    },
+    "has_ended": true,
+    "end_time": {
+      "year": 1251,
+      "month": null,
+      "day": null
+    },
+    "possible_outcomes": [],
+    "outcome": null,
+    "associated_characters": null,
+    "associated_organizations": null,
+    "associated_locations": null,
+    "associated_events": null,
+    "impacts": null
+  },
+  {
+    "name": "光明港保卫战",
+    "event_id": "defense_of_lightshaven",
+    "description": "深渊魔物的主力部队对前线补给基地光明港发起了突袭，人类联盟被迫展开惨烈的防守战，为后续的行动争取时间。",
+    "has_started": true,
+    "start_conditions": null,
+    "start_time": {
+      "year": 1250,
+      "month": 10,
+      "day": null
+    },
+    "has_ended": true,
+    "end_time": {
+      "year": 1250,
+      "month": 12,
+      "day": null
+    },
+    "possible_outcomes": [],
+    "outcome": null,
+    "associated_characters": null,
+    "associated_organizations": null,
+    "associated_locations": null,
+    "associated_events": null,
+    "impacts": null
+  },
+  {
+    "name": "裂隙封印仪式",
+    "event_id": "sealing_ritual_of_the_rift",
+    "description": "由多族顶尖法师组成的施法者同盟在暗影裂谷核心区域施放上古封印魔法，彻底切断了魔物的增援通道。",
+    "has_started": true,
+    "start_conditions": null,
+    "start_time": {
+      "year": 1251,
+      "month": 2,
+      "day": null
+    },
+    "has_ended": true,
+    "end_time": {
+      "year": 1251,
+      "month": 2,
+      "day": null
+    },
+    "possible_outcomes": [],
+    "outcome": null,
+    "associated_characters": null,
+    "associated_organizations": null,
+    "associated_locations": null,
+    "associated_events": null,
+    "impacts": null
+  }
+]

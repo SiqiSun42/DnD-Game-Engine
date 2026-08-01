@@ -1,0 +1,13 @@
+{
+  "category": "valuables",
+  "item_id": "ruby_ring",
+  "name": "红宝石戒指",
+  "description": "纤细漂亮的金戒指，正中央镶嵌着一颗红宝石。",
+  "price": {
+    "base_price": 100,
+    "fluctuation_range": 0.2
+  },
+  "rarity": "uncommon",
+  "weight": 0.1,
+  "other": null
+}

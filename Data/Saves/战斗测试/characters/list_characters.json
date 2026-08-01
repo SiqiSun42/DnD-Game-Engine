@@ -1,0 +1,46 @@
+{
+    "character_index": [
+      {
+        "character_id": "kevin",
+        "identity": "pc",
+        "is_recruitable": null,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "vidcund",
+        "identity": "ally",
+        "is_recruitable": true,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "dylan",
+        "identity": "other",
+        "is_recruitable": true,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "sera",
+        "identity": "other",
+        "is_recruitable": true,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "finnan",
+        "identity": "other",
+        "is_recruitable": true,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "jim",
+        "identity": "other",
+        "is_recruitable": true,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "goblin_king",
+        "identity": "enemy",
+        "is_recruitable": true,
+        "recruit_condition": null
+      }
+    ]
+  }

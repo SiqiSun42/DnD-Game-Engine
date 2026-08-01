@@ -1,0 +1,15 @@
+{
+    "backpacks": [
+      {
+        "character_id": "kevin",
+        "identity": "pc",
+        "inventory": [
+          {
+            "item_id": "guild_commission_letter",
+            "name": "冒险家工会委托信",
+            "quantity": 1
+          }
+        ]
+      }
+    ]
+  }

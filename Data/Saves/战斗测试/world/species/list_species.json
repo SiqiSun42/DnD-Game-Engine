@@ -1,0 +1,22 @@
+[
+    {
+      "species_id": "human",
+      "name": "人类"
+    },
+    {
+      "species_id": "elf",
+      "name": "精灵"
+    },
+    {
+      "species_id": "dwarf",
+      "name": "矮人"
+    },
+    {
+      "species_id": "goblin",
+      "name": "哥布林"
+    },
+    {
+      "species_id": "halfling",
+      "name": "半身人"
+    }
+  ]

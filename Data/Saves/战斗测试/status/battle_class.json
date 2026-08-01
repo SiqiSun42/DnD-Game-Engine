@@ -1,0 +1,87 @@
+{
+    "class_modifiers": [
+        {
+            "character_id": "kevin",
+            "class_name": "fighter",
+            "level": 1,
+            "proficiencies": {
+                "proficency_id": "fighter",
+                "armor_bonus": null,
+                "weapons_bonus": null,
+                "saves_bonus": null
+            },
+            "proficiency_bonus": 2,
+            "skills": ["athletics", "perception"],
+            "traits": ["fighting_style", "second_wind"],
+            "spellcasting": null
+        },
+        {
+            "character_id": "vidcund",
+            "class_name": "wizard",
+            "level": 1,
+            "proficiencies": {
+                "proficency_id": "wizard",
+                "armor_bonus": null,
+                "weapons_bonus": null,
+                "saves_bonus": null
+            },
+            "proficiency_bonus": 2,
+            "skills": ["arcana", "investigation"],
+            "traits": ["arcane_recovery", "arcane_tradition"],
+            "spellcasting": {
+                "spells": ["fire_bolt", "mage_hand", "light", "magic_missile", "shield", "mage_armor"],
+                "max_spell_slots": [
+                    {
+                        "level": 1,
+                        "slots": 2
+                    }
+                ]
+            }
+        },
+        {
+            "character_id": "goblin_1",
+            "class_name": null,
+            "level": 1,
+            "proficiencies": {
+                "proficency_id": "goblin",
+                "armor_bonus": null,
+                "weapons_bonus": null,
+                "saves_bonus": null
+            },
+            "proficiency_bonus": 2,
+            "skills": ["stealth"],
+            "traits": null,
+            "spellcasting": null
+        },
+        {
+            "character_id": "goblin_2",
+            "class_name": null,
+            "level": 1,
+            "proficiencies": {
+                "proficency_id": "goblin",
+                "armor_bonus": null,
+                "weapons_bonus": null,
+                "saves_bonus": null
+            },
+            "proficiency_bonus": 2,
+            "skills": ["stealth"],
+            "traits": null,
+            "spellcasting": null
+        },
+        {
+            "character_id": "goblin_3",
+            "class_name": null,
+            "level": 1,
+            "proficiencies": {
+                "proficency_id": "goblin",
+                "armor_bonus": null,
+                "weapons_bonus": null,
+                "saves_bonus": null
+            },
+            "proficiency_bonus": 2,
+            "skills": ["stealth"],
+            "traits": null,
+            "spellcasting": null
+        }
+    ]
+}

@@ -1,8 +1,29 @@
 const SAVE_DERIVED_FIELD = 'derived';
 
-function resolveStatusDerived(status) {
+function resolveStatusDerived(status, inventory) {
   if (!status || typeof status !== 'object') return {};
-  return {};
+  if (typeof resolveStatusForUi !== 'function') return {};
+
+  const ui = resolveStatusForUi(status, inventory);
+  const characters = {};
+
+  (ui.characters || []).forEach(character => {
+    const current = character.sections?.current || {};
+    characters[character.character_id] = {
+      current_ac: current.current_ac,
+      current_ac_formula: current.current_ac_formula,
+      ac_base: current.ac_base,
+      shield_ac: current.shield_ac,
+      ac_bonus: current.ac_bonus,
+    };
+  });
+
+  const result = { characters };
+  const pcId = typeof getPcCharacterId === 'function' ? getPcCharacterId(status) : null;
+  if (pcId && characters[pcId]) {
+    result.pc = characters[pcId];
+  }
+  return result;
 }
 
 function resolveSaveDerived(saveData) {
@@ -11,12 +32,12 @@ function resolveSaveDerived(saveData) {
   }
 
   const inventoryDerived = typeof resolveInventoryDerived === 'function'
-    ? resolveInventoryDerived(saveData.inventory)
+    ? resolveInventoryDerived(saveData.inventory, saveData.status)
     : {};
 
   return {
     inventory: inventoryDerived,
-    status: resolveStatusDerived(saveData.status),
+    status: resolveStatusDerived(saveData.status, saveData.inventory),
   };
 }
 

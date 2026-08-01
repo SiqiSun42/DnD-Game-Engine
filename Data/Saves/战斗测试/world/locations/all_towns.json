@@ -1,0 +1,61 @@
+{
+    "towns": [
+      {
+        "name": "盐潮村",
+        "location_id": "salt_tide_village",
+        "type": "town",
+        "location": "在利齿礁群的最南边",
+        "description": "沿海的小渔村，居民捕鱼为生。因为哥布林的侵扰，已经变得有些萧条。",
+        "geography": "Coastal",
+        "culture":["ocean_goddess_worship"],
+        "lighting": null,
+        "npcs": null,
+        "exits": {
+            "upper_level": null,
+            "same_level": [
+                {
+                    "target": "salt_tide_forest",
+                    "distance": "10",
+                    "note": "出了村庄就可以到达盐潮森林"
+                }
+            ],
+            "lower_level": [
+                {
+                    "target": "",
+                    "distance": "",
+                    "note": ""
+                }
+            ]
+        },
+        "services": null,
+        "inventory": null,
+        "missions": null,
+        "traits": null,
+        "actions": null
+      },
+      {
+        "name": "盐潮森林",
+        "location_id": "salt_tide_forest",
+        "type": "town",
+        "location": "在利齿礁群的中部",
+        "description": "村庄附近的森林，一共有四条路通往不同的方向。哥布林洞穴藏匿在其深处",
+        "geography": "Forest",
+        "culture":null,
+        "lighting": null,
+        "npcs": null,
+        "exits": {
+            "upper_level": {
+                "target": "the_teeth",
+                "distance": "100",
+                "note": "沿着东边的路走，可以离开这片区域，结束游戏。"
+            },
+            "same_level": null,
+            "lower_level": {
+                "target": "goblin_cave",
+                "distance": "10",
+                "note": "沿着西边的路走，可以到达哥布林洞穴"
+            }
+        }
+      }
+    ]
+  }

@@ -1,0 +1,18 @@
+{
+    "conditions": [
+        {
+            "condition_id": "poisoned",
+            "name": "中毒",
+            "description": "该生物处于中毒状态。",
+            "effects": {
+                "type": "disadvantage",
+                "target": ["attack_roll", "ability_check"]
+            },
+            "duration": {
+                "value": null,
+                "unit": "until_removed"
+            },
+            "removed_by": ["antidote", "long_rest"]
+        }
+    ]
+}

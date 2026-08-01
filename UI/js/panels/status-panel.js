@@ -1,10 +1,10 @@
 const STATUS_SECTIONS = [
   { id: 'current', labelKey: 'current' },
+  { id: 'other', labelKey: 'other' },
   { id: 'basic', labelKey: 'basic' },
   { id: 'race', labelKey: 'race' },
   { id: 'class', labelKey: 'class' },
   { id: 'equipment', labelKey: 'equipment' },
-  { id: 'temp', labelKey: 'temp' },
 ];
 
 function mountStatusPanel(container, schema, data) {

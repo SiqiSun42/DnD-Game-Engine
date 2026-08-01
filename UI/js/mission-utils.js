@@ -4,72 +4,59 @@ function isMissionBundle(missions) {
   return missions?._format === MISSION_BUNDLE_FORMAT;
 }
 
-function buildMissionAllIndex(allMissions) {
-  const index = {};
-  (allMissions?.missions || []).forEach(entry => {
-    const id = entry?.mission_id;
-    if (!id) return;
-    index[id] = entry;
-  });
-  return index;
+function getQuestStatusIcon(mission) {
+  if (mission?.is_failed) return '❌';
+  if (mission?.is_completed) return '✅';
+  return '○';
 }
 
-function getMissionStatusIcon(mission) {
-  if (mission.is_completed) return '✅';
-  if (mission.is_ended) return '❌';
-  return '⬜';
+function getNodeStatusIcon(node) {
+  if (node?.is_completed) return '✅';
+  return '○';
 }
 
-function isMainMission(allEntry) {
-  const types = allEntry?.type;
-  if (!Array.isArray(types)) return false;
-  return types.includes('main_mission');
+function mapMissionForUi(entry) {
+  if (entry?.is_unlocked !== true) return null;
+
+  const nodes = (entry.node || entry.nodes || [])
+    .filter(node => node?.is_unlocked === true)
+    .map(node => ({
+      node_id: node.node_id,
+      description: node.description || '',
+      is_completed: node.is_completed === true,
+    }));
+
+  return {
+    mission_id: entry.mission_id,
+    name: entry.name || entry.mission_id || '',
+    description: entry.description || '',
+    is_completed: entry.is_completed === true,
+    is_failed: entry.is_failed === true,
+    nodes,
+  };
+}
+
+function resolveMissionList(entries) {
+  return (entries || [])
+    .map(mapMissionForUi)
+    .filter(Boolean);
 }
 
 function resolveMissionsForUi(missions) {
   if (!isMissionBundle(missions)) {
-    return { chapter: [], current: [], history: [] };
+    return { mainPlot: [], sideQuest: [], history: [] };
   }
 
-  const list = missions.list?.missions || [];
-  const allById = buildMissionAllIndex(missions.all);
-  const chapter = [];
-  const current = [];
-  const history = [];
-
-  list.forEach(listEntry => {
-    if (listEntry?.is_unlocked === false) return;
-    const missionId = listEntry?.mission_id;
-    if (!missionId) return;
-    const allEntry = allById[missionId];
-    if (!allEntry) return;
-
-    const mission = {
-      mission_id: missionId,
-      name: allEntry.name || listEntry.name || missionId,
-      content: allEntry.content || '',
-      is_completed: allEntry.is_completed === true,
-      is_ended: allEntry.is_ended === true,
-    };
-
-    if (isMainMission(allEntry)) {
-      chapter.push(mission);
-      return;
-    }
-
-    if (mission.is_ended) {
-      history.push(mission);
-    } else {
-      current.push(mission);
-    }
-  });
-
-  return { chapter, current, history };
+  return {
+    mainPlot: resolveMissionList(missions.mainPlot?.main_plot),
+    sideQuest: resolveMissionList(missions.sideQuest?.side_quest),
+    history: [],
+  };
 }
 
 async function hasMissionBundle(basePath) {
   try {
-    const response = await fetch(`${basePath}/missions/list_missions.json`);
+    const response = await fetch(`${basePath}/mission/main_plot.json`);
     return response.ok;
   } catch (_) {
     return false;
@@ -77,16 +64,16 @@ async function hasMissionBundle(basePath) {
 }
 
 async function loadMissionBundle(basePath) {
-  const missionsBase = `${basePath}/missions`;
-  const [all, list] = await Promise.all([
-    fetchJSON(`${missionsBase}/all_missions.json`).catch(() => ({ missions: [] })),
-    fetchJSON(`${missionsBase}/list_missions.json`).catch(() => ({ missions: [] })),
+  const missionBase = `${basePath}/mission`;
+  const [mainPlot, sideQuest] = await Promise.all([
+    fetchJSON(`${missionBase}/main_plot.json`).catch(() => ({ main_plot: [] })),
+    fetchJSON(`${missionBase}/side_quest.json`).catch(() => ({ side_quest: [] })),
   ]);
 
   return {
     _format: MISSION_BUNDLE_FORMAT,
-    all,
-    list,
+    mainPlot,
+    sideQuest,
   };
 }
 

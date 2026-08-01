@@ -11,9 +11,9 @@
             "type": "ally"
         },
         {
-            "character_id": "goblin_king",
-            "name": "哥布林大王",
-            "type": "enemy"
+            "character_id": "goblin_1",
+            "name": "哥布林1",
+            "type": "ally"
         }
     ] 
 }

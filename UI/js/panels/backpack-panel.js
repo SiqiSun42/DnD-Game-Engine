@@ -109,13 +109,20 @@ function mountBackpackPanel(container, schema, data) {
   }
 
   function renderEncumbranceDetail(item) {
+    const maxWeightLine = item.maxWeightFormula
+      ? `最大负重(lb)：${item.maxWeightFormula}`
+      : item.maxWeightLb !== null && item.maxWeightLb !== undefined
+        ? `最大负重(lb)：${formatWeightLbDisplay(item.maxWeightLb)}`
+        : null;
+    const statusLabel = item.statusLabel || '正常';
+    const statusClass = statusLabel === '超重' ? ' backpack-encumbrance-overweight' : '';
     detailEl.innerHTML = `
       <div class="backpack-detail-inner">
         ${renderDetailBodyLines([
-          `最大负重(lb)：${formatWeightLbDisplay(item.maxWeightLb)}`,
+          maxWeightLine,
           `当前负重(lb)：${formatWeightLbDisplay(item.currentWeightLb)}`,
-          `当前状态：${item.statusLabel || '正常'}`,
-        ])}
+        ].filter(Boolean))}
+        <p class="backpack-detail-body${statusClass}">当前状态：${escapePanelText(statusLabel)}</p>
       </div>
     `;
   }

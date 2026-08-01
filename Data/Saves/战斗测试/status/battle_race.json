@@ -1,0 +1,29 @@
+{
+    "racial_modifiers": [
+      {   
+        "character_id": "kevin",
+        "race": "human",
+        "subrace": null
+      },
+      {
+        "character_id": "vidcund",
+        "race": "human ",
+        "subrace": null
+      },
+      {
+        "character_id": "goblin_1",
+        "race": "goblin",
+        "subrace": null
+      },
+      {
+        "character_id": "goblin_2",
+        "race": "goblin",
+        "subrace": null
+      },
+      {
+        "character_id": "goblin_3",
+        "race": "goblin",
+        "subrace": null
+      } 
+    ]
+}

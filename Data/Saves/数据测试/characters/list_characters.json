@@ -2,21 +2,42 @@
     "character_index": [
       {
         "character_id": "kevin",
-        "name": "凯文",
         "identity": "pc",
         "is_recruitable": null,
         "recruit_condition": null
       },
       {
         "character_id": "vidcund",
-        "name": "维特昆德",
         "identity": "ally",
         "is_recruitable": true,
         "recruit_condition": null
       },
       {
         "character_id": "dylan",
-        "name": "迪伦",
+        "identity": "ally",
+        "is_recruitable": true,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "sera",
+        "identity": "ally",
+        "is_recruitable": true,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "finnan",
+        "identity": "ally",
+        "is_recruitable": true,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "jim",
+        "identity": "ally",
+        "is_recruitable": true,
+        "recruit_condition": null
+      },
+      {
+        "character_id": "goblin_king",
         "identity": "ally",
         "is_recruitable": true,
         "recruit_condition": null

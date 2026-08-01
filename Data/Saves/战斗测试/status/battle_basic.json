@@ -1,0 +1,74 @@
+{
+    "basic_statuses": [
+        {
+            "character_id": "kevin",
+            "max_hp": 10,
+            "base_ac": 10,
+            "base_speed": 30,
+            "base_attributes": {
+                "strength": 10,
+                "dexterity": 10,
+                "constitution": 10,
+                "intelligence": 10,
+                "wisdom": 10,
+                "charisma": 10
+            }
+        },
+        {
+            "character_id": "vidcund",
+            "max_hp": 10,
+            "base_ac": 10,
+            "base_speed": 30,
+            "base_attributes": {
+                "strength": 10,
+                "dexterity": 10,
+                "constitution": 10,
+                "intelligence": 10,
+                "wisdom": 10,
+                "charisma": 10
+            }
+        },
+        {
+            "character_id": "goblin_1",
+            "max_hp": 7,
+            "base_ac": 10,
+            "base_speed": 30,
+            "base_attributes": {
+                "strength": 8,
+                "dexterity": 14,
+                "constitution": 10,
+                "intelligence": 10,
+                "wisdom": 8,
+                "charisma": 8
+            }
+        },
+        {
+            "character_id": "goblin_2",
+            "max_hp": 7,
+            "base_ac": 10,
+            "base_speed": 30,
+            "base_attributes": {
+                "strength": 8,
+                "dexterity": 14,
+                "constitution": 10,
+                "intelligence": 10,
+                "wisdom": 8,
+                "charisma": 8
+            }
+        },
+        {
+            "character_id": "goblin_3",
+            "max_hp": 7,
+            "base_ac": 10,
+            "base_speed": 30,
+            "base_attributes": {
+                "strength": 8,
+                "dexterity": 14,
+                "constitution": 10,
+                "intelligence": 10,
+                "wisdom": 8,
+                "charisma": 8
+            }
+        }
+    ]
+}

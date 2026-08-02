@@ -8,7 +8,6 @@ load_dotenv(Path(__file__).resolve().parent / ".env")
 DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "").rstrip("/")
 DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "")
-DEEPSEEK_COMBAT_MODEL = os.getenv("DEEPSEEK_COMBAT_MODEL", "")
 
 def _env_flag(name: str, default: str = "false") -> bool:
     return os.getenv(name, default).lower() in {"1", "true", "yes", "on"}

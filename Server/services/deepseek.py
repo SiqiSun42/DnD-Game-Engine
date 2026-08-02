@@ -7,7 +7,6 @@ import httpx
 from config import (
     DEEPSEEK_API_KEY,
     DEEPSEEK_BASE_URL,
-    DEEPSEEK_COMBAT_MODEL,
     DEEPSEEK_MODEL,
     DEEPSEEK_THINKING_ENABLED,
     DEEPSEEK_USER_PROMPT_PATCH,
@@ -40,7 +39,6 @@ class DeepSeekClient:
         self._api_key = DEEPSEEK_API_KEY
         self._base_url = DEEPSEEK_BASE_URL
         self._model = DEEPSEEK_MODEL
-        self._combat_model = DEEPSEEK_COMBAT_MODEL
         self._thinking_enabled = DEEPSEEK_THINKING_ENABLED
         self._attach_user_prompt_patch = DEEPSEEK_USER_PROMPT_PATCH
         self._dice_roll_pattern = re.compile(r'\[DICE_ROLL:(\w+)\](d\d+)\[/DICE_ROLL:\1\]', re.IGNORECASE)

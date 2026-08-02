@@ -1,5 +1,7 @@
 {
     "battle_id": null,
+    "turns": 1,
+    "round": 1,
     "allies":[
         {
             "character_id": "kevin",

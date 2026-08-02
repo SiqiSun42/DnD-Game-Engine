@@ -29,12 +29,6 @@ function displayDmReply({
     if (usesGamePipeline && typeof extractGameSyncFromDmText === 'function') {
       const gameSync = extractGameSyncFromDmText(segmentText);
       segmentDisplayText = gameSync.displayText;
-      if (gameSync.questSync && typeof applyQuestSync === 'function') {
-        applyQuestSync(gameSync.questSync);
-        if (typeof refreshNotesPanelIfOpen === 'function') {
-          refreshNotesPanelIfOpen();
-        }
-      }
       if (gameSync.inventorySync && typeof applyInventorySync === 'function') {
         applyInventorySync(gameSync.inventorySync);
         if (typeof refreshBackpackPanelIfOpen === 'function') {
@@ -99,9 +93,7 @@ async function requestChat({
     combatActorId,
   };
 
-  const usesGamePipeline = channel === CHAT_CHANNELS.GAME
-    || channel === CHAT_CHANNELS.CHECK_TEST
-    || channel === CHAT_CHANNELS.COMBAT_TEST;
+  const usesGamePipeline = shouldAttachGameContext(channel);
 
   if (usesGamePipeline && typeof buildGameContext === 'function') {
     const gameContext = buildGameContext();
@@ -135,9 +127,7 @@ async function handleChatSend({ text, playerLabel, chat, channel, saveName, mode
   }
 
   try {
-    const usesGamePipeline = resolvedChannel === CHAT_CHANNELS.GAME
-      || resolvedChannel === CHAT_CHANNELS.CHECK_TEST
-      || resolvedChannel === CHAT_CHANNELS.COMBAT_TEST;
+    const usesGamePipeline = shouldAttachGameContext(resolvedChannel);
 
     if (typeof chat.showThinking === 'function') {
       chat.showThinking('DM');
@@ -155,39 +145,10 @@ async function handleChatSend({ text, playerLabel, chat, channel, saveName, mode
       reply,
       chat,
       usesGamePipeline,
-      isLastInChain: !reply.combatAutoContinue && !reply.combatStateUpdate,
+      isLastInChain: true,
     });
 
-    if (resolvedChannel === CHAT_CHANNELS.COMBAT_TEST) {
-      let continueCount = 0;
-      while ((reply.combatAutoContinue || reply.combatStateUpdate)
-        && continueCount < MAX_COMBAT_AUTO_CONTINUE) {
-        continueCount += 1;
-        const isStateUpdate = !!reply.combatStateUpdate;
-        if (!isStateUpdate && typeof chat.showThinking === 'function') {
-          chat.showThinking('DM');
-        }
-        reply = await requestChat({
-          channel: resolvedChannel,
-          saveName: resolvedSaveName,
-          combatContinue: !isStateUpdate,
-          combatStateUpdate: isStateUpdate,
-          combatActorId: isStateUpdate ? reply.combatActorId : null,
-        });
-        if (typeof chat.hideThinking === 'function') {
-          chat.hideThinking();
-        }
-        const stepEnteredCombat = displayDmReply({
-          reply,
-          chat,
-          usesGamePipeline,
-          isLastInChain: !reply.combatAutoContinue && !reply.combatStateUpdate,
-        });
-        enteredCombat = enteredCombat || stepEnteredCombat;
-      }
-    }
-
-    if (usesGamePipeline && enteredCombat && resolvedChannel !== CHAT_CHANNELS.COMBAT_TEST) {
+    if (usesGamePipeline && enteredCombat) {
       const combatPrompt = typeof getCombatEntryPrompt === 'function'
         ? getCombatEntryPrompt()
         : '现在进入战斗！你希望这场战斗如何结束？可输入：胜利 / 失败 / 逃跑';

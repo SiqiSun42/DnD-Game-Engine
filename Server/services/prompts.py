@@ -149,24 +149,6 @@ def format_game_context(context: dict | None) -> str:
     return f"```json\n{json.dumps(context, ensure_ascii=False, indent=2)}\n```"
 
 
-def append_quest_sync_reminder(prompt: str, game_context: dict | None) -> str:
-    if not game_context:
-        return prompt
-    quests = game_context.get("currentQuests") or []
-    if not isinstance(quests, list) or not quests:
-        return prompt
-    quest_text = json.dumps(quests, ensure_ascii=False)
-    notice = (
-        "## 任务栏更新提醒\n\n"
-        f"当前 `currentQuests` = {quest_text}\n\n"
-        "本轮输出前必须对照 devPlotTree 检查：玩家刚才的行动是否完成了其中某项？\n"
-        "- 若已完成某项 → 在 `[QUEST_SYNC]` 中为该条加上 `（已完成）`\n"
-        "- 若 devPlotTree 标明阶段切换条件已满足 → 按节点规则更新 `[QUEST_SYNC]`\n"
-        "- **思考里意识到完成但不同步到 `[QUEST_SYNC]` = 错误**"
-    )
-    return f"{prompt.rstrip()}\n\n{notice}"
-
-
 def append_combat_state_reminder(prompt: str, game_context: dict | None) -> str:
     if not game_context or not game_context.get("inCombat"):
         return prompt
@@ -216,7 +198,6 @@ def build_game_system_prompt(
         panels=panels,
     )
     prompt = f"{prompt.rstrip()}\n\n## 当前游戏状态\n\n{state_block}"
-    prompt = append_quest_sync_reminder(prompt, game_context)
     prompt = append_combat_state_reminder(prompt, game_context)
     prompt = append_rag_context(prompt, rag_context)
     if roll_judge_block and roll_judge_block.strip():

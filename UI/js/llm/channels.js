@@ -1,34 +1,32 @@
 const CONSULT_SAVE_NAME = '咨询城主';
-const CHECK_TEST_SAVE_NAME = '鉴定测试';
-const COMBAT_TEST_SAVE_NAME = '战斗测试';
 
 const CHAT_CHANNELS = {
   CONSULT: 'consult',
-  CHECK_TEST: 'check-test',
-  COMBAT_TEST: 'combat-test',
   GAME: 'game',
   START_GAME: 'start-game',
   CONVERSATION: 'conversation',
   ADVENTURE: 'adventure',
 };
 
+function shouldAttachGameContext(channel) {
+  return channel !== CHAT_CHANNELS.CONSULT
+    && channel !== CHAT_CHANNELS.CONVERSATION
+    && channel !== CHAT_CHANNELS.ADVENTURE
+    && channel !== CHAT_CHANNELS.START_GAME;
+}
+
 function resolveChatChannel(options = {}) {
   if (options.channel) {
     return options.channel;
   }
 
-  const saveName = typeof getActiveSaveName === 'function' ? getActiveSaveName() : null;
-  const meta = typeof getActiveSaveMeta === 'function' ? getActiveSaveMeta() : null;
+  const data = typeof getActiveSaveData === 'function' ? getActiveSaveData() : null;
+  const configuredChannel = data?.settingsGame?.channel;
+  if (typeof configuredChannel === 'string' && configuredChannel.trim()) {
+    return configuredChannel.trim();
+  }
 
-  if (saveName === CONSULT_SAVE_NAME) {
-    return CHAT_CHANNELS.CONSULT;
-  }
-  if (saveName === CHECK_TEST_SAVE_NAME) {
-    return CHAT_CHANNELS.CHECK_TEST;
-  }
-  if (saveName === COMBAT_TEST_SAVE_NAME) {
-    return CHAT_CHANNELS.COMBAT_TEST;
-  }
+  const meta = typeof getActiveSaveMeta === 'function' ? getActiveSaveMeta() : null;
   if (meta?.docType === 'game') {
     return CHAT_CHANNELS.GAME;
   }
@@ -80,11 +78,8 @@ function buildGameContext() {
     status: data.status || null,
     inCombat: data.status?.inCombat ?? false,
     participants: data.status?.participants ?? -1,
-    currentQuests: data.notes?.currentQuests || [],
-    historyQuests: data.notes?.historyQuests || { pages: [] },
+    missions: data.missions || null,
     characters: data.characters || null,
-    devPlotTree: data.notes?.devPlotTree || null,
-    defaultDevPlotEntryId: data.notes?.defaultDevPlotEntryId || null,
     settingsGame: data.settingsGame || null,
     promptFile: data.settingsGame?.promptFile || null,
   };

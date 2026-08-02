@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 
 from handlers.registry import get_handler
 from services.deepseek import DeepSeekError
+from services.save_files import load_save_json_files
 
 
 class ChatMessage(BaseModel):
@@ -43,10 +44,30 @@ class ChatResponse(BaseModel):
     suppressDisplay: bool = False
 
 
+def _should_mount_save_json_files(context: dict) -> bool:
+    settings = context.get("settingsGame") or {}
+    mode = settings.get("panelMount", "all")
+    if isinstance(mode, str) and mode.strip().lower() == "auto":
+        return False
+    return True
+
+
+def _enrich_context_with_save_files(context: dict, save_name: str | None) -> dict:
+    if not save_name or not _should_mount_save_json_files(context):
+        return context
+    save_json = load_save_json_files(save_name)
+    if not save_json:
+        return context
+    enriched = dict(context)
+    enriched["saveJsonFiles"] = save_json
+    return enriched
+
+
 async def process_chat_request(body: ChatRequest) -> ChatResponse:
     handler = get_handler(body.channel)
     payload = [message.model_dump(exclude_none=True) for message in body.messages]
     context = dict(body.gameContext or {})
+    context = _enrich_context_with_save_files(context, body.saveName)
     if body.combatContinue:
         context["combatContinue"] = True
     if body.combatStateUpdate:

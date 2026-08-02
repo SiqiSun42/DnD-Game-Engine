@@ -314,40 +314,41 @@ async function loadCurrentData(basePath) {
 
 async function loadTemplateData() {
   const base = `${UI_DATA_ROOT}/templates/${encodeURIComponent(TEMPLATE_NAME)}`;
-  const [chat, inventory, characters, status, world, notes, missions, settingsGame, current] = await Promise.all([
+  const [chat, inventory, characters, status, world, missions, settingsGame, current] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
     loadInventoryData(base),
     loadCharacterData(base),
     loadStatusData(base),
     loadWorldData(base),
-    fetchJSON(`${base}/notes.json`),
     loadMissionData(base),
     fetchJSON(`${base}/settings-game.json`),
     loadCurrentData(base),
   ]);
-  return { chat, inventory, characters, status, world, notes, missions, settingsGame, current };
+  return { chat, inventory, characters, status, world, missions, settingsGame, current };
 }
 
 async function loadConversationSaveData(saveName) {
   const base = getSaveFolderBase(saveName);
-  const chat = await fetchJSON(`${base}/chat.json`);
-  return { chat };
+  const [chat, settingsGame] = await Promise.all([
+    fetchJSON(`${base}/chat.json`),
+    fetchJSON(`${base}/settings-game.json`).catch(() => ({})),
+  ]);
+  return { chat, settingsGame };
 }
 
 async function loadSaveDataFromFolder(saveName) {
   const base = getSaveFolderBase(saveName);
-  const [chat, inventory, characters, status, world, notes, missions, settingsGame, current] = await Promise.all([
+  const [chat, inventory, characters, status, world, missions, settingsGame, current] = await Promise.all([
     fetchJSON(`${base}/chat.json`),
     loadInventoryData(base),
     loadCharacterData(base),
     loadStatusData(base),
     loadWorldData(base),
-    fetchJSON(`${base}/notes.json`),
     loadMissionData(base),
     fetchJSON(`${base}/settings-game.json`),
     loadCurrentData(base),
   ]);
-  return { chat, inventory, characters, status, world, notes, missions, settingsGame, current };
+  return { chat, inventory, characters, status, world, missions, settingsGame, current };
 }
 
 async function loadSave(saveName) {
@@ -463,7 +464,6 @@ function appendChatMessage(message) {
   persistActiveSaveData();
 }
 
-const QUEST_SYNC_PATTERN = /\[QUEST_SYNC\]\s*([\s\S]*?)\s*\[\/QUEST_SYNC\]/;
 const INVENTORY_SYNC_PATTERN = /\[INVENTORY_SYNC\]\s*([\s\S]*?)\s*\[\/INVENTORY_SYNC\]/;
 const STATUS_SYNC_PATTERN = /\[STATUS_SYNC\]\s*([\s\S]*?)\s*\[\/STATUS_SYNC\]/i;
 const STATUS_SYNC_VARIANT_PATTERN = /(?:\[STATUS_SYNC\]|#{1,6}\s*STATUS_SYNC|(?:^|\n)\s*STATUS_SYNC\s*(?:\n|$))\s*(\{[\s\S]*\})\s*\[\/STATUS_SYNC\]/i;
@@ -573,41 +573,10 @@ function getCombatEntryPrompt() {
   return COMBAT_ENTRY_PROMPT;
 }
 
-function parseQuestSyncPayload(parsed) {
-  if (Array.isArray(parsed)) {
-    return { currentQuests: parsed.map(item => String(item)) };
-  }
-  if (!parsed || typeof parsed !== 'object') {
-    return null;
-  }
-  const questSync = {};
-  if (Array.isArray(parsed.currentQuests)) {
-    questSync.currentQuests = parsed.currentQuests.map(item => String(item));
-  }
-  if (parsed.historyQuests && Array.isArray(parsed.historyQuests.pages)) {
-    questSync.historyQuests = parsed.historyQuests;
-  }
-  if (!questSync.currentQuests && !questSync.historyQuests) {
-    return null;
-  }
-  return questSync;
-}
-
 function extractGameSyncFromDmText(text) {
   let displayText = String(text || '');
-  let questSync = null;
   let inventorySync = null;
   let statusSync = null;
-
-  const questMatch = displayText.match(QUEST_SYNC_PATTERN);
-  if (questMatch) {
-    try {
-      questSync = parseQuestSyncPayload(JSON.parse(questMatch[1].trim()));
-    } catch (_) {
-      questSync = null;
-    }
-    displayText = displayText.replace(QUEST_SYNC_PATTERN, '').trimEnd();
-  }
 
   const inventoryMatch = displayText.match(INVENTORY_SYNC_PATTERN);
   if (inventoryMatch) {
@@ -640,34 +609,7 @@ function extractGameSyncFromDmText(text) {
     }
   }
 
-  return { displayText, questSync, inventorySync, statusSync };
-}
-
-function extractQuestSyncFromDmText(text) {
-  const result = extractGameSyncFromDmText(text);
-  return {
-    displayText: result.displayText,
-    quests: result.questSync?.currentQuests || null,
-  };
-}
-
-function applyQuestSync(questSync) {
-  if (!questSync || !GameData.activeSaveData) return false;
-  if (!GameData.activeSaveData.notes) {
-    GameData.activeSaveData.notes = {};
-  }
-  if (Array.isArray(questSync.currentQuests)) {
-    GameData.activeSaveData.notes.currentQuests = questSync.currentQuests;
-  }
-  if (questSync.historyQuests && Array.isArray(questSync.historyQuests.pages)) {
-    GameData.activeSaveData.notes.historyQuests = questSync.historyQuests;
-  }
-  persistActiveSaveData();
-  return true;
-}
-
-function updateCurrentQuests(quests) {
-  return applyQuestSync({ currentQuests: quests });
+  return { displayText, inventorySync, statusSync };
 }
 
 function applyInventorySync(inventory) {

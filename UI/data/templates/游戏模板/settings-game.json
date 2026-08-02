@@ -3,5 +3,6 @@
   "realism": "适中",
   "dmStyle": "正常",
   "rating": "青少年",
-  "preferences": []
+  "preferences": [],
+  "panelMount": "all"
 }

@@ -51,11 +51,7 @@ def _panel_available(context: dict | None, panel_id: str) -> bool:
     if panel_id == PANEL_WORLD:
         return bool(context.get("world") or context.get("locationNode"))
     if panel_id == PANEL_NOTES:
-        return bool(
-            context.get("currentQuests")
-            or context.get("devPlotTree")
-            or context.get("historyQuests"),
-        )
+        return bool(context.get("missions"))
     return False
 
 
@@ -126,12 +122,35 @@ def _summarize_world(context: dict) -> str:
 
 
 def _summarize_notes(context: dict) -> str:
-    quests = context.get("currentQuests") or []
-    has_plot = bool(context.get("devPlotTree"))
-    parts = [f"当前任务 {len(quests)} 条"]
-    if has_plot:
-        parts.append("含 devPlotTree")
-    return "，".join(parts)
+    missions = context.get("missions") or {}
+    main_plot = missions.get("mainPlot", {}).get("main_plot") or []
+    side_quest = missions.get("sideQuest", {}).get("side_quest") or []
+    parts = []
+    if main_plot:
+        parts.append(f"主线 {len(main_plot)} 条")
+    if side_quest:
+        parts.append(f"支线 {len(side_quest)} 条")
+    return "，".join(parts) if parts else "无任务"
+
+
+def _save_json_mount_enabled(context: dict | None) -> bool:
+    return _panel_mount_mode(context) == "all"
+
+
+def format_save_json_files_block(context: dict | None) -> str:
+    if not _save_json_mount_enabled(context):
+        return ""
+    files = (context or {}).get("saveJsonFiles")
+    if not isinstance(files, dict) or not files:
+        return ""
+    sections = ["## 存档 JSON 文件（完整挂载）", ""]
+    for path in sorted(files.keys()):
+        payload = files[path]
+        sections.append(
+            f"### `{path}`\n\n"
+            f"```json\n{json.dumps(payload, ensure_ascii=False, indent=2)}\n```",
+        )
+    return "\n\n".join(sections)
 
 
 def _summarize_panel(context: dict, panel_id: str) -> str:
@@ -148,18 +167,60 @@ def _summarize_panel(context: dict, panel_id: str) -> str:
     return ""
 
 
+def _panel_mount_mode(context: dict | None) -> str:
+    if not context:
+        return "all"
+    settings = context.get("settingsGame") or {}
+    mode = settings.get("panelMount")
+    if isinstance(mode, str) and mode.strip().lower() == "auto":
+        return "auto"
+    return "all"
+
+
+def _resolve_panels_auto(
+    channel: str,
+    context: dict | None,
+    last_user: str = "",
+) -> list[str]:
+    selected = set(CHANNEL_DEFAULT_PANELS.get(channel, (PANEL_STATUS, PANEL_INVENTORY)))
+    if context and context.get("inCombat"):
+        selected.update((PANEL_STATUS, PANEL_INVENTORY))
+
+    text = (last_user or "").lower()
+    for panel_id, keywords in PANEL_KEYWORDS.items():
+        if any(keyword.lower() in text for keyword in keywords):
+            selected.add(panel_id)
+
+    return [
+        panel for panel in PANEL_LABELS
+        if panel in selected and _panel_available(context, panel)
+    ]
+
+
 def build_panel_index(context: dict | None) -> str:
     if not context:
         return "（无存档面板数据）"
+    mount_mode = _panel_mount_mode(context)
+    if mount_mode == "all":
+        mount_note = "系统每轮默认挂载所有可用面板的完整 JSON，以及存档文件夹内全部 JSON 文件。"
+    else:
+        mount_note = (
+            "系统每轮会根据 channel 与玩家输入挂载相关面板的完整 JSON。"
+            "未出现在「已挂载面板」中的面板，本轮不可引用其具体字段。"
+        )
     lines = [
-        "以下面板数据存在于当前存档，系统每轮会自动挂载与本回合相关的完整数据。",
-        "未出现在下方「已挂载面板」中的面板，本轮不可引用其具体字段。",
+        "以下面板数据存在于当前存档。",
+        mount_note,
         "",
     ]
     for panel_id, label in PANEL_LABELS.items():
         if not _panel_available(context, panel_id):
             continue
         lines.append(f"- **{label}** (`{panel_id}`)：{_summarize_panel(context, panel_id)}")
+    save_files = context.get("saveJsonFiles")
+    if isinstance(save_files, dict) and save_files and _save_json_mount_enabled(context):
+        lines.append("")
+        lines.append(f"- **存档 JSON 文件**：共 {len(save_files)} 个（见下方完整挂载）")
     return "\n".join(lines)
 
 
@@ -173,17 +234,10 @@ def resolve_panels_for_turn(
     if explicit is not None:
         return [panel for panel in explicit if _panel_available(context, panel)]
 
-    selected = set(CHANNEL_DEFAULT_PANELS.get(channel, (PANEL_STATUS, PANEL_INVENTORY)))
-    if context and context.get("inCombat"):
-        selected.update((PANEL_STATUS, PANEL_INVENTORY))
+    if _panel_mount_mode(context) == "all":
+        return [panel for panel in PANEL_LABELS if _panel_available(context, panel)]
 
-    text = (last_user or "").lower()
-    for panel_id, keywords in PANEL_KEYWORDS.items():
-        if any(keyword.lower() in text for keyword in keywords):
-            selected.add(panel_id)
-
-    ordered = [panel for panel in PANEL_LABELS if panel in selected and _panel_available(context, panel)]
-    return ordered
+    return _resolve_panels_auto(channel, context, last_user)
 
 
 def extract_panel_payload(context: dict, panel_id: str) -> dict | list | None:
@@ -204,12 +258,7 @@ def extract_panel_payload(context: dict, panel_id: str) -> dict | list | None:
             "locationNode": context.get("locationNode"),
         }
     if panel_id == PANEL_NOTES:
-        return {
-            "currentQuests": context.get("currentQuests") or [],
-            "historyQuests": context.get("historyQuests") or {"pages": []},
-            "devPlotTree": context.get("devPlotTree"),
-            "defaultDevPlotEntryId": context.get("defaultDevPlotEntryId"),
-        }
+        return context.get("missions")
     return None
 
 
@@ -259,6 +308,10 @@ def format_game_panels_block(
             )
     else:
         sections.append("## 已挂载面板（本轮可引用）\n\n（本轮无完整面板挂载，仅可使用「当前概要」。）")
+
+    save_json_block = format_save_json_files_block(context)
+    if save_json_block:
+        sections.append(save_json_block)
 
     return "\n\n".join(sections)
 

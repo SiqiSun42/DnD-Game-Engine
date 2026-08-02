@@ -13,17 +13,17 @@
         {
             "character_id": "goblin_1",
             "name": "哥布林1",
-            "type": "ally"
+            "type": "enemy"
         },
         {
             "character_id": "goblin_2",
             "name": "哥布林2",
-            "type": "ally"
+            "type": "enemy"
         },
         {
             "character_id": "goblin_3",
             "name": "哥布林3",
-            "type": "ally"
+            "type": "enemy"
         }
     ] 
 }
